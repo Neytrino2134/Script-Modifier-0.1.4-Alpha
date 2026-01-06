@@ -150,7 +150,7 @@ export const nodes = {
     'node.content.style.3d_cartoon': '3D Cartoon',
     'node.content.style.3d_realistic': 'Realistic 3D',
     'node.content.style.2d_animation': '2D Animation',
-    'node.content.style.anime': 'Anime Style',
+    'node.content.style.anime': 'Anime',
     'node.content.style.comics': 'Comics',
     'node.content.style.custom': 'Special',
     'node.content.chatPlaceholder': 'Type a message...',
@@ -338,4 +338,6 @@ export const nodes = {
     'node.content.stack.role': '2. Role & Core Logic',
     'node.content.stack.cinematography': '3. Cinematography & Framing',
     'node.content.stack.world': '4. World & Continuity',
+    'node.action.locateInStack': 'Locate in Stack',
+    'node.content.notePlaceholder': 'Enter text here...',
 };

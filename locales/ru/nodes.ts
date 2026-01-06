@@ -338,4 +338,6 @@ export const nodes = {
     'node.content.stack.role': '2. Роль и Логика',
     'node.content.stack.cinematography': '3. Кинематография и Кадр',
     'node.content.stack.world': '4. Мир и Непрерывность',
+    'node.action.locateInStack': 'Найти в стеке',
+    'node.content.notePlaceholder': 'Введите текст здесь...',
 };
