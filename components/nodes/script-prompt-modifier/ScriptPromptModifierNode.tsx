@@ -1,15 +1,14 @@
-
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import type { NodeContentProps } from '../../types';
-import { useAppContext } from '../../contexts/Context';
+import type { NodeContentProps } from '../../../types';
+import { useAppContext } from '../../../contexts/Context';
 import { PROMPT_MODIFIER_INSTRUCTIONS } from '../../../utils/prompts/promptModifier';
 import { SettingsPanel } from './SettingsPanel';
 import { CharactersStylePanel } from './CharactersStylePanel';
 import { InputFramesPanel } from './InputFramesPanel';
 import { OutputPromptsPanel } from './OutputPromptsPanel';
-import { useLanguage } from '../../localization';
-import Tooltip from '../ui/Tooltip';
-import CustomCheckbox from '../ui/CustomCheckbox';
+import { useLanguage } from '../../../localization';
+import Tooltip from '../../ui/Tooltip';
+import CustomCheckbox from '../../ui/CustomCheckbox';
 
 const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
     node, onValueChange, onModifyScriptPrompts, isModifyingScriptPrompts, onExecuteFullChain, isExecutingChain, onStopGeneration, isStopping, t, getUpstreamTextValue, connections, connectedInputs, onApplyAliases, addToast, saveDataToCatalog, deselectAllNodes, inputData
@@ -556,7 +555,11 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
     );
 
     return (
-        <div ref={nodeContentRef} className="flex flex-col h-full">
+        <div 
+            ref={nodeContentRef} 
+            className="flex flex-col h-full"
+            onWheel={(e) => e.stopPropagation()}
+        >
             <div className="flex flex-col gap-2 mb-2 flex-shrink-0">
                 <div className="flex gap-2 items-center">
                     {/* Model Switcher */}
@@ -624,10 +627,12 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                     <button 
                         onClick={isLoading ? onStopGeneration : handleGenerateClick} 
                         disabled={isStopping || isExecutingChain} 
-                        className={`flex-grow h-10 px-4 font-bold text-white rounded-md transition-colors duration-200 flex items-center justify-center ${
+                        className={`flex-grow h-10 px-4 font-bold text-xs uppercase tracking-wide text-white rounded-lg transition-all duration-200 shadow-sm flex items-center justify-center ${
                             isStopping 
                             ? 'bg-yellow-600 hover:bg-yellow-500' 
-                            : (isLoading ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-500')
+                            : (isLoading 
+                                ? 'bg-cyan-600 hover:bg-cyan-500' 
+                                : 'bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-500')
                         }`}
                     >
                         {!isLoading && !isStopping && (
@@ -654,7 +659,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                     )}
                 </div>
 
-                <div className="bg-gray-900/50 rounded-md flex-shrink-0 flex flex-col">
+                <div className="bg-gray-900/50 rounded-md flex-shrink-0 flex flex-col" onWheel={(e) => e.stopPropagation()}>
                     <div className="p-2 border-b border-gray-800 flex items-center justify-start gap-4">
                         <div className="flex items-center space-x-1 text-xs text-gray-400">
                             <label htmlFor={`start-range-${node.id}`} className="whitespace-nowrap">{isProcessWholeScene ? t('node.content.processFromScene') : t('node.content.processFromFrame')}</label>
@@ -815,7 +820,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                 onRefresh={refreshUpstreamData}
             />
             
-            <div className="flex-grow flex flex-row min-h-0 items-stretch bg-gray-900 rounded-b-md overflow-hidden pt-1 border-t border-gray-600">
+            <div className="flex-grow flex flex-row min-h-0 items-stretch bg-gray-900 rounded-b-md overflow-hidden border-t border-gray-600">
                  <InputFramesPanel 
                     verticalDividerPos={verticalDividerPos}
                     isProcessWholeScene={isProcessWholeScene}

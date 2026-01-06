@@ -45,7 +45,7 @@ const CharacterItem: React.FC<{
                             value={char.name} 
                             readOnly={char.isLinked} 
                             onChange={e => onUpdate(currentId, 'name', e.target.value)} 
-                            className={`font-semibold text-white bg-transparent w-64 rounded px-1 border border-transparent focus:border-emerald-500 focus:bg-gray-800 focus:outline-none transition-colors ${char.isLinked ? 'cursor-not-allowed text-gray-400 focus:border-transparent' : ''}`} 
+                            className={`font-semibold text-white bg-transparent w-64 rounded px-1 border border-transparent focus:border-emerald-500 focus:ring-0 focus:bg-gray-800 focus:outline-none transition-colors ${char.isLinked ? 'cursor-not-allowed text-gray-400 focus:border-transparent' : ''}`} 
                             onMouseDown={e => e.stopPropagation()} 
                             onFocus={deselectAllNodes}
                          />
@@ -58,7 +58,7 @@ const CharacterItem: React.FC<{
                         type="text"
                         value={char.index || char.alias || ''}
                         readOnly={true}
-                        className={`font-semibold text-gray-400 bg-gray-900/50 w-24 rounded px-1 text-xs py-0.5 border border-transparent cursor-not-allowed ${hasDuplicateIndex ? 'border-red-500 ring-1 ring-red-500' : ''}`}
+                        className={`font-semibold text-gray-400 bg-gray-900/50 w-24 rounded px-1 text-xs py-0.5 border border-transparent cursor-not-allowed focus:outline-none focus:ring-0 ${hasDuplicateIndex ? 'border-red-500 ring-1 ring-red-500' : ''}`}
                         onFocus={deselectAllNodes}
                         onMouseDown={e => e.stopPropagation()}
                     />

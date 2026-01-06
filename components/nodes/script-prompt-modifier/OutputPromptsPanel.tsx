@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CombinedPromptItem } from './DisplayItems';
 import { ActionButton } from '../../ActionButton';
@@ -30,7 +29,7 @@ export const OutputPromptsPanel: React.FC<OutputPromptsPanelProps> = ({
 }) => {
     return (
         <div className="overflow-y-scroll custom-scrollbar pl-1 space-y-2" style={{ width: `calc(${100 - verticalDividerPos}% - 0.5rem)`, contentVisibility: 'auto' }} onWheel={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center pl-2 sticky top-0 bg-gray-900 z-10 pt-2 pb-2 border-b border-gray-800/50">
+            <div className="flex justify-between items-center pl-2 sticky top-0 bg-gray-900 z-10 pt-1 pb-1 border-b border-gray-800/50">
                 <h3 className="font-bold text-emerald-400 px-2">{t('node.content.finalPrompt_plural')}</h3>
                 <div className="flex items-center space-x-1">
                      <ActionButton tooltipPosition="left" title={t('node.action.downloadJson')} onClick={onDownloadJson}>

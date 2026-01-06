@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ActionButton } from '../../ActionButton';
 import { AnalyzedCharacter, EditableFramePart } from './types';
 import { CharacterIndexControl } from './CharacterIndexControl';
@@ -159,6 +159,8 @@ interface OutputFramesPanelProps {
     onToggleSceneContextCollapse: (sceneIndex: number) => void;
     onToggleCollapse: (frameUniqueId: string) => void;
     onAddFrame: (sceneIndex: number, frameIndex?: number) => void;
+    onAddScene: () => void;
+    onRenameScene: (sceneIndex: number, newTitle: string) => void;
     onReorderFrame: (sceneIndex: number, frameIndex: number, dir: 'up' | 'down') => void;
     onDeleteFrame: (sceneIndex: number, frameIndex: number) => void;
     onFramePartChange: (sceneIndex: number, frameIndex: number, partKey: EditableFramePart | 'characters' | 'duration', value: any) => void;
@@ -176,16 +178,34 @@ export const OutputFramesPanel: React.FC<OutputFramesPanelProps> = React.memo(({
     collapsedOutputScenes, collapsedFrames, collapsedContexts, selectedFrames,
     onToggleAllOutputScenes, onToggleAllFramesCollapse,
     onToggleOutputSceneCollapse, onToggleSceneContextCollapse, onToggleCollapse,
-    onAddFrame, onReorderFrame, onDeleteFrame, onFramePartChange, onSceneContextChange,
+    onAddFrame, onAddScene, onRenameScene, onReorderFrame, onDeleteFrame, onFramePartChange, onSceneContextChange,
     onFrameClick, onCopy, handleTextFocus, t, onDeleteScene
 }) => {
+    const [editingSceneIndex, setEditingSceneIndex] = useState<number | null>(null);
+    const [tempTitle, setTempTitle] = useState('');
+
+    const startEditing = (index: number, currentTitle: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingSceneIndex(index);
+        setTempTitle(currentTitle);
+    };
+
+    const saveTitle = (index: number) => {
+        onRenameScene(index, tempTitle);
+        setEditingSceneIndex(null);
+    };
+
+    const cancelEditing = () => {
+        setEditingSceneIndex(null);
+    };
+
     return (
         <div className="overflow-y-scroll custom-scrollbar pl-1 space-y-2 px-1 pb-1" style={{ width, contentVisibility: 'auto' }} onWheel={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center pr-2 sticky top-0 bg-gray-900 z-10 pt-2 pb-2 border-b border-gray-800/50 -mx-1 px-2">
+            <div className="flex justify-between items-center pr-2 sticky top-0 bg-gray-900 z-10 py-1 border-b border-gray-800/50 -mx-1 px-2">
                 <h3 className="font-bold text-emerald-400 px-2">{t('node.content.frames')}</h3>
                 <div className="flex items-center space-x-1">
                     {scenes.length === 0 && (
-                         <ActionButton tooltipPosition="left" title={t('node.action.addFirstFrame')} onClick={(e) => { e.stopPropagation(); onAddFrame(0); }}>
+                         <ActionButton tooltipPosition="left" title={t('node.action.addFirstFrame')} onClick={(e) => { e.stopPropagation(); onAddScene(); }}>
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
@@ -193,6 +213,11 @@ export const OutputFramesPanel: React.FC<OutputFramesPanelProps> = React.memo(({
                     )}
                     {scenes.length > 0 && (
                         <>
+                             <ActionButton tooltipPosition="left" title={t('node.action.addScene')} onClick={(e) => { e.stopPropagation(); onAddScene(); }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </ActionButton>
                             <ActionButton tooltipPosition="left" title={areAllOutputScenesCollapsed ? t('node.action.expandAllScenes') : t('node.action.collapseAllScenes')} onClick={onToggleAllOutputScenes}>
                                 {areAllOutputScenesCollapsed ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -214,11 +239,12 @@ export const OutputFramesPanel: React.FC<OutputFramesPanelProps> = React.memo(({
             {scenes.map((scene, sceneIndex) => {
                 const isSceneCollapsed = collapsedOutputScenes.has(sceneIndex);
                 const isContextCollapsed = collapsedContexts.has(sceneIndex);
+                const sceneTitle = scene.title || `Scene ${scene.sceneNumber}`;
 
                 return (
                     <div key={scene.sceneNumber} className="mb-4">
                         <div 
-                            className="px-2 py-1 mb-1 text-xs font-bold text-gray-400 uppercase border-b border-gray-700 hover:bg-gray-800/50 transition-colors rounded" 
+                            className="group px-2 py-1 mb-1 text-xs font-bold text-gray-400 uppercase border-b border-gray-700 hover:bg-gray-800/50 transition-colors rounded" 
                             onClick={() => onToggleOutputSceneCollapse(sceneIndex)}
                         >
                             <div className="flex items-center justify-between w-full gap-2">
@@ -230,9 +256,34 @@ export const OutputFramesPanel: React.FC<OutputFramesPanelProps> = React.memo(({
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                                         )}
                                     </ActionButton>
-                                    <span className="truncate font-bold text-gray-300 text-sm">
-                                        {`${t('node.content.scene')} ${scene.sceneNumber}${scene.title ? `: ${scene.title}` : ''}`}
-                                    </span>
+                                    
+                                    {editingSceneIndex === sceneIndex ? (
+                                        <input
+                                            type="text"
+                                            value={tempTitle}
+                                            onChange={(e) => setTempTitle(e.target.value)}
+                                            onBlur={() => saveTitle(sceneIndex)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') saveTitle(sceneIndex); else if (e.key === 'Escape') cancelEditing(); }}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            autoFocus
+                                            className="bg-gray-900 text-white px-1 py-0.5 rounded border border-emerald-500 outline-none w-full font-bold"
+                                        />
+                                    ) : (
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <span className="truncate font-bold text-gray-300 text-sm">
+                                                {`${t('node.content.scene')} ${scene.sceneNumber}: ${scene.title || ''}`}
+                                            </span>
+                                            <button 
+                                                onClick={(e) => startEditing(sceneIndex, scene.title || `Scene ${scene.sceneNumber}`, e)}
+                                                className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-emerald-400 transition-opacity"
+                                            >
+                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1.5 flex-shrink-0">
                                     <span className="flex-shrink-0 text-[9px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-400 font-mono">{(scene.frames?.length || 0)} {t('node.content.frame_plural')}</span>
@@ -282,6 +333,7 @@ export const OutputFramesPanel: React.FC<OutputFramesPanelProps> = React.memo(({
                                             className="w-full text-xs p-2 bg-gray-900 border-none rounded-md resize-y min-h-[50px] focus:outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar" 
                                             placeholder={t('node.content.sceneContextPlaceholder')}
                                             onFocus={handleTextFocus} 
+                                            onMouseDown={e => e.stopPropagation()}
                                         />
                                     )}
                                 </div>

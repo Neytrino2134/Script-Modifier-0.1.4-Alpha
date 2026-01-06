@@ -1,7 +1,7 @@
 
-export const LAYERED_CONSTRUCTION_NO_STYLE_TEXT = "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Environment/Background] -> [Subject Visuals & Interaction] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background (Horizon, Lighting, Weather). \n- **Interaction:** If multiple entities are present, describe them as a GROUP interaction. Do not isolate them. Merge 'Pose' and 'Micro-Action' into a single, clear **'Action'** description. Avoid complex, impossible physics. Keep actions simple and readable for the AI.\n- **Technical:** End with lens, angle, and quality tags.";
+export const LAYERED_CONSTRUCTION_NO_STYLE_TEXT = "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Environment/Background] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background (Horizon, Lighting, Weather). \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry (e.g. 'kneeling', 'reaching', 'twisted torso') and movement.\n- **Technical:** End with lens, angle, and quality tags.";
 
-export const LAYERED_CONSTRUCTION_NO_CHAR_TEXT = "**MASTER CONSTRUCTION ALGORITHM (No Entity Vis):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO ENTITY VISUALS:** Do NOT include physical descriptions (clothing, face, hair) of the entities. Refer to them ONLY by their Index (e.g. `[Entity-1]`) and their **ACTION**.\n2. **FLOW:** [Environment/Background] -> [Subject Action/Interaction ONLY] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background. \n- **Action:** Describe WHAT the subjects are doing. Do NOT describe how they look.\n- **Technical:** End with lens, angle, and quality tags.";
+export const LAYERED_CONSTRUCTION_NO_CHAR_TEXT = "**MASTER CONSTRUCTION ALGORITHM (No Entity Vis):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO ENTITY VISUALS:** Do NOT include physical descriptions (clothing, face, hair) of the entities. Refer to them ONLY by their Index (e.g. `[Entity-1]`).\n2. **FLOW:** [Environment/Background] -> [Subject Index] + [**Full Pose & Action**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background. \n- **Action:** Describe **POSE, GESTURE, and MOVEMENT**. You MUST describe the physical body geometry (e.g. 'sitting cross-legged', 'running', 'arms raised') even without describing the clothes/face.\n- **Technical:** End with lens, angle, and quality tags.";
 
 export const PROMPT_MODIFIER_INSTRUCTIONS = {
     INPUTS: {
@@ -47,7 +47,7 @@ export const PROMPT_MODIFIER_INSTRUCTIONS = {
     GENERAL_CHAR_DESC: {
         id: 'general_char_desc',
         label: 'General Detail',
-        text: "Summarize and incorporate a CONCISE, GENERAL version of the visual prompt from the entity's profile."
+        text: "Summarize and incorporate a CONCISE, GENERAL version of the visual prompt from the character's profile."
     },
     FULL_CHAR_DESC: {
         id: 'full_char_desc',
@@ -67,7 +67,7 @@ export const PROMPT_MODIFIER_INSTRUCTIONS = {
     LAYERED_CONSTRUCTION: {
         id: 'rule_layers',
         label: 'Layered',
-        text: "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Style] -> [Environment/Background] -> [Subject Visuals & Interaction] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background (Horizon, Lighting, Weather). \n- **Interaction:** If multiple entities are present, describe them as a GROUP interaction. Do not isolate them. Merge 'Pose' and 'Micro-Action' into a single, clear **'Action'** description. Avoid complex, impossible physics. Keep actions simple and readable for the AI.\n- **Technical:** End with lens, angle, and quality tags."
+        text: "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Style] -> [Environment/Background] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background (Horizon, Lighting, Weather). \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry and movement.\n- **Technical:** End with lens, angle, and quality tags."
     },
     VISUAL_SATURATION: {
         id: 'rule_saturation',

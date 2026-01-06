@@ -39,7 +39,7 @@ const AnalyzerCharacterItem: React.FC<{
                             value={char.name} 
                             readOnly={char.isLinked} 
                             onChange={e => onUpdate(currentId, 'name', e.target.value)} 
-                            className={`font-semibold text-white bg-transparent w-64 focus:bg-gray-800 rounded px-1 ${char.isLinked ? 'cursor-not-allowed text-gray-400 focus:ring-0' : ''}`} 
+                            className={`font-semibold text-white bg-transparent w-64 rounded px-1 border border-transparent focus:border-emerald-500 focus:ring-0 focus:bg-gray-800 focus:outline-none transition-colors ${char.isLinked ? 'cursor-not-allowed text-gray-400 focus:border-transparent' : ''}`} 
                             onMouseDown={e => e.stopPropagation()} 
                          />
                          <span className="text-[9px] text-gray-500 font-mono ml-2 truncate max-w-[120px]" title={String(currentId)}>({currentId})</span>
@@ -52,7 +52,7 @@ const AnalyzerCharacterItem: React.FC<{
                         value={char.index || ''}
                         readOnly={char.isLinked}
                         onChange={e => onUpdate(currentId, 'index', e.target.value)}
-                        className={`font-semibold text-white bg-gray-800 w-24 rounded px-1 text-xs py-0.5 focus:ring-1 focus:ring-emerald-500 focus:outline-none ${char.isLinked ? 'bg-gray-900/50 text-gray-400 cursor-not-allowed border border-transparent' : ''}`}
+                        className={`font-semibold text-white bg-gray-800 w-24 rounded px-1 text-xs py-0.5 border border-transparent focus:border-emerald-500 focus:ring-0 focus:outline-none transition-colors ${char.isLinked ? 'bg-gray-900/50 text-gray-400 cursor-not-allowed focus:border-transparent' : ''}`}
                         onFocus={deselectAllNodes}
                         onMouseDown={e => e.stopPropagation()}
                     />
@@ -289,7 +289,7 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
                                 char={char}
                                 currentId={charId}
                                 isSelected={selectedCharacters.has(charId)}
-                                isCollapsed={collapsedCharacters.has(charId)} // CHANGED: .includes() -> .has()
+                                isCollapsed={collapsedCharacters.has(charId)}
                                 t={t}
                                 onToggleCollapse={handleToggleCharacterCollapse}
                                 onClick={handleCharacterClick}

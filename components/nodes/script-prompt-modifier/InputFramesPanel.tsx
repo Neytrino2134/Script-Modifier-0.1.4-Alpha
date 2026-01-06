@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ActionButton } from '../../ActionButton';
 
@@ -127,8 +126,8 @@ export const InputFramesPanel: React.FC<InputFramesPanelProps> = ({
     t
 }) => {
     return (
-        <div className="overflow-y-scroll overflow-x-hidden custom-scrollbar pr-1 space-y-2 p-1" style={{ width: `calc(${verticalDividerPos}% - 0.5rem)`, contentVisibility: 'auto' }} onWheel={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center pr-2 sticky top-0 bg-gray-900 z-10 pt-2 pb-2 border-b border-gray-800/50 mb-2">
+        <div className="overflow-y-scroll overflow-x-hidden custom-scrollbar pr-1 space-y-2 px-1" style={{ width: `calc(${verticalDividerPos}% - 0.5rem)`, contentVisibility: 'auto' }} onWheel={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center pr-2 sticky top-0 bg-gray-900 z-10 pt-1 pb-1 border-b border-gray-800/50 mb-2 -mx-1 px-2">
                 <h3 className="font-bold text-emerald-400 px-1">{t('node.content.inputFrames')}</h3>
                 {upstreamAnalyzerData?.scenes && upstreamAnalyzerData.scenes.length > 0 && (
                      <ActionButton tooltipPosition="left" title={areAllInputScenesCollapsed ? t('node.action.expandAllScenes') : t('node.action.collapseAllScenes')} onClick={onToggleAllInputScenes}>

@@ -19,14 +19,16 @@
 
 
 
+
+
 export const modifier = {
     'instruction.inputs': 'Inputs',
     'instruction.desc.inputs': 'Source Data: Script Frames, Character Visuals, Scene Style, Global Scene Context.',
     'instruction.role': 'Role: Lead Environment Artist',
     'instruction.desc.role': 'You are an expert Lead Environment Artist and AI Prompt Engineer. Synthesize inputs into a definitive visual description.',
     'instruction.layered': 'Algorithm: Unified Flow',
-    'instruction.desc.layered': 'Generates a SINGLE seamless block text. Merges interaction: "[Character-1] is catching [Character-2]". Square brackets [ ] are mandatory for indices.',
-    'instruction.desc.layered_no_char': 'Structure: [Environment] -> [Action]. Omits character appearance, keeping only indices [Character-N] and their actions.',
+    'instruction.desc.layered': 'Generates a SINGLE seamless block. Structure: [Style] -> [Background] -> [Visuals] + [POSE & ACTION] -> [Camera].',
+    'instruction.desc.layered_no_char': 'Structure: [Environment] -> [Index] + [FULL POSE & ACTION]. Omits appearance but explicitly describes body geometry/movement.',
     'instruction.visuals': 'Style: Saturation',
     'instruction.desc.visuals': 'Use rich visual descriptors: volumetric lighting, chiaroscuro, 8k textures, depth of field.',
     'instruction.process_whole_scene': 'Batch Scene',

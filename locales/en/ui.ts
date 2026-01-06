@@ -1,5 +1,4 @@
 
-
 export const ui = {
     'toolbar.edit': 'Edit (V)',
     'toolbar.cutter': 'Cut Connection (C)',
@@ -162,4 +161,18 @@ export const ui = {
     'tooltip.lang.pt': 'Generate script in Portuguese.',
     'tooltip.lang.zh': 'Generate script in Chinese.',
     'node.action.locateInStack': 'Locate in Stack',
+    'help.tabs.hotkeys': 'Hotkeys & Help',
+    'help.tabs.links': 'Other Apps & Links',
+    'help.category.socials': 'Socials',
+    'help.category.stable': 'Google AI Studio (Stable)',
+    'help.category.alpha': 'Google AI Studio (Alpha)',
+    'help.category.web': 'Web / Netlify',
+    'help.category.github': 'GitHub Repositories',
+    'help.link.youtube': 'YouTube Channel',
+    'help.link.telegram_channel': 'Telegram Channel',
+    'help.link.telegram_chat': 'Telegram Chat',
+    'help.sub.news': 'News & Updates',
+    'help.sub.discussion': 'Discussion',
+    'help.sub.stable': 'Stable Version',
+    'help.sub.alpha': 'Alpha Version',
 };

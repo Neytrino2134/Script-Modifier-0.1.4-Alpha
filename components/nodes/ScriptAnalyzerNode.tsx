@@ -28,6 +28,7 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
     const [upstreamScriptData, setUpstreamScriptData] = useState<any>(null);
     const [collapsedInputScenes, setCollapsedInputScenes] = useState<Set<number>>(new Set());
     const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(true); // Default to collapsed
+    const [verticalDividerPos, setVerticalDividerPos] = useState(50);
     
     // Output state
     const [collapsedOutputScenes, setCollapsedOutputScenes] = useState<Set<number>>(new Set());
@@ -141,6 +142,25 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
         handleValueUpdate({ uiState: { ...uiState, ...updates } });
     }, [handleValueUpdate, uiState]);
     
+    const handleVerticalDividerMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startPos = verticalDividerPos;
+        const parent = (e.target as HTMLElement).parentElement;
+        if (!parent) return;
+        const totalWidth = parent.offsetWidth;
+        const currentScale = viewTransform.scale;
+
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            const dx = (moveEvent.clientX - startX) / currentScale;
+            const newPos = startPos + (dx / totalWidth) * 100;
+            setVerticalDividerPos(Math.max(20, Math.min(80, newPos)));
+        };
+        const handleMouseUp = () => { window.removeEventListener('mousemove', handleMouseMove); window.removeEventListener('mouseup', handleMouseUp); };
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+    };
+
     // Timer Effect
     useEffect(() => {
         let interval: number;
@@ -381,6 +401,27 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
          scene.frames = frames.map((f: any, i: number) => ({...f, frameNumber: i + 1}));
          newScenes[sceneIndex] = scene;
          handleValueUpdate({ scenes: newScenes });
+    }, [scenes, handleValueUpdate]);
+
+    const handleAddOutputScene = useCallback(() => {
+        const newScenes = [...scenes];
+        const nextSceneNum = scenes.length + 1;
+        newScenes.push({
+            sceneNumber: nextSceneNum,
+            title: `Scene ${nextSceneNum}`,
+            description: '',
+            frames: [],
+            sceneContext: ''
+        });
+        handleValueUpdate({ scenes: newScenes });
+    }, [scenes, handleValueUpdate]);
+
+    const handleRenameOutputScene = useCallback((sceneIndex: number, newTitle: string) => {
+        const newScenes = [...scenes];
+        if (newScenes[sceneIndex]) {
+            newScenes[sceneIndex] = { ...newScenes[sceneIndex], title: newTitle };
+            handleValueUpdate({ scenes: newScenes });
+        }
     }, [scenes, handleValueUpdate]);
 
     const handleReorderFrame = useCallback((sceneIndex: number, frameIndex: number, dir: 'up' | 'down') => {
@@ -763,9 +804,9 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                 onDeleteCharacter={handleDeleteCharacter}
             />
             
-            <div className="flex-grow flex flex-row min-h-0 items-stretch bg-gray-900 rounded-b-md overflow-hidden pt-1 border-t border-gray-600">
+            <div className="flex-grow flex flex-row min-h-0 items-stretch bg-gray-900 rounded-b-md overflow-hidden border-t border-gray-600">
                 <InputScriptsPanel 
-                    width="50%"
+                    width={`calc(${verticalDividerPos}% - 0.5rem)`} 
                     upstreamScriptData={upstreamScriptData}
                     collapsedInputScenes={collapsedInputScenes}
                     isSummaryCollapsed={isSummaryCollapsed}
@@ -782,10 +823,13 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                     areAllInputScenesCollapsed={upstreamScriptData?.scenes?.length > 0 && collapsedInputScenes.size === upstreamScriptData.scenes.length}
                 />
                 
-                <div className="w-2 mx-1 bg-gray-700"></div>
+                <div 
+                    onMouseDown={handleVerticalDividerMouseDown} 
+                    className="w-2 mx-1 cursor-col-resize bg-gray-600 hover:bg-emerald-500 transition-colors flex-shrink-0 rounded-full" 
+                />
 
                 <OutputFramesPanel 
-                     width="50%"
+                     width={`calc(${100 - verticalDividerPos}% - 0.5rem)`} 
                      scenes={scenes}
                      characters={characters}
                      areAllOutputScenesCollapsed={scenes.length > 0 && collapsedOutputScenes.size === scenes.length}
@@ -818,6 +862,8 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                         });
                      }}
                      onAddFrame={handleAddFrame}
+                     onAddScene={handleAddOutputScene}
+                     onRenameScene={handleRenameOutputScene}
                      onReorderFrame={handleReorderFrame}
                      onDeleteFrame={handleDeleteFrame}
                      onFramePartChange={handleFramePartChange}

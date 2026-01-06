@@ -1,5 +1,4 @@
 
-
 export const ui = {
     'toolbar.edit': 'Редактировать (V)',
     'toolbar.cutter': 'Резак (C)',
@@ -166,4 +165,18 @@ export const ui = {
     'tooltip.lang.pt': 'Генерировать сценарий на португальском.',
     'tooltip.lang.zh': 'Генерировать сценарий на китайском.',
     'node.action.locateInStack': 'Найти в стеке',
+    'help.tabs.hotkeys': 'Помощь и горячие клавиши',
+    'help.tabs.links': 'Другие приложения и ссылки',
+    'help.category.socials': 'Социальные сети',
+    'help.category.stable': 'Google AI Studio (Stable)',
+    'help.category.alpha': 'Google AI Studio (Alpha)',
+    'help.category.web': 'Web / Netlify',
+    'help.category.github': 'GitHub Репозитории',
+    'help.link.youtube': 'YouTube Канал',
+    'help.link.telegram_channel': 'Telegram Канал',
+    'help.link.telegram_chat': 'Telegram Чат',
+    'help.sub.news': 'Новости и обновления',
+    'help.sub.discussion': 'Обсуждение',
+    'help.sub.stable': 'Стабильная версия',
+    'help.sub.alpha': 'Альфа версия',
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { PROMPT_MODIFIER_INSTRUCTIONS, LAYERED_CONSTRUCTION_NO_STYLE_TEXT, LAYERED_CONSTRUCTION_NO_CHAR_TEXT } from '../../../utils/prompts/promptModifier';
 import { SAFE_GENERATION_INSTRUCTIONS } from '../../../utils/prompts/common';
@@ -196,6 +195,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
         <div 
             className={`border ${isResizerHovered ? 'border-emerald-500' : 'border-gray-600'} hover:border-gray-400 rounded-md bg-gray-900 overflow-hidden mb-2 flex-shrink-0 flex flex-col relative transition-colors duration-200`}
             style={{ height: uiState.isSettingsCollapsed ? 'auto' : `${height}px` }}
+            onWheel={(e) => e.stopPropagation()}
         >
             <div 
                 className="flex justify-between items-center p-2 bg-gray-800/50 cursor-pointer select-none hover:bg-gray-700/50 transition-colors flex-shrink-0"
