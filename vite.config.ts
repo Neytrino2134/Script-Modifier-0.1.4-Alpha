@@ -6,6 +6,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    // Базовый путь должен совпадать с именем вашего репозитория на GitHub
+    base: '/Script-Modifier/',
     define: {
       // Безопасная замена глобальных переменных
       'process.env.API_KEY': JSON.stringify(env.API_KEY),
