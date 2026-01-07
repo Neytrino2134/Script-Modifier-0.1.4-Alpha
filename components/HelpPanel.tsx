@@ -106,7 +106,7 @@ const HelpPanel: React.FC = () => {
           category: t('help.category.alpha'),
           links: [
                { label: "Prompt Modifier 0.1.8", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1OJfPP9wUKlnjvZ5_2_Fxq_v1dW0iftlW?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
-               { label: "Script Modifier 0.1.4", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1y9CSUmlVQK2xq7ckses7fpM6wpbZdBnB?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
+               { label: "Script Modifier 0.1.5", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1y9CSUmlVQK2xq7ckses7fpM6wpbZdBnB?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
           ]
       },
       {
@@ -119,8 +119,8 @@ const HelpPanel: React.FC = () => {
       {
           category: t('help.category.github'),
           links: [
-              { label: "Script Modifier Repo", subLabel: "v0.1.4 Alpha", url: "https://github.com/Neytrino2134/Script-Modifier-0.1.4-Alpha", iconType: 'github' },
-              { label: "Prompt Modifier Repo", subLabel: "v0.1.8 Alpha", url: "https://github.com/Neytrino2134/Prompt-Modifier-0.1.8-Alpha", iconType: 'github' },
+              { label: "Script Modifier Repo", subLabel: "v0.1.5 Alpha", url: "https://github.com/Neytrino2134/Script-Modifier", iconType: 'github' },
+              { label: "Prompt Modifier Repo", subLabel: "v0.1.8 Alpha", url: "https://github.com/Neytrino2134/Prompt-Modifier", iconType: 'github' },
           ]
       }
   ], [t]);
@@ -313,8 +313,8 @@ const HelpPanel: React.FC = () => {
               <div className="flex flex-col gap-1">
                 <span>Author: MeowMaster</span>
                 <span>Email: MeowMasterart@gmail.com</span>
-                <a href="https://github.com/Neytrino2134/Script-Modifier-0.1.4-Alpha" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">
-                    GitHub: Neytrino2134/Script-Modifier-0.1.4-Alpha
+                <a href="https://github.com/Neytrino2134/Script-Modifier" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">
+                    GitHub: Neytrino2134/Script-Modifier
                 </a>
               </div>
               <a href="https://www.netlify.com" target="_blank" rel="noopener noreferrer" className="opacity-70 hover:opacity-100 transition-opacity">

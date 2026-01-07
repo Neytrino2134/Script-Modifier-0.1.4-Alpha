@@ -1,4 +1,5 @@
 
+
 export const ui = {
     'toolbar.edit': 'Редактировать (V)',
     'toolbar.cutter': 'Резак (C)',
@@ -112,7 +113,7 @@ export const ui = {
     'search.node.script_prompt_modifier.title': 'Финалайзер промптов',
     'search.node.script_prompt_modifier.description': 'Принимает проанализированные данные сценария (персонажи, кадры, окружение) и синтезирует их в финальные, насыщенные, художественные промпты для генерации изображений, по одному на каждый кадр.',
     'search.node.error_analyzer.title': 'Анализатор ошибок',
-    'search.node.error_analyzer.description': 'Проверяет и исправляет текст на наличие орфографических и грамматических ошибок.',
+    'search.node.error_analyzer.description': 'Проверяет и исправляет текст на наличие орфографических и грамматических ошибок. Имеет один текстовый вход и один текстовый выход.',
     'search.node.note.title': 'Заметка',
     'search.node.note.description': 'Простое текстовое поле для заметок. (N)',
     'search.node.reroute_dot.title': 'Точка маршрутизации',
@@ -179,4 +180,5 @@ export const ui = {
     'help.sub.discussion': 'Обсуждение',
     'help.sub.stable': 'Стабильная версия',
     'help.sub.alpha': 'Альфа версия',
+    'imageViewer.title': 'Просмотр изображения',
 };

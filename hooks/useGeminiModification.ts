@@ -271,7 +271,8 @@ export const useGeminiModification = ({
             includeFullCharDesc = false,
             safeGeneration = false,
             thinkingEnabled = false,
-            charDescMode: configCharDescMode
+            charDescMode: configCharDescMode,
+            sceneContexts = {} // Local scene contexts (Master Environment Prompts)
         } = finalizerConfig;
         
         let charDescMode: 'none' | 'general' | 'full' = configCharDescMode;
@@ -316,8 +317,17 @@ export const useGeminiModification = ({
 
         let scenesToProcess: any[] = [];
 
+        // Prepare scenes with correct context (Local > Upstream)
+        const effectiveScenes = scenes.map((s: any) => ({
+            ...s,
+            // Prefer local context if available and not empty, otherwise use upstream context
+            sceneContext: (sceneContexts[s.sceneNumber] && sceneContexts[s.sceneNumber].trim()) 
+                ? sceneContexts[s.sceneNumber] 
+                : (s.sceneContext || '')
+        }));
+
         if (processWholeScene) {
-             scenesToProcess = scenes.filter((scene: any) => {
+             scenesToProcess = effectiveScenes.filter((scene: any) => {
                 const sNum = scene.sceneNumber;
                 const startOk = !startSceneNumber || sNum >= startSceneNumber;
                 const endOk = !endSceneNumber || sNum <= endSceneNumber;
@@ -327,7 +337,7 @@ export const useGeminiModification = ({
                  framesToProcess: scene.frames || []
              }));
         } else {
-            scenesToProcess = scenes.map((scene: any) => {
+            scenesToProcess = effectiveScenes.map((scene: any) => {
                 const validFrames = (scene.frames || []).filter((f: any) => {
                     const startOk = !startFrameNumber || f.frameNumber >= startFrameNumber;
                     const endOk = !endFrameNumber || f.frameNumber <= endFrameNumber;

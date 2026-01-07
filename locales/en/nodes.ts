@@ -1,4 +1,5 @@
 
+
 export const nodes = {
     'node.title.text_input': 'Text Input',
     'node.title.prompt_processor': 'Prompt Processor',
@@ -109,6 +110,7 @@ export const nodes = {
     'node.output.default': 'Output',
     'node.output.allCharacters': 'All Characters',
     'node.output.primaryCharacter': 'Primary Character',
+    'node.content.prompt': 'Prompt', // Added
     'node.content.action': 'Action',
     'node.content.actionPlaceholder': 'Action prompt...',
     'node.content.allScriptParts': 'All Script Parts (Combined)',
@@ -340,4 +342,16 @@ export const nodes = {
     'node.content.stack.world': '4. World & Continuity',
     'node.action.locateInStack': 'Locate in Stack',
     'node.content.notePlaceholder': 'Enter text here...',
+    
+    // Script Generator Stack Headers
+    'node.content.sg_stack.priming': '1. Priming & Context',
+    'node.content.sg_stack.narrative': '2. Narrative Engine',
+    'node.content.sg_stack.world': '3. World & Style',
+    'node.content.sg_stack.constraints': '4. Constraints & Formatting',
+
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. Priming & Context',
+    'node.content.spm_stack.physics': '2. Physics & Logic',
+    'node.content.spm_stack.hierarchy': '3. Subject Hierarchy',
+    'node.content.spm_stack.construction': '4. Construction & Format',
 };

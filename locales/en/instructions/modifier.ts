@@ -21,14 +21,16 @@
 
 
 
+
+
 export const modifier = {
     'instruction.inputs': 'Inputs',
     'instruction.desc.inputs': 'Source Data: Script Frames, Character Visuals, Scene Style, Global Scene Context.',
     'instruction.role': 'Role: Lead Environment Artist',
     'instruction.desc.role': 'You are an expert Lead Environment Artist and AI Prompt Engineer. Synthesize inputs into a definitive visual description.',
     'instruction.layered': 'Algorithm: Unified Flow',
-    'instruction.desc.layered': 'Generates a SINGLE seamless block. Structure: [Style] -> [Background] -> [Visuals] + [POSE & ACTION] -> [Camera].',
-    'instruction.desc.layered_no_char': 'Structure: [Environment] -> [Index] + [FULL POSE & ACTION]. Omits appearance but explicitly describes body geometry/movement.',
+    'instruction.desc.layered': 'Generates a SINGLE seamless block. Structure: [Style] -> [MASTER SET DESIGN FROM CONTEXT] -> [Visuals] + [POSE & ACTION] -> [Camera].',
+    'instruction.desc.layered_no_char': 'Structure: [MASTER SET DESIGN] -> [Index] + [FULL POSE & ACTION]. Omits appearance but explicitly describes body geometry/movement.',
     'instruction.visuals': 'Style: Saturation',
     'instruction.desc.visuals': 'Use rich visual descriptors: volumetric lighting, chiaroscuro, 8k textures, depth of field.',
     'instruction.process_whole_scene': 'Batch Scene',
@@ -43,8 +45,8 @@ export const modifier = {
     'instruction.desc.atmosphere_fix': 'Describe mood as physical properties of air and light.',
     'instruction.subject_focus': 'Context Hierarchy',
     'instruction.desc.subject_focus': 'CRITICAL: Even for Close-ups, describe 1. Full Character + ACTIVE INTERACTION (e.g. dragging). 2. Pose. 3. Detail. The AI needs the full context to render parts correctly.',
-    'instruction.always_env': 'CRITICAL: ENV HIERARCHY',
-    'instruction.desc.always_env': 'CRITICAL: Describe environment STRICTLY from Far to Near: 1. Horizon/Sky. 2. Midground (Architecture/Trees). 3. Foreground (Textures). Even for Macro shots, describe the blurred background using this order.',
+    'instruction.always_env': 'MANDATORY SET DESIGN',
+    'instruction.desc.always_env': "CRITICAL: Use the provided 'Global Scene Context' as the ABSOLUTE TRUTH for the background. You MUST inject the specific furniture, lighting, and textures from the context into the environment layer of EVERY prompt. Do not hallucinate generic backgrounds.",
     'instruction.pm_anthro': 'Anthro Detail',
     'instruction.desc.pm_anthro': 'MANDATORY: Word "anthropomorphic" before species in both Image AND Video. Enhanced textures/anatomy.',
     'instruction.pm_subscribe': 'Legible Text',

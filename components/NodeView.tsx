@@ -355,6 +355,7 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
       }}
       onClick={handleNodeClick} onMouseEnter={() => onNodeMouseEnter(node.id)} onMouseLeave={onNodeMouseLeave} onMouseDown={isRerouteDot ? handleDragMouseDown : undefined} onTouchStart={isRerouteDot ? handleDragTouchStart : undefined}
       onContextMenu={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
     >
       <div
         className={`absolute inset-0 border-2 ${borderColorClass} rounded-lg pointer-events-none`}

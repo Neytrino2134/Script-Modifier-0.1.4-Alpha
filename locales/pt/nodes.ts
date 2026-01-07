@@ -232,7 +232,7 @@ export const nodes = {
     'node.content.translating': 'Traduzindo...',
     'node.content.useExistingCharacters': 'Usar personagens existentes',
     'node.content.useExistingCharactersInfo': 'Usa dados de personagens conectados em vez de gerar novos.',
-    'node.content.createKeyItem': 'Criar Secundários/Itens',
+    'node.content.createKeyItem': 'Criar Secundários/Itens', // Fallback
     'node.content.createSecondaryChars': 'Personagens Secundários',
     'node.content.createKeyItems': 'Itens Chave',
     'node.content.createKeyItemInfo': 'Permite à IA criar personagens secundários ou itens.',
@@ -332,4 +332,10 @@ export const nodes = {
     'node.content.commercialSafe': 'Comercialmente Seguro',
     'instruction.desc.commercial_safe': 'Evita estritamente marcas registradas (Disney, Pixar) e as substitui por descrições genéricas.',
     'node.content.findStack': 'Buscar na pilha...',
+
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. Preparação e Contexto',
+    'node.content.spm_stack.physics': '2. Física e Lógica',
+    'node.content.spm_stack.hierarchy': '3. Hierarquia do Sujeito',
+    'node.content.spm_stack.construction': '4. Construção e Formato',
 };

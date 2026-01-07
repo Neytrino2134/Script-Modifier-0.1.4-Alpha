@@ -1,12 +1,14 @@
 
+
+
 export const modifier = {
     'instruction.inputs': 'Kirishlar',
     'instruction.desc.inputs': 'Manba: Kadrlar, Vizuallar, Uslub, Kontekst.',
     'instruction.role': 'Rol: Bosh Muhit Rassomi',
     'instruction.desc.role': 'Siz ekspert Bosh Muhit Rassomisiz. Kirish ma’lumotlarini vizual tavsifga aylantiring.',
     'instruction.layered': 'Algoritm: Yagona Oqim',
-    'instruction.desc.layered': 'YAGONA, UZLUKSIZ matn bloku yaratadi.',
-    'instruction.desc.layered_no_char': 'Tuzilishi: [Muhit] -> [Harakat]. Personaj ko\'rinishini o‘tkazib yuboradi.',
+    'instruction.desc.layered': 'YAGONA, UZLUKSIZ matn bloku yaratadi. Tuzilishi: [Uslub] -> [ASOSIY SAHNA DIZAYNI] -> [Vizuallar] + [POZA VA HARAKAT] -> [Kamera].',
+    'instruction.desc.layered_no_char': 'Tuzilishi: [ASOSIY SAHNA DIZAYNI] -> [Harakat]. Personaj ko\'rinishini o‘tkazib yuboradi.',
     'instruction.visuals': 'Uslub: To‘yinganlik',
     'instruction.desc.visuals': 'Boy vizual tavsiflardan foydalaning.',
     'instruction.process_whole_scene': 'Paket Sahna',
@@ -21,8 +23,8 @@ export const modifier = {
     'instruction.desc.atmosphere_fix': 'Kayfiyatni fizik xususiyatlar sifatida tasvirlang.',
     'instruction.subject_focus': 'Kontekst Ierarxiyasi',
     'instruction.desc.subject_focus': 'MUHIM: 1. To‘liq Personaj. 2. Poza. 3. Detal.',
-    'instruction.always_env': 'MUHIM: MUHIT IERARXIYASI',
-    'instruction.desc.always_env': 'MUHIM: Muhitni Uzoqdan Yaqingacha tasvirlang.',
+    'instruction.always_env': 'MAJBURIY SAHNA DIZAYNI',
+    'instruction.desc.always_env': 'MUHIM: Taqdim etilgan "Global Sahna Konteksti"dan fon uchun MUTLAQ HAQIQAT sifatida foydalaning. Mebel, yoritish va teksturalarning o‘ziga xos tafsilotlarini HAR BIR promptning muhit qatlamiga kiritishingiz SHART. Umumiy fonlarni o‘ylab topmang.',
     'instruction.pm_anthro': 'Antro Tafsilot',
     'instruction.desc.pm_anthro': 'MAJBURIY: "anthropomorphic" so‘zini qo‘shing.',
     'instruction.pm_subscribe': 'O‘qiladigan Matn',

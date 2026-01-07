@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import type { NodeContentProps } from '../../types';
 import { ActionButton } from '../ActionButton';
 
-const ImagePreviewNode: React.FC<NodeContentProps> = ({ node, onValueChange, t, onExtractTextFromImage, isExtractingText, addToast, deselectAllNodes }) => {
+const ImagePreviewNode: React.FC<NodeContentProps> = ({ node, onValueChange, t, onExtractTextFromImage, isExtractingText, addToast, deselectAllNodes, setImageViewer }) => {
     const [isDragOver, setIsDragOver] = useState(false);
     const isLoading = isExtractingText;
 
@@ -78,6 +78,16 @@ const ImagePreviewNode: React.FC<NodeContentProps> = ({ node, onValueChange, t, 
             addToast("Failed to copy image", 'info');
         }
     };
+    
+    const handleImageClick = (e: React.MouseEvent) => {
+        if (imageBase64 && setImageViewer) {
+            e.stopPropagation();
+            setImageViewer({
+                sources: [{ src: `data:image/png;base64,${imageBase64}`, frameNumber: 0, prompt: node.title }],
+                initialIndex: 0
+            });
+        }
+    };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
@@ -98,20 +108,23 @@ const ImagePreviewNode: React.FC<NodeContentProps> = ({ node, onValueChange, t, 
             onDrop={handleDrop}
             className={`flex flex-col h-full rounded-md transition-all duration-200 outline-none ${isDragOver ? 'ring-2 ring-emerald-400' : 'focus:ring-1 focus:ring-emerald-500/50'}`}
         >
-            <div className="relative flex-grow bg-gray-900/50 rounded-md flex items-center justify-center overflow-hidden mb-2 group">
+            <div 
+                className="relative flex-grow bg-gray-900/50 rounded-md flex items-center justify-center overflow-hidden mb-2 group cursor-pointer"
+                onClick={handleImageClick}
+            >
                 {imageBase64 ? (
                     <>
-                        <img src={`data:image/png;base64,${imageBase64}`} alt="Preview" className="w-full h-full object-contain" />
+                        <img src={`data:image/png;base64,${imageBase64}`} alt="Preview" className="w-full h-full object-contain pointer-events-none" />
                         <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button 
-                                onClick={handleCopyImage}
+                                onClick={(e) => { e.stopPropagation(); handleCopyImage(); }}
                                 className="p-1.5 bg-gray-800/80 rounded-full text-white hover:bg-emerald-600 transition-colors backdrop-blur-sm"
                                 title={t('node.action.copy')}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                             </button>
                             <button 
-                                onClick={() => handleValueUpdate({ imageBase64: null, extractedText: '' })}
+                                onClick={(e) => { e.stopPropagation(); handleValueUpdate({ imageBase64: null, extractedText: '' }); }}
                                 className="p-1.5 bg-gray-800/80 rounded-full text-white hover:bg-red-600 transition-colors backdrop-blur-sm"
                                 title={t('node.action.clear')}
                             >

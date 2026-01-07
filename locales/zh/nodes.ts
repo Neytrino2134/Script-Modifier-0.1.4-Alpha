@@ -332,4 +332,10 @@ export const nodes = {
     'node.content.commercialSafe': '商业安全',
     'instruction.desc.commercial_safe': '严格避免商标（迪士尼、皮克斯）并替换为通用描述。',
     'node.content.findStack': '在堆栈中查找...',
+
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. 引导与语境',
+    'node.content.spm_stack.physics': '2. 物理与逻辑',
+    'node.content.spm_stack.hierarchy': '3. 主体层级',
+    'node.content.spm_stack.construction': '4. 构建与格式',
 };

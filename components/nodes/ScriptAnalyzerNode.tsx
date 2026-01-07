@@ -88,15 +88,15 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                 autoIndexCharacters: parsed.autoIndexCharacters !== false,
                 
                 uiState: parsed.uiState || { isSettingsCollapsed: true, isCharStyleCollapsed: true }, // Default collapsed
-                settingsPaneHeight: parsed.settingsPaneHeight || 200,
-                characterPaneHeight: parsed.characterPaneHeight || 200,
+                settingsPaneHeight: parsed.settingsPaneHeight || 380,
+                characterPaneHeight: parsed.characterPaneHeight || 170,
                 generationProgress: parsed.generationProgress || null,
             };
         } catch {
             return { 
                 characters: [], scenes: [], targetLanguage: language, model: 'gemini-3-pro-preview', 
                 uiState: { isSettingsCollapsed: true, isCharStyleCollapsed: true },
-                settingsPaneHeight: 200, characterPaneHeight: 200, anatomicalStrictness: true, propConsistency: true,
+                settingsPaneHeight: 380, characterPaneHeight: 170, anatomicalStrictness: true, propConsistency: true,
                 minFrames: null, maxFrames: null, framesPerScene: null
             };
         }
@@ -115,8 +115,8 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
     // --- EFFECT: Collapse existing Output Scenes/Frames on Initial Mount ---
     useEffect(() => {
         if (scenes && scenes.length > 0) {
-            const allSceneIndices = new Set(scenes.map((_: any, i: number) => i));
-            const allContextIndices = new Set(scenes.map((_: any, i: number) => i));
+            const allSceneIndices = new Set<number>(scenes.map((_: any, i: number) => i));
+            const allContextIndices = new Set<number>(scenes.map((_: any, i: number) => i));
             const allFrameIds = new Set<string>();
             scenes.forEach((s: any, sIdx: number) => {
                 (s.frames || []).forEach((f: any) => allFrameIds.add(`${sIdx}-${f.frameNumber}`));
@@ -128,7 +128,7 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
         }
         
         if (characters && characters.length > 0) {
-             const allCharIds = new Set(characters.map((c: any) => c.id || c.name));
+             const allCharIds = new Set<string | number>(characters.map((c: any) => c.id || c.name));
              setCollapsedCharacters(allCharIds);
         }
     }, []); // Only run once on mount
@@ -159,6 +159,34 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
         const handleMouseUp = () => { window.removeEventListener('mousemove', handleMouseMove); window.removeEventListener('mouseup', handleMouseUp); };
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
+    };
+
+    // Smart Range Logic
+    const handleStartSceneChange = (val: number) => {
+        const newStart = Math.max(1, val);
+        const updates: any = { startSceneNumber: newStart };
+        // Smart Push: If start exceeds end, move end up
+        if (endSceneNumber !== null && newStart > endSceneNumber) {
+            updates.endSceneNumber = newStart;
+        }
+        handleValueUpdate(updates);
+    };
+
+    const handleEndSceneChange = (val: number | null) => {
+        if (val === null) {
+            handleValueUpdate({ endSceneNumber: null });
+            return;
+        }
+        const newEnd = Math.max(1, val);
+        const updates: any = { endSceneNumber: newEnd };
+        
+        // Smart Pull: If end drops below start, move start down
+        // Treat null start as 1
+        const currentStart = startSceneNumber || 1;
+        if (newEnd < currentStart) {
+            updates.startSceneNumber = newEnd;
+        }
+        handleValueUpdate(updates);
     };
 
     // Timer Effect
@@ -303,7 +331,7 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
         setTimeout(() => onAnalyzeScript(node.id), 50);
     };
 
-    // Range Handlers
+    // Range Handlers (Previous/Next +5 Logic)
     const handleRangeNext = () => {
         const currentStart = startSceneNumber || 1;
         const nextStart = Math.ceil(currentStart / 5) * 5 + 1;
@@ -566,23 +594,59 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                 </div>
 
                 <div className="bg-gray-900/50 rounded-md flex-shrink-0 flex flex-col">
-                     {/* Scene Range Controls */}
+                     {/* Scene Range Controls with Smart Logic */}
                      <div className="p-2 border-b border-gray-800 flex items-center justify-start gap-4">
                         <div className="flex items-center space-x-1 text-xs text-gray-400">
                             <label className="whitespace-nowrap">{t('node.content.analyzeFromScene')}</label>
                             <div className="relative w-14 h-7">
-                                <input type="number" min="1" placeholder="1" value={startSceneNumber || ''} onChange={e => handleValueUpdate({ startSceneNumber: e.target.value ? parseInt(e.target.value) : null })} className="w-full h-full pl-2 pr-4 bg-gray-800 text-white rounded-md text-center focus:ring-1 focus:ring-emerald-500 focus:outline-none appearance-none text-xs" onMouseDown={e => e.stopPropagation()} />
+                                <input 
+                                    type="number" 
+                                    min="1" 
+                                    placeholder="1" 
+                                    value={startSceneNumber || ''} 
+                                    onChange={e => handleStartSceneChange(parseInt(e.target.value) || 1)} 
+                                    className="w-full h-full pl-2 pr-4 bg-gray-800 text-white rounded-md text-center focus:ring-1 focus:ring-emerald-500 focus:outline-none appearance-none text-xs" 
+                                    onMouseDown={e => e.stopPropagation()} 
+                                />
                                 <div className="absolute right-0 top-0 bottom-0 w-4 flex flex-col border-l border-gray-700">
-                                    <button onClick={() => handleValueUpdate({ startSceneNumber: (startSceneNumber || 0) + 1 })} className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-tr-md focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" /></svg></button>
-                                    <button onClick={() => handleValueUpdate({ startSceneNumber: Math.max(1, (startSceneNumber || 0) - 1) })} className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-br-md border-t border-gray-700 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg></button>
+                                    <button 
+                                        onClick={() => handleStartSceneChange((startSceneNumber || 0) + 1)} 
+                                        className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-tr-md focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" /></svg>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleStartSceneChange(Math.max(1, (startSceneNumber || 0) - 1))} 
+                                        className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-br-md border-t border-gray-700 focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                    </button>
                                 </div>
                             </div>
                             <label className="whitespace-nowrap">{t('node.content.analyzeUpToScene')}</label>
                             <div className="relative w-16 h-7">
-                                <input type="number" min="1" placeholder={t('node.content.endPlaceholder')} value={endSceneNumber || ''} onChange={e => handleValueUpdate({ endSceneNumber: e.target.value ? parseInt(e.target.value) : null })} className="w-full h-full pl-2 pr-4 bg-gray-800 text-white rounded-md text-center focus:ring-1 focus:ring-emerald-500 focus:outline-none appearance-none text-xs" onMouseDown={e => e.stopPropagation()} />
+                                <input 
+                                    type="number" 
+                                    min="1" 
+                                    placeholder={t('node.content.endPlaceholder')} 
+                                    value={endSceneNumber || ''} 
+                                    onChange={e => handleEndSceneChange(e.target.value ? parseInt(e.target.value) : null)} 
+                                    className="w-full h-full pl-2 pr-4 bg-gray-800 text-white rounded-md text-center focus:ring-1 focus:ring-emerald-500 focus:outline-none appearance-none text-xs" 
+                                    onMouseDown={e => e.stopPropagation()} 
+                                />
                                 <div className="absolute right-0 top-0 bottom-0 w-4 flex flex-col border-l border-gray-700">
-                                    <button onClick={() => handleValueUpdate({ endSceneNumber: (endSceneNumber || 0) + 1 })} className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-tr-md focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" /></svg></button>
-                                    <button onClick={() => handleValueUpdate({ endSceneNumber: Math.max(1, (endSceneNumber || 0) - 1) })} className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-br-md border-t border-gray-700 focus:outline-none"><svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg></button>
+                                    <button 
+                                        onClick={() => handleEndSceneChange((endSceneNumber || (startSceneNumber || 1)) + 1)} 
+                                        className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-tr-md focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" /></svg>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleEndSceneChange((endSceneNumber || (startSceneNumber || 1)) - 1)} 
+                                        className="h-1/2 hover:bg-gray-700 text-gray-500 hover:text-white flex items-center justify-center rounded-br-md border-t border-gray-700 focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -626,28 +690,40 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                         </div>
                     </div>
                     
-                    <div className="px-2 pb-2 flex items-center gap-4 border-b border-gray-800">
+                    <div className="px-2 pb-2 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-gray-800">
                         <div className="flex items-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); if (!isLoading) handleValueUpdate({ batchProcessing: !batchProcessing }); }}>
                             <CustomCheckbox
                                 id={`batch-processing-${node.id}`}
                                 checked={batchProcessing}
                                 onChange={(checked) => handleValueUpdate({ batchProcessing: checked })}
                                 disabled={isLoading}
-                                className="h-3.5 w-3.5"
+                                className="h-3.5 w-3.5 pointer-events-none"
                             />
                             <label 
-                                htmlFor={`batch-processing-${node.id}`} 
                                 className="text-xs text-gray-400 cursor-pointer select-none font-medium group-hover:text-emerald-400 transition-colors" 
                                 title={t('node.content.batchProcessingInfo')}
-                                onClick={(e) => e.stopPropagation()} 
                             >
                                 {t('node.content.batchProcessing')}
                             </label>
                             <SearchTrigger id={SCRIPT_ANALYZER_INSTRUCTIONS.BATCH_PROCESSING.id} onClick={handleSearchClick} />
                         </div>
 
+                         <div className="flex items-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); if (!isLoading) handleValueUpdate({ thinkingEnabled: !thinkingEnabled }); }}>
+                            <CustomCheckbox
+                                id={`thinking-${node.id}`}
+                                checked={thinkingEnabled}
+                                onChange={(checked) => handleValueUpdate({ thinkingEnabled: checked })}
+                                disabled={isLoading}
+                                className="h-3.5 w-3.5 pointer-events-none"
+                            />
+                            <label className="text-xs text-gray-400 cursor-pointer select-none font-medium group-hover:text-cyan-400 transition-colors">
+                                {t('node.content.thinkingEnabled')}
+                            </label>
+                            <SearchTrigger id="thinking_mode" onClick={handleSearchClick} />
+                        </div>
+
                         <div 
-                            className="flex items-center ml-2 border-l border-gray-700 pl-2 gap-2 cursor-pointer group"
+                            className="flex items-center gap-2 cursor-pointer group"
                             onClick={(e) => { 
                                 e.stopPropagation(); 
                                 if (!isLoading) handleValueUpdate({ shotFilter: shotFilter === 'wideOnly' ? 'all' : 'wideOnly' }); 
@@ -666,6 +742,76 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                                 {t('node.content.shotFilter.wideOnly')}
                             </label>
                             <SearchTrigger id={SCRIPT_ANALYZER_INSTRUCTIONS.SHOT_FILTER_WIDE.id} onClick={handleSearchClick} />
+                        </div>
+
+                        <div className="flex items-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); if (!isLoading) handleValueUpdate({ extendedAnalysis: !extendedAnalysis }); }}>
+                            <CustomCheckbox
+                                id={`extended-analysis-${node.id}`}
+                                checked={extendedAnalysis}
+                                onChange={(checked) => handleValueUpdate({ extendedAnalysis: checked })}
+                                disabled={isLoading}
+                                className="h-3.5 w-3.5 pointer-events-none"
+                            />
+                            <label className="text-xs text-gray-400 cursor-pointer select-none font-medium group-hover:text-cyan-400 transition-colors">
+                                {t('node.content.extendedAnalysis')}
+                            </label>
+                            <SearchTrigger id={SCRIPT_ANALYZER_INSTRUCTIONS.EXTENDED_VISUALS.id} onClick={handleSearchClick} />
+                        </div>
+
+                         <div className="flex items-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); if (!isLoading) handleValueUpdate({ microActionBreakdown: !microActionBreakdown }); }}>
+                            <CustomCheckbox
+                                id={`micro-action-${node.id}`}
+                                checked={microActionBreakdown}
+                                onChange={(checked) => handleValueUpdate({ microActionBreakdown: checked })}
+                                disabled={isLoading}
+                                className="h-3.5 w-3.5 pointer-events-none"
+                            />
+                            <label className="text-xs text-gray-400 cursor-pointer select-none font-medium group-hover:text-cyan-400 transition-colors">
+                                {t('node.content.microActionBreakdown')}
+                            </label>
+                            <SearchTrigger id={SCRIPT_ANALYZER_INSTRUCTIONS.ACTION_PHASE_BREAKDOWN.id} onClick={handleSearchClick} />
+                        </div>
+
+                         <div className="flex items-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); if (!isLoading) handleValueUpdate({ livingWorldEnabled: !livingWorldEnabled }); }}>
+                            <CustomCheckbox
+                                id={`living-world-${node.id}`}
+                                checked={livingWorldEnabled}
+                                onChange={(checked) => handleValueUpdate({ livingWorldEnabled: checked })}
+                                disabled={isLoading}
+                                className="h-3.5 w-3.5 pointer-events-none"
+                            />
+                            <label className="text-xs text-gray-400 cursor-pointer select-none font-medium group-hover:text-emerald-400 transition-colors">
+                                {t('instruction.rule_living_world')}
+                            </label>
+                            <SearchTrigger id={SCRIPT_ANALYZER_INSTRUCTIONS.LIVING_WORLD.id} onClick={handleSearchClick} />
+                        </div>
+
+                        <div className="flex items-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); if (!isLoading) handleValueUpdate({ anthroEnabled: !anthroEnabled }); }}>
+                            <CustomCheckbox
+                                id={`anthro-${node.id}`}
+                                checked={anthroEnabled}
+                                onChange={(checked) => handleValueUpdate({ anthroEnabled: checked })}
+                                disabled={isLoading}
+                                className="h-3.5 w-3.5 pointer-events-none"
+                            />
+                            <label className="text-xs text-gray-400 cursor-pointer select-none font-medium group-hover:text-cyan-400 transition-colors">
+                                {t('node.content.anthroEnabled')}
+                            </label>
+                            <SearchTrigger id={SCRIPT_ANALYZER_INSTRUCTIONS.ANTHRO_LOGIC.id} onClick={handleSearchClick} />
+                        </div>
+
+                        <div className="flex items-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); if (!isLoading) handleValueUpdate({ subscribeEnhancement: !subscribeEnhancement }); }}>
+                            <CustomCheckbox
+                                id={`subscribe-${node.id}`}
+                                checked={subscribeEnhancement}
+                                onChange={(checked) => handleValueUpdate({ subscribeEnhancement: checked })}
+                                disabled={isLoading}
+                                className="h-3.5 w-3.5 pointer-events-none"
+                            />
+                            <label className="text-xs text-gray-400 cursor-pointer select-none font-medium group-hover:text-cyan-400 transition-colors">
+                                {t('node.content.subscribeEnhancement')}
+                            </label>
+                            <SearchTrigger id={SCRIPT_ANALYZER_INSTRUCTIONS.SUBSCRIBE_LOGIC.id} onClick={handleSearchClick} />
                         </div>
                     </div>
                     
@@ -729,7 +875,7 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                         anatomicalStrictness={anatomicalStrictness}
                         propConsistency={propConsistency} // New Prop
                         t={t}
-                        initialHeight={settingsPaneHeight || 200}
+                        initialHeight={settingsPaneHeight || 380}
                         onHeightChange={(h) => handleValueUpdate({ settingsPaneHeight: h })}
                         scale={viewTransform.scale}
                         model={model}
@@ -746,7 +892,7 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
 
             <CharactersPanel 
                 uiState={uiState}
-                initialHeight={characterPaneHeight || 200}
+                initialHeight={characterPaneHeight || 170}
                 onHeightChange={(h) => handleValueUpdate({ characterPaneHeight: h })}
                 scale={viewTransform.scale}
                 onUpdateUiState={handleUiStateUpdate}
@@ -760,7 +906,7 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
                 areAllCharactersCollapsed={characters.length > 0 && collapsedCharacters.size === characters.length}
                 onToggleAllCharacters={() => {
                      if (collapsedCharacters.size === characters.length) setCollapsedCharacters(new Set());
-                     else setCollapsedCharacters(new Set(characters.map((c: any) => c.id || c.name)));
+                     else setCollapsedCharacters(new Set<string | number>(characters.map((c: any) => c.id || c.name)));
                 }}
                 handleCharacterClick={(e, id) => {
                      setSelectedCharacters(prev => {

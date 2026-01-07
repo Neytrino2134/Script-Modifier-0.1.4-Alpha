@@ -332,4 +332,10 @@ export const nodes = {
     'node.content.commercialSafe': 'Sûr pour le Commerce',
     'instruction.desc.commercial_safe': 'Évite strictement les marques déposées (Disney, Pixar) et les remplace par des descriptions génériques.',
     'node.content.findStack': 'Trouver dans la pile...',
+
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. Amorçage et Contexte',
+    'node.content.spm_stack.physics': '2. Physique et Logique',
+    'node.content.spm_stack.hierarchy': '3. Hiérarchie du Sujet',
+    'node.content.spm_stack.construction': '4. Construction et Format',
 };

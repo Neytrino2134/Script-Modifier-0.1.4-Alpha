@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { CombinedPromptItem } from './DisplayItems';
 import { ActionButton } from '../../ActionButton';
+import { SceneContextMap } from './types';
 
 interface OutputPromptsPanelProps {
     verticalDividerPos: number;
@@ -9,6 +11,7 @@ interface OutputPromptsPanelProps {
     collapsedPrompts: Set<string>;
     areAllOutputScenesCollapsed: boolean;
     areAllOutputPromptsCollapsed: boolean;
+    sceneContexts: SceneContextMap; // Received context map
     onToggleOutputSceneCollapse: (key: string) => void;
     onTogglePromptCollapse: (id: string) => void;
     onToggleAllOutputScenes: () => void;
@@ -17,15 +20,18 @@ interface OutputPromptsPanelProps {
     onDeleteScenePrompts: (sNum: number) => void;
     onDownloadJson: () => void;
     onCopy: (text: string) => void;
+    onUpdateSceneContext: (sceneNum: string, newValue: string) => void; // Update handler
     t: (key: string) => string;
+    deselectAllNodes?: () => void;
 }
 
 export const OutputPromptsPanel: React.FC<OutputPromptsPanelProps> = ({
     verticalDividerPos, groupedPrompts, collapsedOutputScenes, collapsedPrompts,
-    areAllOutputScenesCollapsed, areAllOutputPromptsCollapsed,
+    areAllOutputScenesCollapsed, areAllOutputPromptsCollapsed, sceneContexts,
     onToggleOutputSceneCollapse, onTogglePromptCollapse,
     onToggleAllOutputScenes, onToggleAllOutputPrompts,
-    onDeletePrompt, onDeleteScenePrompts, onDownloadJson, onCopy, t
+    onDeletePrompt, onDeleteScenePrompts, onDownloadJson, onCopy, onUpdateSceneContext, t,
+    deselectAllNodes
 }) => {
     return (
         <div className="overflow-y-scroll custom-scrollbar pl-1 space-y-2" style={{ width: `calc(${100 - verticalDividerPos}% - 0.5rem)`, contentVisibility: 'auto' }} onWheel={e => e.stopPropagation()}>
@@ -57,6 +63,8 @@ export const OutputPromptsPanel: React.FC<OutputPromptsPanelProps> = ({
             </div>
             {groupedPrompts.length > 0 ? groupedPrompts.map((group) => {
                 const isSceneCollapsed = collapsedOutputScenes.has(group.sceneNum);
+                const contextValue = sceneContexts[group.sceneNum] || '';
+                
                 return (
                     <div key={group.sceneNum} className="mb-4">
                         <div className="px-2 py-1 mb-1 text-xs font-bold text-gray-400 uppercase border-b border-gray-700 flex justify-between items-center group cursor-pointer hover:bg-gray-800/50 transition-colors rounded" onClick={() => onToggleOutputSceneCollapse(group.sceneNum)}>
@@ -75,6 +83,29 @@ export const OutputPromptsPanel: React.FC<OutputPromptsPanelProps> = ({
                         </div>
                         {!isSceneCollapsed && (
                             <div className="pl-2 space-y-2">
+                                {/* MASTER ENVIRONMENT PROMPT UI */}
+                                <div className="bg-gray-800/80 border border-emerald-500/30 rounded-md p-2 mb-2 shadow-inner">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">MASTER ENVIRONMENT PROMPT</span>
+                                        </div>
+                                        <ActionButton tooltipPosition="left" title={t('node.action.copy')} onClick={(e) => { e.stopPropagation(); onCopy(contextValue); }}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                        </ActionButton>
+                                    </div>
+                                    <textarea 
+                                        value={contextValue}
+                                        onChange={(e) => onUpdateSceneContext(group.sceneNum, e.target.value)}
+                                        className="w-full text-xs p-2 bg-gray-900 border border-gray-700 rounded resize-y min-h-[60px] focus:outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar text-gray-300 placeholder-gray-600"
+                                        placeholder="Detailed master scene description (Furniture, Lighting, Textures)..."
+                                        onFocus={deselectAllNodes}
+                                        onMouseDown={e => e.stopPropagation()}
+                                    />
+                                </div>
+
                                 {group.prompts.map((item, idx) => {
                                     const p = item.final || item.video;
                                     const promptId = `${p.sceneNumber}-${p.frameNumber}`;

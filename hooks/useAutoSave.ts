@@ -85,6 +85,9 @@ export const useAutoSave = (
     // Prevent accidental exit logic
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            // Bypass prompt if the app is performing a deliberate hard reload
+            if ((window as any).isReloading) return;
+
             // Check the ref current value to get the latest state without closure staleness
             const hasContent = tabsRef.current.some(tab => tab.nodes.length > 0);
             if (hasContent) {

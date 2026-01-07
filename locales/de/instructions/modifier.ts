@@ -1,12 +1,14 @@
 
+
+
 export const modifier = {
     'instruction.inputs': 'Eingaben',
     'instruction.desc.inputs': 'Datenquelle: Analysator-Frames, Visuelle Profile, Szenenstil.',
     'instruction.role': 'Rolle: Lead Environment Artist',
     'instruction.desc.role': 'Sie sind Experte für Prompt-Engineering. Synthetisieren Sie Eingaben zu einer definitiven visuellen Beschreibung.',
     'instruction.layered': 'Algorithmus: Einheitlicher Fluss',
-    'instruction.desc.layered': 'Generiert einen EINZIGEN nahtlosen Textblock. Verbindet Interaktionen: "[Character-1] is catching [Character-2]".',
-    'instruction.desc.layered_no_char': 'Struktur: [Umgebung] -> [Aktion]. Lässt Aussehen weg, behält nur Indizes und Aktionen.',
+    'instruction.desc.layered': 'Generiert einen EINZIGEN nahtlosen Textblock. Struktur: [Stil] -> [MASTER SET DESIGN] -> [Visuals] + [POSE & AKTION] -> [Kamera].',
+    'instruction.desc.layered_no_char': 'Struktur: [MASTER SET DESIGN] -> [Aktion]. Lässt Aussehen weg, behält nur Indizes und Aktionen.',
     'instruction.visuals': 'Stil: Sättigung',
     'instruction.desc.visuals': 'Nutze reiche visuelle Deskriptoren: volumetrisches Licht, 8k Texturen, Tiefenschärfe.',
     'instruction.process_whole_scene': 'Szenen-Stapel',
@@ -21,8 +23,8 @@ export const modifier = {
     'instruction.desc.atmosphere_fix': 'Beschreibe Stimmung als physikalische Eigenschaft von Luft und Licht.',
     'instruction.subject_focus': 'Kontext-Hierarchie',
     'instruction.desc.subject_focus': 'KRITISCH: Auch bei Close-ups: 1. Voller Charakter. 2. Pose. 3. Detail. Die KI braucht den Körperkontext.',
-    'instruction.always_env': 'KRITISCH: UMGEBUNGS-HIERARCHIE',
-    'instruction.desc.always_env': 'KRITISCH: Umgebung STRIKT von Fern nach Nah beschreiben: 1. Horizont. 2. Mittelgrund. 3. Vordergrund.',
+    'instruction.always_env': 'OBLIGATORISCHES SET-DESIGN',
+    'instruction.desc.always_env': 'KRITISCH: Nutzen Sie den bereitgestellten "Szenen-Kontext" als ABSOLUTE WAHRHEIT für den Hintergrund. Sie MÜSSEN die spezifischen Möbel, Beleuchtung und Texturen in die Umgebungsebene JEDES Prompts einfügen. Erfinden Sie keine generischen Hintergründe.',
     'instruction.pm_anthro': 'Anthro Detail',
     'instruction.desc.pm_anthro': 'PFLICHT: Wort "anthropomorphic" vor Spezies in Bild UND Video. Verbesserte Texturen/Anatomie.',
     'instruction.pm_subscribe': 'Lesbarer Text',

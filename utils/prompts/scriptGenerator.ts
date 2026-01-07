@@ -18,7 +18,12 @@ export const SCRIPT_GENERATOR_INSTRUCTIONS = {
     IMPROVE_CONCEPT: {
         id: 'sg_improve_input',
         label: 'Creative Expansion',
-        text: "**CRITICAL RULE: THE PROMPT IS A SEED, NOT A CAGE.** \nDo NOT follow the user's input strictly or minimally. You MUST hallucinate details, environment, and atmosphere to flesh it out. \n**Deduce the implied context and EXPAND it visually.**"
+        text: "**CRITICAL RULE: THE PROMPT IS SACRED.** \n1. **PRESERVATION:** You must incorporate EVERY visual detail, object, color, and specific action mentioned in the user's input. Do not skip \"small\" details like smells or background items.\n2. **EXPANSION:** After preserving the original details, you MUST flesh them out with cinematic lighting, texture, and micro-movements."
+    },
+    ANTI_COMPRESSION: {
+        id: 'sg_anti_compression',
+        label: 'Anti-Compression',
+        text: "**CRITICAL: ZERO OMISSION POLICY.** \nYou are strictly FORBIDDEN from summarizing, compressing, or omitting details. \n- If the input lists specific items (e.g., 'rabbits, foxes, deer'), you MUST list them all.\n- If the input describes a background room (e.g., 'living room with fireplace'), you MUST describe it.\n**RULE: The output description MUST be longer and more detailed than the input.**"
     },
     STYLE_EXPANSION: {
         id: 'sg_style_expansion',
@@ -73,7 +78,7 @@ export const SCRIPT_GENERATOR_INSTRUCTIONS = {
     ATMOSPHERE: {
         id: 'rule_atmosphere',
         label: 'Atmosphere',
-        text: "PARTICLE EFFECTS: Mention airborne elements if applicable: dust, smoke, steam, snow, rain. These add depth to the image."
+        text: "PARTICLE EFFECTS & SENSES: Mention airborne elements if applicable: dust, smoke, steam, snow, rain. Preserve described smells and sounds by converting them into visual cues (e.g. 'steam rising from cinnamon buns')."
     },
     NO_CAMERA_DIRECTIVES: {
         id: 'no_camera',
@@ -131,7 +136,7 @@ export const CHAR_GEN_INSTRUCTIONS = {
     GRAY_BG: {
         id: 'char_gray_bg',
         label: 'Visual Concept',
-        text: "For every entity visual prompt, ALWAYS append: ', full body character concept on a gray background'."
+        text: "For every entity visual prompt, ALWAYS append: ', full body character concept on a gray background'.",
     },
     SECONDARY_CHARS: {
         id: 'create_secondary_chars',

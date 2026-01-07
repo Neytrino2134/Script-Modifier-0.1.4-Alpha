@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { PROMPT_MODIFIER_INSTRUCTIONS, LAYERED_CONSTRUCTION_NO_STYLE_TEXT, LAYERED_CONSTRUCTION_NO_CHAR_TEXT } from '../../../utils/prompts/promptModifier';
 import { SAFE_GENERATION_INSTRUCTIONS } from '../../../utils/prompts/common';
@@ -63,12 +64,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     
     // Internal state for smooth dragging
-    const [height, setHeight] = useState(localSettingsHeight || 200);
+    const [height, setHeight] = useState(localSettingsHeight || 380);
 
     // Sync internal state with prop
     useEffect(() => {
         if (Math.abs(localSettingsHeight - height) > 1) {
-            setHeight(localSettingsHeight || 200);
+            setHeight(localSettingsHeight || 380);
         }
     }, [localSettingsHeight]);
 
@@ -156,10 +157,29 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
             // Disable it (add to disabled list)
             newDisabledIds = [...disabledInstructionIds, id];
         }
+
+        // Synchronize 'Img->Vid Flow' with 'Video Prompt'
+        // If Video Prompt is toggled, toggle Consistency to match.
+        const VIDEO_PROMPT_ID = PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id;
+        const CONSISTENCY_ID = PROMPT_MODIFIER_INSTRUCTIONS.IMG_VID_CONSISTENCY.id;
+
+        if (id === VIDEO_PROMPT_ID) {
+            if (isDisabled) {
+                // Video Prompt is being ENABLED -> Enable Consistency
+                newDisabledIds = newDisabledIds.filter(pid => pid !== CONSISTENCY_ID);
+            } else {
+                // Video Prompt is being DISABLED -> Disable Consistency
+                if (!newDisabledIds.includes(CONSISTENCY_ID)) {
+                    newDisabledIds.push(CONSISTENCY_ID);
+                }
+            }
+        }
+
         onUpdateValue({ disabledInstructionIds: newDisabledIds });
     };
 
     const isInstructionEnabled = (id: string) => !disabledInstructionIds.includes(id);
+    const isVideoPromptEnabled = isInstructionEnabled(PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id);
     
     const getFormattedModelName = (modelId: string) => {
         if (modelId === 'gemini-3-flash-preview') return 'Gemini 3 Flash Preview';
@@ -288,6 +308,34 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                         </label>
                         <SearchTrigger id={PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.id} onClick={handleSearchClick} t={t} />
                     </div>
+
+                    {/* General Char Desc */}
+                    <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
+                        <CustomCheckbox
+                            id="quick-general-char"
+                            checked={charDescMode === 'general'} 
+                            onChange={() => onUpdateValue({ charDescMode: charDescMode === 'general' ? 'none' : 'general' })} 
+                            className="h-3.5 w-3.5"
+                        />
+                        <label htmlFor="quick-general-char" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-emerald-400 transition-colors whitespace-nowrap">
+                            {t('node.content.includeGeneralCharDesc')}
+                        </label>
+                        <SearchTrigger id={PROMPT_MODIFIER_INSTRUCTIONS.GENERAL_CHAR_DESC.id} onClick={handleSearchClick} t={t} />
+                    </div>
+
+                    {/* Video Prompt */}
+                    <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
+                        <CustomCheckbox
+                            id="quick-video-prompt"
+                            checked={isVideoPromptEnabled}
+                            onChange={() => toggleInstruction(PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id)} 
+                            className="h-3.5 w-3.5"
+                        />
+                        <label htmlFor="quick-video-prompt" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-cyan-400 transition-colors whitespace-nowrap">
+                            {t('instruction.video')}
+                        </label>
+                        <SearchTrigger id={PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id} onClick={handleSearchClick} t={t} />
+                    </div>
                 </div>
 
                 {/* Search Filter Header */}
@@ -361,9 +409,26 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                         />
                     )}
 
+                    {/* Thinking Mode - Moved Here */}
+                    {shouldShow("Enable extended reasoning", t('node.content.thinkingEnabled')) && (
+                        <InstructionBrick 
+                           ref={el => { brickRefs.current['thinking-brick'] = el; }}
+                           id="thinking-brick"
+                           index={thinkingEnabled ? ++stepCount : undefined}
+                           label={t('node.content.thinkingEnabled')} 
+                           originalText="Enable extended reasoning for deeper plot coherence." 
+                           translatedText="Включить расширенное мышление для улучшения сюжета." 
+                           isEnabled={thinkingEnabled} 
+                           onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })} 
+                           color='cyan'
+                           className="h-auto" 
+                           isHighlighted={targetScrollId === 'thinking-brick'}
+                       />
+                   )}
+
                     {/* 1. PRIMING & ROLE */}
                     <div className="space-y-1 flex-none mb-3">
-                        <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">1. Priming & Role</h6>
+                        <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.spm_stack.priming')}</h6>
 
                          {/* Safe Generation */}
                          {shouldShow(SAFE_GENERATION_INSTRUCTIONS.text, t('node.content.safeGeneration')) && (
@@ -382,22 +447,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                             />
                         )}
 
-                         {/* Thinking Mode */}
-                         {shouldShow("Enable extended reasoning", t('node.content.thinkingEnabled')) && (
-                             <InstructionBrick 
-                                ref={el => { brickRefs.current['thinking-brick'] = el; }}
-                                id="thinking-brick"
-                                index={thinkingEnabled ? ++stepCount : undefined}
-                                label={t('node.content.thinkingEnabled')} 
-                                originalText="Enable extended reasoning for deeper plot coherence." 
-                                translatedText="Включить расширенное мышление для улучшения сюжета." 
-                                isEnabled={thinkingEnabled} 
-                                onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })} 
-                                color='cyan'
-                                className="h-auto" 
-                                isHighlighted={targetScrollId === 'thinking-brick'}
-                            />
-                        )}
                         {shouldShow(PROMPT_MODIFIER_INSTRUCTIONS.ROLE.text, t('instruction.role')) && (
                             <InstructionBrick 
                                 ref={el => { brickRefs.current[PROMPT_MODIFIER_INSTRUCTIONS.ROLE.id] = el; }}
@@ -415,7 +464,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
 
                     {/* 2. CORE PHYSICS & RULES */}
                     <div className="space-y-1 flex-none mb-3">
-                         <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">2. Core Physics & Rules</h6>
+                         <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.spm_stack.physics')}</h6>
                         
                         {/* NO POV INSTRUCTION */}
                         {shouldShow(PROMPT_MODIFIER_INSTRUCTIONS.NO_POV.text, t('instruction.no_pov')) && (
@@ -491,7 +540,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
 
                     {/* 3. SUBJECT HIERARCHY */}
                     <div className="space-y-1 flex-none mb-3">
-                         <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">3. Subject Hierarchy</h6>
+                         <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.spm_stack.hierarchy')}</h6>
                          
                          {shouldShow(PROMPT_MODIFIER_INSTRUCTIONS.SUBJECT_FOCUS.text, t('instruction.subject_focus')) && (
                              <InstructionBrick 
@@ -651,7 +700,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
 
                     {/* 4. CONSTRUCTION & FORMAT */}
                     <div className="space-y-1 flex-none">
-                         <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">4. Construction & Output</h6>
+                         <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.spm_stack.construction')}</h6>
                         
                         {/* Process Whole Scene */}
                          {shouldShow(PROMPT_MODIFIER_INSTRUCTIONS.PROCESS_WHOLE_SCENE.text, t('instruction.process_whole_scene')) && (
@@ -726,12 +775,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                             <InstructionBrick 
                                 ref={el => { brickRefs.current[PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id] = el; }}
                                 id={PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id} 
-                                index={isInstructionEnabled(PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id) ? ++stepCount : undefined}
+                                index={isVideoPromptEnabled ? ++stepCount : undefined}
                                 label={t('instruction.video')} 
                                 originalText={PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.text} 
                                 translatedText={t('instruction.desc.video')}
                                 onToggle={() => toggleInstruction(PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id)}
-                                isEnabled={isInstructionEnabled(PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id)}
+                                isEnabled={isVideoPromptEnabled}
                                 color='cyan'
                                 className="h-auto"
                                 isHighlighted={targetScrollId === PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id}

@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 export const analyzer = {
     'instruction.ana_role': 'Analyzer Role',
     'instruction.desc.ana_role': 'You are a world-class Film Director and Cinematographer. You write instructions for AI generation. Each frame must be described repeatedly and in detail, independently of the previous one, while maintaining the context of previous frames. Do not use literary abbreviations or devices.',
@@ -23,8 +16,8 @@ export const analyzer = {
     'instruction.desc.rule_living_world_anthro': 'Background extras/crowds must be Anthropomorphic Animals (NOT humans).',
     'instruction.rule_persistence': 'Persistence',
     'instruction.desc.rule_persistence': "SCENE-WIDE CHRONOLOGICAL PERSISTENCE: Maintain a persistent global state for the entire scene. Every frame is part of a single physical space. Track the exact position, pose, and status of every character and object, even when they are off-camera. If Character A is in Frame 1 but the camera cuts to Character B in Frame 2, Character A must still exist logically in their last position. If an object is moved, it stays moved. Ensure total continuity across the sequence.",
-    'instruction.rule_mandatory_bg': 'Mandatory Global BG',
-    'instruction.desc.rule_mandatory_bg': "FORBIDDEN to leave background empty or just say 'blurred background'. Always describe the location and lighting fully, even for macro shots.",
+    'instruction.rule_mandatory_bg': 'Set Design Manifesto',
+    'instruction.desc.rule_mandatory_bg': "MANDATORY: Describe the PHYSICAL SET, not just a 'background'. 1. Location (In/Out). 2. Furniture (Color, Material, Position). 3. Lighting (Warm/Cold) & Palette. This context is fixed and applies to all frames.",
     'instruction.desc.rule_mandatory_bg_wide': "FORBIDDEN to leave background empty. Since you are using WIDE SHOTS only, you must provide comprehensive geography, horizon, and weather details in every frame.",
     'instruction.shot_filter_wide': 'Wide Shots Only',
     'instruction.desc.shot_filter_wide': 'STRICT FILTER: Use ONLY Wide, Long, and Medium shots. Close-ups (CU/ECU) are forbidden.',
@@ -38,9 +31,11 @@ export const analyzer = {
     'instruction.desc.tech_directives_wide': 'Strict technical terminology. Use ONLY abbreviations (WS, MS, LS). NO CU/ECU.',
     'instruction.use_aliases': 'Use Aliases',
     'instruction.desc.use_aliases': 'Use Entity-N format (Strictly English). Rest of text in target language.',
+    'instruction.character_array_integrity': 'Array Integrity',
+    'instruction.desc.character_array_integrity': 'CRITICAL: The `characters` array MUST include every Entity-N mentioned in the prompt text.',
     'instruction.action_phase_breakdown': 'Micro-Actions',
     'instruction.desc.action_phase_breakdown': 'Decompose complex actions into preparation, initiation, apex, and reaction phases.',
-    'instruction.desc.action_phase_breakdown_wide': 'Decompose actions into phases, but KEEP CAMERA WIDE. Show impact via full-body posture, not zoom.',
+    'instruction.desc.action_phase_breakdown_wide': 'Decompose phases, but KEEP CAMERA WIDE. Show impact via full-body posture, not zoom.',
     'instruction.batch_processing': 'Batch Processing',
     'instruction.desc.batch_processing': 'Analyze all provided scenes as a continuous sequence to maintain narrative and visual consistency.',
     'instruction.ana_prompt_lang': 'Prompt Language',

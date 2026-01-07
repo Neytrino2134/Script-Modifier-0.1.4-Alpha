@@ -41,7 +41,7 @@ export const nodes = {
     'node.help.error_analyzer': 'Matndagi imlo va grammatik xatolarni tekshiradi va tuzatadi.',
     'node.help.note': 'Eslatmalar uchun oddiy matn maydoni. Boshqa tugunlarga ulanmaydi.',
     'node.help.reroute_dot': 'Ulanishlarni qayta yo‘naltirish va tarmoqlash uchun nuqta.',
-    'node.help.data_reader': 'Ulangan tugundan kelayotgan xom matn ma’lumotlarini ko‘rsatadi.',
+    'node.help.data_reader': 'Ulangan tugundan kelayotgan xom ma’lumotlarni ko‘rsatadi.',
     'node.help.speech_synthesizer': 'Matnni tanlangan ovoz yordamida nutqqa aylantiradi.',
     'node.help.idea_generator': 'G‘oyalarni yaratish uchun ikki bosqichli tugun (Kategoriyalar va G‘oya).',
     'node.help.narrator_text_generator': 'Hikoyachi yoki diktor uchun matn yaratadi.',
@@ -332,4 +332,10 @@ export const nodes = {
     'node.content.commercialSafe': 'Tijorat uchun xavfsiz',
     'instruction.desc.commercial_safe': 'Mashhur savdo belgilari (Disney, Pixar) dan qat\'iy qochadi va ularni umumiy tavsiflar bilan almashtiradi.',
     'node.content.findStack': 'Stekni topish...',
+    
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. Prayming va Kontekst',
+    'node.content.spm_stack.physics': '2. Fizika va Mantiq',
+    'node.content.spm_stack.hierarchy': '3. Subyekt Ierarxiyasi',
+    'node.content.spm_stack.construction': '4. Qurilish va Format',
 };

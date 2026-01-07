@@ -46,7 +46,7 @@ interface SettingsPanelProps {
     simpleActions?: boolean;
     commercialSafe?: boolean;
     smartConceptEnabled?: boolean;
-    atmosphericEntryEnabled?: boolean; // New prop
+    atmosphericEntryEnabled?: boolean;
 }
 
 // Defined outside to prevent re-mounting and flickering
@@ -459,46 +459,61 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         <div ref={scrollContainerRef} className="p-2 overflow-y-auto custom-scrollbar space-y-1 flex-grow relative">
                             <h5 className="text-[10px] text-gray-500 uppercase font-bold mb-1">{t('node.content.activePromptStack')}</h5>
                             
+                            <div className="space-y-1 pb-2 border-b border-gray-700/30 mb-2">
+                                {shouldShow(model, t('node.content.model')) && (
+                                    <InstructionBrick 
+                                        ref={el => { brickRefs.current['model-brick'] = el; }}
+                                        id="model-brick"
+                                        label={t('node.content.model')} 
+                                        text={getFormattedModelName(model)}
+                                        isMandatory 
+                                        color='gray'
+                                        isHighlighted={highlightedId === 'model-brick'}
+                                    />
+                                )}
+
+                                {shouldShow(t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`), t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)) && (
+                                     <InstructionBrick 
+                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)} 
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} 
+                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)} 
+                                        isMandatory color='gray' index={++stepCount} 
+                                    />
+                                )}
+
+                                {shouldShow(getNativeLanguageName(targetLanguage), t('node.content.targetLanguage')) && (
+                                    <InstructionBrick 
+                                        ref={el => { brickRefs.current['target_lang'] = el; }}
+                                        id="target_lang"
+                                        index={++stepCount}
+                                        label={t('node.content.targetLanguage')} 
+                                        text={`Target Language: ${getLanguageName(targetLanguage)}`} 
+                                        translatedText={getNativeLanguageName(targetLanguage)} 
+                                        isMandatory color='gray' 
+                                        isHighlighted={highlightedId === 'target_lang'}
+                                    />
+                                )}
+
+                                {/* Thinking Mode - Moved Here */}
+                                {shouldShow("Thinking Mode", t('node.content.thinkingEnabled')) && (
+                                    <InstructionBrick 
+                                        ref={el => { brickRefs.current['thinking_mode'] = el; }}
+                                        id="thinking_mode"
+                                        index={thinkingEnabled ? ++stepCount : undefined}
+                                        label={t('node.content.thinkingEnabled')} 
+                                        text="Enable extended reasoning for deeper plot coherence." 
+                                        translatedText="Включить расширенное мышление." 
+                                        isEnabled={thinkingEnabled} 
+                                        onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })} 
+                                        color='cyan' 
+                                        isHighlighted={highlightedId === 'thinking_mode'}
+                                    />
+                                )}
+                            </div>
+
                             {/* 1. PRIMING & CONTEXT */}
                             <div className="space-y-1 mb-3">
-                                {/* GROUP: Core Model Params & Input */}
-                                <div className="space-y-1 pb-2 border-b border-gray-700/30 mb-2">
-                                     {shouldShow(model, t('node.content.model')) && (
-                                        <InstructionBrick 
-                                            ref={el => { brickRefs.current['model-brick'] = el; }}
-                                            id="model-brick"
-                                            label={t('node.content.model')} 
-                                            text={getFormattedModelName(model)}
-                                            isMandatory 
-                                            color='gray'
-                                            isHighlighted={highlightedId === 'model-brick'}
-                                        />
-                                    )}
-
-                                    {shouldShow(t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`), t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)) && (
-                                         <InstructionBrick 
-                                            label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)} 
-                                            text={SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} 
-                                            translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)} 
-                                            isMandatory color='gray' index={++stepCount} 
-                                        />
-                                    )}
-
-                                    {shouldShow(getNativeLanguageName(targetLanguage), t('node.content.targetLanguage')) && (
-                                        <InstructionBrick 
-                                            ref={el => { brickRefs.current['target_lang'] = el; }}
-                                            id="target_lang"
-                                            index={++stepCount}
-                                            label={t('node.content.targetLanguage')} 
-                                            text={`Target Language: ${getLanguageName(targetLanguage)}`} 
-                                            translatedText={getNativeLanguageName(targetLanguage)} 
-                                            isMandatory color='gray' 
-                                            isHighlighted={highlightedId === 'target_lang'}
-                                        />
-                                    )}
-                                </div>
-
-                                <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">1. Priming & Context</h6>
+                                <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.sg_stack.priming')}</h6>
                                 
                                 {/* Safe Generation */}
                                 {shouldShow(SAFE_GENERATION_INSTRUCTIONS.text, t('node.content.safeGeneration')) && (
@@ -545,22 +560,20 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                     />
                                 )}
                                 
-                                {/* Thinking Mode */}
-                                {shouldShow("Thinking Mode", t('node.content.thinkingEnabled')) && (
+                                {/* Anti-Compression - Mandatory Readonly */}
+                                {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text, t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)) && (
                                     <InstructionBrick 
-                                        ref={el => { brickRefs.current['thinking_mode'] = el; }}
-                                        id="thinking_mode"
-                                        index={thinkingEnabled ? ++stepCount : undefined}
-                                        label="Thinking Mode" 
-                                        text="Enable extended reasoning for deeper plot coherence." 
-                                        translatedText="Включить расширенное мышление." 
-                                        isEnabled={thinkingEnabled} 
-                                        onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })} 
-                                        color='cyan' 
-                                        isHighlighted={highlightedId === 'thinking_mode'}
+                                        ref={el => { brickRefs.current[SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id] = el; }}
+                                        id={SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}
+                                        index={++stepCount}
+                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)} 
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text} 
+                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)} 
+                                        isMandatory color='emerald'
+                                        isHighlighted={highlightedId === SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}
                                     />
                                 )}
-
+                                
                                 {/* Sceneless Mode Brick - Moved here to be always visible and toggleable */}
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.SCENELESS_MODE.text, t('instruction.sceneless_mode')) && (
                                     <InstructionBrick 
@@ -581,7 +594,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             {/* 2. NARRATIVE ENGINE */}
                             <div className="space-y-1 mb-3">
                                 <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">
-                                    {scenelessMode ? "2. Visual Focus (Sceneless)" : "2. Narrative Engine"}
+                                    {t('node.content.sg_stack.narrative')}
                                 </h6>
                                 
                                 {(!scenelessMode ? [
@@ -637,7 +650,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                             {/* 3. VISUAL STYLE & WORLD */}
                             <div className="space-y-1 mb-3">
-                                <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">3. World & Style</h6>
+                                <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.sg_stack.world')}</h6>
                                  
                                 {/* Living World */}
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.LIVING_WORLD.text, t('instruction.sg_living_world')) && (
@@ -752,7 +765,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                             {/* 4. OUTPUT FORMAT & CONSTRAINTS */}
                             <div className="space-y-1 mb-3">
-                                 <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">4. Constraints & Formatting</h6>
+                                 <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.sg_stack.constraints')}</h6>
                                 
                                  {/* Simple Actions */}
                                  {shouldShow(t('instruction.sg_simple_actions'), t('instruction.sg_simple_actions')) && (

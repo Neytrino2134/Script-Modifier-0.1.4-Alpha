@@ -81,7 +81,7 @@ export const CharactersStylePanel: React.FC<CharactersStylePanelProps> = ({
             </div>
 
             {!uiState.isCharStyleCollapsed && (
-                <div className="p-2 flex gap-2 h-40">
+                <div className="p-2 flex gap-2 h-[170px]">
                     <div className="w-1/2 flex flex-col min-h-0">
                         <div className="flex-grow overflow-y-auto custom-scrollbar pr-1 space-y-1 bg-gray-800 rounded-md p-1 border border-gray-700" onWheel={(e) => e.stopPropagation()}>
                             {sortedCharacters && sortedCharacters.length > 0 ? sortedCharacters.map((char: any, index: number) => (

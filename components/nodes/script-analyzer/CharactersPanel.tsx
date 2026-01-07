@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { ActionButton } from '../../ActionButton';
 import { EditableCharacterDescription } from './EditableCharacterDescription';
 import { AnalyzerUiState } from './types';
@@ -113,14 +113,15 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
     visualStyle, upstreamVisualStyle, deselectAllNodes, t, onEmbedCharacter, onSyncCharacters, onClearCharacters, onDeleteCharacter, isSyncAvailable, onMoveCharacter, onAddCharacter
 }) => {
     const [isResizerHovered, setIsResizerHovered] = useState(false);
+    const panelRef = useRef<HTMLDivElement>(null);
     
-    // Internal state for smooth dragging
-    const [height, setHeight] = useState(initialHeight || 200);
+    // Internal state for initialization and non-drag updates
+    const [height, setHeight] = useState(initialHeight || 170);
 
     // Sync internal state with prop (e.g. from undo/redo or external change)
     useEffect(() => {
         if (Math.abs(initialHeight - height) > 1) {
-            setHeight(initialHeight || 200);
+            setHeight(initialHeight || 170);
         }
     }, [initialHeight]);
 
@@ -135,17 +136,30 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
         const handleMouseMove = (moveEvent: MouseEvent) => {
             moveEvent.preventDefault();
             moveEvent.stopPropagation();
+            
             const dy = (moveEvent.clientY - startY) / scale;
             currentHeight = Math.max(100, Math.min(800, startHeight + dy));
-            setHeight(currentHeight); 
+            
+            // Optimization: Update DOM directly to bypass React render cycle during drag
+            if (panelRef.current) {
+                requestAnimationFrame(() => {
+                     if (panelRef.current) {
+                        panelRef.current.style.height = `${currentHeight}px`;
+                     }
+                });
+            }
         };
 
         const handleMouseUp = (upEvent: MouseEvent) => {
             upEvent.preventDefault();
             upEvent.stopPropagation();
+            
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
-            onHeightChange(currentHeight); // Save to parent state on release
+            
+            // Sync React state at the end
+            setHeight(currentHeight);
+            onHeightChange(currentHeight); 
         };
 
         window.addEventListener('mousemove', handleMouseMove);
@@ -176,8 +190,15 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
         nameCounts[name] = (nameCounts[name] || 0) + 1;
     });
 
+    const indexCounts: Record<string, number> = {};
+    allCharacters.forEach(c => {
+        const idx = (c.index || c.alias || '').trim().toLowerCase();
+        indexCounts[idx] = (indexCounts[idx] || 0) + 1;
+    });
+
     return (
         <div 
+            ref={panelRef}
             style={{ height: uiState.isCharStyleCollapsed ? 'auto' : `${height}px` }} 
             className={`flex-shrink-0 mb-1 bg-gray-900 rounded-md border ${isResizerHovered ? 'border-emerald-500' : 'border-gray-700'} hover:border-gray-400 overflow-hidden flex flex-col transition-all duration-200 relative`}
         >
@@ -189,7 +210,7 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                     </svg>
-                    <h3 className="font-bold text-gray-400 select-none transition-colors uppercase text-xs tracking-wider">{t('node.content.characters')}</h3>
+                    <h3 className="font-bold text-emerald-400 select-none transition-colors uppercase text-xs tracking-wider">{t('node.content.characters')}</h3>
 
                     {isSyncAvailable && onSyncCharacters && (
                         <Tooltip title={t('node.action.refreshData')} position="top">
@@ -282,6 +303,9 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
                 {allCharacters.map((char: any, index: number) => {
                     const charId = char.id || `char-idx-${index}`;
                     const hasDuplicateName = nameCounts[(char.name || '').trim().toLowerCase()] > 1;
+                    const charIndexVal = (char.index || char.alias || '').trim().toLowerCase();
+                    const hasDuplicateIndex = indexCounts[charIndexVal] > 1;
+
                     return (
                         <div key={charId} className={hasDuplicateName ? "border-red-500 border rounded-lg" : ""}>
                             {hasDuplicateName && <div className="text-[10px] text-red-400 bg-red-900/30 px-2 py-0.5 rounded-t-lg">Duplicate Name Warning</div>}

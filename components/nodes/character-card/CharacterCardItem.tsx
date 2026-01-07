@@ -43,6 +43,7 @@ interface CharacterCardItemProps {
     onPasteImageToSlot: () => void;
     onClearImage: () => void;
     onViewImage: () => void;
+    onUploadImage: () => void; // New callback
     onImageDrop: (e: React.DragEvent) => void;
     
     transformingRatio: string | null;
@@ -63,7 +64,7 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
     onGenerateImage, isGeneratingImage, onSyncFromConnection,
     onCopyImageToClipboard, onDetach, onSaveCharacter, onLoadCharacter,
     onSaveToCatalog, onCopyCard, onPasteToCard, onOpenInEditor, onOpenInRasterEditor,
-    onRatioChange, onCrop1x1, onRatioExpand, onPasteImageToSlot, onClearImage, onViewImage, onImageDrop,
+    onRatioChange, onCrop1x1, onRatioExpand, onPasteImageToSlot, onClearImage, onViewImage, onUploadImage, onImageDrop,
     transformingRatio, deselectAllNodes,
     isModifying, isUpdatingDescription, onModifyRequest, onUpdateDescriptionRequest,
     secondaryLanguage
@@ -135,7 +136,6 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                         onFocus={deselectAllNodes} 
                         className={`w-28 shrink-0 ${isDuplicate ? '!border-red-500 !ring-1 !ring-red-500' : ''}`} 
                     />
-                    {/* Add Button Logic is handled in parent via index check if needed, or we can just omit it here and rely on node-level button */}
                 </div>
 
                 <div className="flex flex-col flex-shrink-0 mb-1">
@@ -167,7 +167,11 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                     
                     {!char.isImageCollapsed && (
                         <div 
-                            onClick={onOpenInRasterEditor} 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (hasImage) onViewImage();
+                                else onUploadImage();
+                            }}
                             // UPDATED Drag Handlers to ignore card dragging
                             onDragEnter={(e) => { 
                                 if (e.dataTransfer.types.includes('application/prompt-modifier-card')) return;
@@ -190,7 +194,7 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                                     <img src={`data:image/png;base64,${char.thumbnails[char.selectedRatio] || char.image!}`} className="object-contain w-full h-full" style={{ imageRendering: 'auto' }} draggable={true} onDragStart={(e) => { 
                                         const src = char.imageSources?.[char.selectedRatio] || char.image;
                                         if(src) { e.dataTransfer.setData('application/prompt-modifier-drag-image', src); e.stopPropagation(); } 
-                                    }} onClick={(e) => { e.stopPropagation(); onViewImage(); }} />
+                                    }} />
                                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                         <ActionButton title={t('node.action.paste')} onClick={(e) => { e.stopPropagation(); onPasteImageToSlot(); }} className="bg-black/60 p-1.5 rounded text-emerald-400 hover:text-white" tooltipPosition="left">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -236,17 +240,6 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                     >
                         {isGeneratingImage ? '...' : t('node.content.generateImage')}
                     </button>
-                    
-                    <div className="flex gap-1 shrink-0">
-                        {char.selectedRatio === '1:1' && <Tooltip title="Crop to 1:1"><button onClick={(e) => { e.stopPropagation(); onCrop1x1(); }} disabled={!!transformingRatio || !hasImage} className="w-12 bg-emerald-600/80 hover:bg-emerald-600 text-white rounded text-[10px] font-bold transition-colors h-8 flex items-center justify-center disabled:opacity-50 disabled:bg-gray-700 disabled:text-gray-500">{transformingRatio === '1:1' ? '...' : '1:1'}</button></Tooltip>}
-                        {char.selectedRatio === '16:9' && <Tooltip title="Expand to 16:9"><button onClick={(e) => { e.stopPropagation(); onRatioExpand('16:9'); }} disabled={!!transformingRatio || !hasImage} className="w-12 bg-emerald-600/80 hover:bg-emerald-600 text-white rounded text-[10px] font-bold transition-colors h-8 flex items-center justify-center disabled:opacity-50 disabled:bg-gray-700 disabled:text-gray-500">{transformingRatio === '16:9' ? '...' : '16:9'}</button></Tooltip>}
-                        {char.selectedRatio === '9:16' && <Tooltip title="Expand to 9:16"><button onClick={(e) => { e.stopPropagation(); onRatioExpand('9:16'); }} disabled={!!transformingRatio || !hasImage} className="w-12 bg-emerald-600/80 hover:bg-emerald-600 text-white rounded text-[10px] font-bold transition-colors h-8 flex items-center justify-center disabled:opacity-50 disabled:bg-gray-700 disabled:text-gray-500">{transformingRatio === '9:16' ? '...' : '9:16'}</button></Tooltip>}
-                    </div>
-
-                    <div className="flex gap-1 shrink-0">
-                        <Tooltip title="Editor"><button onClick={(e) => { e.stopPropagation(); onOpenInRasterEditor(); }} disabled={!hasImage} className="w-9 h-8 bg-cyan-600 hover:bg-cyan-500 text-white rounded flex items-center justify-center disabled:opacity-50 transition-colors disabled:bg-gray-700 disabled:text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg></button></Tooltip>
-                        <Tooltip title="AI Editor"><button onClick={(e) => { e.stopPropagation(); onOpenInEditor(); }} disabled={!char.image} className="w-9 h-8 bg-cyan-600 hover:bg-cyan-500 text-white rounded flex items-center justify-center disabled:opacity-50 transition-colors disabled:bg-gray-700 disabled:text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 22.5l-.648-1.938a3.375 3.375 0 00-2.672-2.672L11.25 18l1.938-.648a3.375 3.375 0 002.672-2.672L16.25 13l.648 1.938a3.375 3.375 0 002.672 2.672L21.75 18l-1.938.648a3.375 3.375 0 00-2.672 2.672z" /></svg></button></Tooltip>
-                    </div>
                 </div>
 
                 {/* Prompt Section */}

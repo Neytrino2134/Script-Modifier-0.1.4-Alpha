@@ -1,3 +1,4 @@
+
 import React, { useCallback, MouseEvent, useState, ReactNode, useEffect, useRef, TouchEvent, useMemo } from 'react';
 import type { Node, Connection, LineStyle, Point, Tool, LibraryItem } from './types';
 import { NodeType } from './types';
@@ -27,6 +28,7 @@ import { getNodeDefaults } from './hooks/useNodes';
 import Tooltip from './components/ui/Tooltip';
 import ContextMenu from './components/menus/ContextMenu';
 import ConnectionQuickAddMenu from './components/menus/ConnectionQuickAddMenu';
+import ImageViewer from './components/ui/ImageViewer';
 
 const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<LanguageCode>('en');
@@ -71,7 +73,11 @@ const Editor: React.FC = () => {
     setConnectionMenu,
     handleAddNodeFromConnectionMenu,
     handleAddNodeFromToolbar,
-    translateGraph
+    translateGraph,
+    imageViewerState,
+    setImageViewer,
+    onDownloadImage,
+    onCopyImageToClipboard,
   } = context;
 
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
@@ -399,6 +405,17 @@ const Editor: React.FC = () => {
      }
   };
 
+  const handleDownloadImageFromViewer = (imageUrl: string, frameNumber: number, prompt: string) => {
+       const filename = `Image_${frameNumber}_${prompt.slice(0, 10).replace(/\s+/g, '_')}.png`;
+       onDownloadImage(imageUrl.startsWith('data:') ? imageUrl.split(',')[1] : imageUrl, filename);
+  };
+  
+  const handleCopyImageFromViewer = async (imageUrl: string) => {
+       const base64 = imageUrl.startsWith('data:') ? imageUrl.split(',')[1] : imageUrl;
+       await onCopyImageToClipboard(base64);
+       addToast(t('toast.copied'), 'success');
+  };
+
   return (
     <div className="w-screen h-screen overflow-hidden bg-gray-900 flex flex-col">
       <Canvas>
@@ -428,6 +445,18 @@ const Editor: React.FC = () => {
           hasExistingKey={apiSettings.hasApiKey}
           initialUseFreeKey={apiSettings.useFreeKey}
         />
+        
+        {imageViewerState && (
+            <ImageViewer 
+                sources={imageViewerState.sources}
+                initialIndex={imageViewerState.initialIndex}
+                initialPosition={{ x: window.innerWidth / 2 - 400, y: window.innerHeight / 2 - 300 }} // Centered fallback, component handles persistence
+                onClose={() => setImageViewer(null)}
+                onDownloadImageFromUrl={handleDownloadImageFromViewer}
+                onCopyImageToClipboard={handleCopyImageFromViewer}
+            />
+        )}
+        
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json,application/json" className="hidden" />
         <input type="file" ref={catalogFileInputRef} onChange={handleCatalogFileChange} accept=".json,application/json" className="hidden" />
         <input type="file" ref={libraryFileInputRef} onChange={handleLibraryFileChange} accept=".json,application/json" className="hidden" />

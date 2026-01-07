@@ -101,8 +101,8 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                 newValue = { ...currentValue, characters: [], scenes: [], visualStyle: '', generatedStyle: '', detailedCharacters: [] };
                 break;
             case NodeType.SCRIPT_PROMPT_MODIFIER:
-                // Explicitly clear usedCharacters and styleOverride as well
-                newValue = { ...currentValue, finalPrompts: [], videoPrompts: [], generationProgress: null, usedCharacters: [], styleOverride: '' };
+                // Explicitly clear usedCharacters, styleOverride, and sceneContexts as well
+                newValue = { ...currentValue, finalPrompts: [], videoPrompts: [], generationProgress: null, usedCharacters: [], styleOverride: '', sceneContexts: {} };
                 break;
             case NodeType.NARRATOR_TEXT_GENERATOR:
                 newValue = { ...currentValue, prompt: '', generatedTexts: { ru: '', en: '' } };
@@ -334,6 +334,14 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                                     } else if (node.type === NodeType.SCRIPT_PROMPT_MODIFIER) {
                                         typeString = 'script-prompt-modifier-data';
                                         filename = `final_prompts_${timestamp}.json`;
+                                        // Ensure sceneContexts are saved
+                                        dataToSave = {
+                                            finalPrompts: rawData.finalPrompts || [],
+                                            videoPrompts: rawData.videoPrompts || [],
+                                            usedCharacters: rawData.usedCharacters || [],
+                                            sceneContexts: rawData.sceneContexts || {},
+                                            visualStyle: rawData.styleOverride || ''
+                                        };
                                     } else if (node.type === NodeType.YOUTUBE_ANALYTICS) {
                                         typeString = 'youtube-analytics-data';
                                         filename = `youtube_analytics_${timestamp}.json`;

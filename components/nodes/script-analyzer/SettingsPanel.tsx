@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useRef, useEffect } from 'react';
 import { InstructionBrick } from './InstructionBrick';
 import { SCRIPT_ANALYZER_INSTRUCTIONS } from '../../../utils/prompts/scriptAnalyzer';
@@ -76,12 +78,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     
     // Internal state for smooth dragging
-    const [height, setHeight] = useState(initialHeight || 200);
+    const [height, setHeight] = useState(initialHeight || 380);
 
     // Sync internal state with prop
     useEffect(() => {
         if (Math.abs(initialHeight - height) > 1) {
-            setHeight(initialHeight || 200);
+            setHeight(initialHeight || 380);
         }
     }, [initialHeight]);
 
@@ -310,6 +312,22 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                         />
                     )}
 
+                     {/* Thinking Mode - Moved to Top */}
+                     {shouldShow("Enable extended reasoning", t('node.content.thinkingEnabled')) && (
+                         <InstructionBrick 
+                            ref={el => { brickRefs.current['thinking_mode'] = el; }}
+                            id="thinking_mode"
+                            index={thinkingEnabled ? ++stepCount : undefined}
+                            label={t('node.content.thinkingEnabled')} 
+                            originalText="Enable extended reasoning for deeper plot coherence." 
+                            translatedText="Включить расширенное мышление для улучшения сюжета." 
+                            isEnabled={thinkingEnabled}
+                            onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })}
+                            color='cyan' 
+                            isHighlighted={targetScrollId === 'thinking_mode'}
+                        />
+                    )}
+
                     {/* 1. SYSTEM & CONTEXT */}
                     <div className="space-y-1 mb-3">
                         <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.stack.system')}</h6>
@@ -327,22 +345,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                                 isEnabled={safeGeneration}
                                 onToggle={() => onUpdateValue({ safeGeneration: !safeGeneration })}
                                 isHighlighted={targetScrollId === 'safe_gen'}
-                            />
-                        )}
-                        
-                         {/* Thinking Mode */}
-                         {shouldShow("Enable extended reasoning", t('node.content.thinkingEnabled')) && (
-                             <InstructionBrick 
-                                ref={el => { brickRefs.current['thinking_mode'] = el; }}
-                                id="thinking_mode"
-                                index={thinkingEnabled ? ++stepCount : undefined}
-                                label={t('node.content.thinkingEnabled')} 
-                                originalText="Enable extended reasoning for deeper plot coherence." 
-                                translatedText="Включить расширенное мышление для улучшения сюжета." 
-                                isEnabled={thinkingEnabled}
-                                onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })}
-                                color='cyan' 
-                                isHighlighted={targetScrollId === 'thinking_mode'}
                             />
                         )}
                         
@@ -688,6 +690,21 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                                 isMandatory
                                 color='gray'
                                 isHighlighted={targetScrollId === SCRIPT_ANALYZER_INSTRUCTIONS.USE_ALIASES.id}
+                            />
+                        )}
+
+                         {/* NEW: Character Array Integrity */}
+                         {shouldShow(SCRIPT_ANALYZER_INSTRUCTIONS.CHARACTER_ARRAY_INTEGRITY.text, t('instruction.character_array_integrity')) && (
+                            <InstructionBrick 
+                                ref={el => { brickRefs.current[SCRIPT_ANALYZER_INSTRUCTIONS.CHARACTER_ARRAY_INTEGRITY.id] = el; }}
+                                id={SCRIPT_ANALYZER_INSTRUCTIONS.CHARACTER_ARRAY_INTEGRITY.id}
+                                index={++stepCount}
+                                label={t('instruction.character_array_integrity')}
+                                originalText={SCRIPT_ANALYZER_INSTRUCTIONS.CHARACTER_ARRAY_INTEGRITY.text}
+                                translatedText={t('instruction.desc.character_array_integrity')}
+                                isMandatory 
+                                isCritical
+                                isHighlighted={targetScrollId === SCRIPT_ANALYZER_INSTRUCTIONS.CHARACTER_ARRAY_INTEGRITY.id}
                             />
                         )}
 

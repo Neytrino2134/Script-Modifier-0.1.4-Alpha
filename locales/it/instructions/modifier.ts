@@ -1,12 +1,14 @@
 
+
+
 export const modifier = {
     'instruction.inputs': 'Input',
     'instruction.desc.inputs': 'Fonte: Frame analizzatore, Profili visivi, Stile scena.',
     'instruction.role': 'Ruolo: Lead Environment Artist',
     'instruction.desc.role': 'Esperto Prompt Engineering. Sintetizza gli input in una descrizione visiva definitiva.',
     'instruction.layered': 'Algoritmo: Flusso Unificato',
-    'instruction.desc.layered': 'Genera UN SOLO blocco di testo fluido. Unisce interazioni: "[Character-1] is catching [Character-2]".',
-    'instruction.desc.layered_no_char': 'Struttura: [Ambiente] -> [Azione]. Omette aspetto, tiene solo indici e azioni.',
+    'instruction.desc.layered': 'Genera UN SOLO blocco di testo fluido. Struttura: [Stile] -> [DESIGN SET MASTER] -> [Visivi] + [POSA & AZIONE] -> [Camera].',
+    'instruction.desc.layered_no_char': 'Struttura: [DESIGN SET MASTER] -> [Indice] + [POSA & AZIONE]. Omette aspetto, tiene solo indici e azioni.',
     'instruction.visuals': 'Stile: Saturazione',
     'instruction.desc.visuals': 'Usa descrittori ricchi: luce volumetrica, texture 8k, profondità di campo.',
     'instruction.process_whole_scene': 'Batch Scena',
@@ -21,8 +23,8 @@ export const modifier = {
     'instruction.desc.atmosphere_fix': 'Descrivere umore come proprietà fisiche di aria e luce.',
     'instruction.subject_focus': 'Gerarchia Contesto',
     'instruction.desc.subject_focus': 'CRITICO: Anche per Primi piani: 1. Pers. Completo. 2. Posa. 3. Dettaglio. L\'IA necessita contesto corporeo.',
-    'instruction.always_env': 'CRITICO: GERARCHIA ENV',
-    'instruction.desc.always_env': 'CRITICO: Descrivere ambiente RIGOROSAMENTE da Lontano a Vicino: 1. Orizzonte. 2. Piano Medio. 3. Primo piano.',
+    'instruction.always_env': 'DESIGN SET OBBLIGATORIO',
+    'instruction.desc.always_env': "CRITICO: Usa il 'Contesto Scena Globale' fornito come la VERITÀ ASSOLUTA per lo sfondo. DEVI iniettare i dettagli specifici di mobili, illuminazione e texture dal contesto nel livello ambiente di OGNI prompt. Non allucinare sfondi generici.",
     'instruction.pm_anthro': 'Dettaglio Anthro',
     'instruction.desc.pm_anthro': 'OBBLIGATORIO: Parola "anthropomorphic" prima della specie in Immagine E Video. Texture/anatomia migliorate.',
     'instruction.pm_subscribe': 'Testo Leggibile',

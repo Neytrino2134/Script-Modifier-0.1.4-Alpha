@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { Node, NodeType, Point, CatalogItem, Tool, LineStyle } from '../types';
 
@@ -158,7 +159,11 @@ export const useCanvasEvents = ({
                     initialValueObj = { scenes: data.scenes };
                 } else if (data.type === 'script-prompt-modifier-data') {
                     targetNodeType = NodeType.SCRIPT_PROMPT_MODIFIER;
-                    initialValueObj = { finalPrompts: data.finalPrompts };
+                    // Extract both prompts and contexts
+                    initialValueObj = { 
+                        finalPrompts: data.finalPrompts,
+                        sceneContexts: data.sceneContexts || {} 
+                    };
                 } else if (data.type === 'youtube-title-data') {
                     targetNodeType = NodeType.YOUTUBE_TITLE_GENERATOR;
                     initialValueObj = data; // Already correct structure
@@ -293,7 +298,10 @@ export const useCanvasEvents = ({
                             break;
                         case 'script-prompt-modifier-data':
                             targetNodeType = NodeType.SCRIPT_PROMPT_MODIFIER;
-                            initialValueObj = { finalPrompts: data.finalPrompts };
+                            initialValueObj = { 
+                                finalPrompts: data.finalPrompts,
+                                sceneContexts: data.sceneContexts || {} // Extract contexts
+                            };
                             break;
                         case 'youtube-title-data':
                             targetNodeType = NodeType.YOUTUBE_TITLE_GENERATOR;
@@ -416,7 +424,7 @@ export const useCanvasEvents = ({
             }
 
             // Space key for Quick Add
-            if (e.code === 'Space' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTyping) {
+            if (e.code === 'Space' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing && !isTyping) {
                 e.preventDefault();
                 openQuickAddMenu(clientPointerPositionRef.current);
                 return;

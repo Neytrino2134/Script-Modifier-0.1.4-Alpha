@@ -77,8 +77,8 @@ export const SCRIPT_ANALYZER_INSTRUCTIONS = {
     },
     MANDATORY_BG: {
         id: 'rule_mandatory_bg',
-        label: 'Mandatory Global BG',
-        text: "**CRITICAL RULE: MANDATORY GLOBAL BACKGROUND.** The 'environmentPrompt' field can NEVER be empty or vague. It MUST contain a full description of the scene's location and lighting. Even for an Extreme Close-Up, you must describe the background context (e.g. lighting, bokeh, atmosphere)."
+        label: 'Set Design Manifesto',
+        text: "**CRITICAL: DETAILED SET DESIGN & CONTEXT.** The scene context is NOT just a background; it is a physical set. \n1. **LOCATION & GEOMETRY:** Define if Indoors/Outdoors. Define room shape, ceiling height, and boundaries.\n2. **FURNITURE & PROPS:** You MUST describe the SIZE, COLOR, MATERIAL, and POSITION of every major object (e.g., NOT 'a sofa', BUT 'a massive L-shaped crimson velvet sofa in the corner'). Describe specific floor textures (e.g., 'worn beige wool carpet').\n3. **LIGHTING & PALETTE:** Define the exact light source (window, lamp, neon), temperature (warm/cold), intensity (dim/bright), and the overall color palette of the scene.\n\n**RULE:** This detailed environment MUST be established in the `sceneContext` and referenced in EVERY frame, even Close-Ups."
     },
     MANDATORY_BG_WIDE: {
         id: 'rule_mandatory_bg_wide',
@@ -99,6 +99,11 @@ export const SCRIPT_ANALYZER_INSTRUCTIONS = {
         id: 'use_aliases',
         label: 'Entity-N (English)',
         text: "**CRITICAL: ENGLISH INDEXING.** When referring to characters in any field (imagePrompt, environmentPrompt, etc.), ALWAYS use the English format `Entity-N` (e.g. `Entity-1`). \n**NEVER translate 'Entity'** (e.g. NO 'Сущность-1', NO 'Entidad-1'). \nAll other descriptive text must be in the Target Language."
+    },
+    CHARACTER_ARRAY_INTEGRITY: {
+        id: 'character_array_integrity',
+        label: 'Array Integrity',
+        text: "**CRITICAL JSON RULE: CHARACTER ARRAY INTEGRITY.** The `characters` array in the JSON output MUST list the Index string of **EVERY** entity mentioned in the `imagePrompt`, `videoPrompt`, or `environmentPrompt` for that frame. \n**VIOLATION:** Describing interaction between Entity-1 and Entity-2 but only listing `[\"Entity-1\"]`. \n**CORRECTION:** List `[\"Entity-1\", \"Entity-2\"]` if both are visually present or interacting."
     },
     EXTENDED_VISUALS: {
         id: 'extended_visuals',

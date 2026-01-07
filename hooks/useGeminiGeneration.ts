@@ -109,7 +109,7 @@ export const useGeminiGeneration = ({
         }
     }, [connections, setNodes, getUpstreamTextValue, nodes, setError, setIsGeneratingCharacters]);
 
-    const handleGenerateImage = useCallback(async (nodeId: string) => {
+    const handleGenerateImage = useCallback(async (nodeId: string, characterId?: number | string) => {
         const node = nodes.find(n => n.id === nodeId);
         if (!node) return;
     
@@ -117,41 +117,63 @@ export const useGeminiGeneration = ({
         try { parsedValue = JSON.parse(node.value || '{}'); } 
         catch { parsedValue = { prompt: '', imageBase64: '' }; }
     
-        const { prompt } = parsedValue;
-        const inputConnection = connections.find(c => c.toNodeId === nodeId);
-        const finalPrompt = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : prompt;
+        let finalPrompt = '';
+        let targetIndex = -1;
+        let selectedRatio = '1:1';
+        let loadingId = nodeId;
+
+        if (node.type === NodeType.CHARACTER_CARD) {
+            // Handle Character Card Logic (Array of cards)
+            let cards = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+            targetIndex = typeof characterId === 'number' ? characterId : 0;
+            
+            const card = cards[targetIndex];
+            if (card) {
+                const mainPrompt = card.prompt || '';
+                const suffix = card.additionalPrompt || '';
+                finalPrompt = `${mainPrompt} ${suffix}`.trim();
+                selectedRatio = card.selectedRatio || '1:1';
+            }
+            loadingId = `${nodeId}-${targetIndex}`;
+        } else {
+            // Handle Image Generator Logic (Single object)
+            const { prompt } = parsedValue;
+            const inputConnection = connections.find(c => c.toNodeId === nodeId);
+            finalPrompt = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : prompt;
+            selectedRatio = '1:1'; // Image Generator defaults to 1:1
+        }
     
-        if (!finalPrompt || !finalPrompt.trim()) { setError("Please enter a prompt for image generation."); return; }
+        if (!finalPrompt || !finalPrompt.trim()) { 
+            setError("Please enter a prompt for image generation."); 
+            return; 
+        }
         
         setError(null);
-        setIsGeneratingImage(nodeId);
-
-        const selectedRatio = (node.type === NodeType.CHARACTER_CARD && parsedValue.selectedRatio) 
-            ? parsedValue.selectedRatio 
-            : '1:1';
+        setIsGeneratingImage(loadingId);
 
         try {
             const result = await generateImage(finalPrompt, selectedRatio);
             
-            let updatedValue = { ...parsedValue, prompt: finalPrompt };
-
             if (node.type === NodeType.CHARACTER_CARD) {
-                const currentSources = parsedValue.imageSources || {};
-                
-                updatedValue = {
-                    ...updatedValue,
-                    imageSources: {
-                        ...currentSources,
-                        [selectedRatio]: result
-                    },
-                    imageBase64: null, 
-                    image: null 
-                };
+                let cards = Array.isArray(parsedValue) ? [...parsedValue] : [parsedValue];
+                if (cards[targetIndex]) {
+                     const currentSources = cards[targetIndex].imageSources || {};
+                     cards[targetIndex] = {
+                         ...cards[targetIndex],
+                         imageSources: {
+                             ...currentSources,
+                             [selectedRatio]: result
+                         },
+                         // Clear legacy fields to prefer imageSources
+                         image: null, 
+                         imageBase64: null 
+                     };
+                }
+                setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: JSON.stringify(cards) } : n));
             } else {
-                updatedValue.imageBase64 = result;
+                let updatedValue = { ...parsedValue, prompt: finalPrompt, imageBase64: result };
+                setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: JSON.stringify(updatedValue) } : n));
             }
-
-            setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: JSON.stringify(updatedValue) } : n));
         } catch (e: any) {
             setError(e.message || "An unknown error occurred during image generation.");
         } finally {

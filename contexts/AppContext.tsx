@@ -1,3 +1,4 @@
+
 import React, { createContext, useCallback, useMemo, useState, ReactNode, useContext, useRef, useEffect } from 'react';
 import type { Node, Connection, Point, Group, LibraryItem, LineStyle, Tool, CatalogItem, TabState, ConnectingInfo } from '../types';
 import { NodeType, LibraryItemType, CatalogItemType } from '../types';
@@ -296,7 +297,8 @@ export interface AppContextType {
     // Image Caching & Viewer
     setFullSizeImage: (nodeId: string, slotIndex: number, imageBase64: string) => void;
     getFullSizeImage: (nodeId: string, slotIndex: number) => string | null;
-    setImageViewer: (data: { sources: {src: string, frameNumber: number}[], initialIndex: number } | null) => void;
+    setImageViewer: (data: { sources: {src: string, frameNumber: number; prompt?: string}[], initialIndex: number } | null) => void;
+    imageViewerState: { sources: {src: string, frameNumber: number; prompt?: string}[], initialIndex: number } | null;
     onCopyImageToClipboard: (base64: string) => void;
     onDownloadImage: (base64: string, filename: string) => void;
     onSaveCharacterCard: (nodeId: string) => void;
@@ -326,7 +328,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // --- Image Cache & Viewer State ---
     // Stores full resolution images in memory: Key = `${nodeId}-${slotIndex}`, Value = base64String
     const imageCache = useRef<Map<string, string>>(new Map());
-    const [imageViewerState, setImageViewer] = useState<{ sources: {src: string, frameNumber: number}[], initialIndex: number } | null>(null);
+    const [imageViewerState, setImageViewer] = useState<{ sources: {src: string, frameNumber: number; prompt?: string}[], initialIndex: number } | null>(null);
 
     const setFullSizeImage = useCallback((nodeId: string, slotIndex: number, imageBase64: string) => {
         const key = `${nodeId}-${slotIndex}`;
@@ -872,6 +874,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setFullSizeImage,
         getFullSizeImage,
         setImageViewer,
+        imageViewerState,
         onCopyImageToClipboard,
         onDownloadImage,
         onSaveCharacterCard,

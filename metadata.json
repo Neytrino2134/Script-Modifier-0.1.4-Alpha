@@ -1,5 +1,5 @@
 {
-  "name": "Script Modifier 0.1.4 Alpha",
+  "name": "Script Modifier 0.1.5 Alpha",
   "description": "Визуально создавайте, дорабатывайте и генерируйте сценарии с помощью Gemini API.",
   "requestFramePermissions": [
     "clipboard-read"

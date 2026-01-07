@@ -1,4 +1,5 @@
 
+
 export const ui = {
     'toolbar.edit': 'Edit (V)',
     'toolbar.cutter': 'Cut Connection (C)',
@@ -175,4 +176,5 @@ export const ui = {
     'help.sub.discussion': 'Discussion',
     'help.sub.stable': 'Stable Version',
     'help.sub.alpha': 'Alpha Version',
+    'imageViewer.title': 'Image Viewer',
 };

@@ -55,6 +55,9 @@ const CharacterCardNode: React.FC<NodeContentProps> = ({
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [editorImageSrc, setEditorImageSrc] = useState<string | null>(null);
     const [editingCardIndex, setEditingCardIndex] = useState<number>(0);
+    
+    // Upload State (Distinguish between Editor upload and direct slot upload)
+    const [uploadTargetIndex, setUploadTargetIndex] = useState<number | null>(null);
 
     // Drag State
     const [draggedCardIndex, setDraggedCardIndex] = useState<number | null>(null);
@@ -542,12 +545,15 @@ const CharacterCardNode: React.FC<NodeContentProps> = ({
             const reader = new FileReader();
             reader.onload = async (ev) => {
                 const dataUrl = ev.target?.result as string;
-                if (dataUrl) await processNewImage(editingCardIndex, dataUrl);
+                // Use uploadTargetIndex if set (for clicking on empty slot), otherwise use editingCardIndex (for editor)
+                const targetIndex = uploadTargetIndex !== null ? uploadTargetIndex : editingCardIndex;
+                if (dataUrl) await processNewImage(targetIndex, dataUrl);
             };
             reader.readAsDataURL(file);
         }
         if (e.target) e.target.value = '';
-    }, [editingCardIndex]);
+        setUploadTargetIndex(null); // Reset after use
+    }, [editingCardIndex, uploadTargetIndex]);
 
     // Drop Zone Component
     const DropZone = ({ index }: { index: number }) => (
@@ -620,6 +626,10 @@ const CharacterCardNode: React.FC<NodeContentProps> = ({
                             onClearImage={() => handleUpdateCard(idx, { thumbnails: { ...char.thumbnails, [char.selectedRatio]: null }, image: null })}
                             onViewImage={() => {
                                  if (getFullSizeImage) { setImageViewer({ sources: [{ src: getFullSizeImage(nodeId, (idx * 10) + (RATIO_INDICES[char.selectedRatio] || 1)) || char.image!, frameNumber: 0 }], initialIndex: 0 }); }
+                            }}
+                            onUploadImage={() => {
+                                setUploadTargetIndex(idx);
+                                fileInputRef.current?.click();
                             }}
                             onImageDrop={(e) => {
                                  const data = e.dataTransfer.getData('application/prompt-modifier-drag-image'); 

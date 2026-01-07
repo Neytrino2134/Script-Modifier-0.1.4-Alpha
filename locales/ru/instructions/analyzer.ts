@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 export const analyzer = {
     'instruction.inputs_data': 'Входные данные',
     'instruction.desc.inputs_data': 'Источник: Краткое содержание, Профили персонажей, Текст сцен.',
@@ -27,8 +18,8 @@ export const analyzer = {
     'instruction.desc.rule_living_world_anthro': 'Массовка на фоне — антропоморфные животные (НЕ люди).',
     'instruction.rule_persistence': 'Постоянство',
     'instruction.desc.rule_persistence': 'ХРОНОЛОГИЧЕСКОЕ ПОСТОЯНСТВО СЦЕНЫ: Поддерживайте единое физическое пространство между всеми кадрами сцены.',
-    'instruction.rule_mandatory_bg': 'Обязательный Глобальный Фон',
-    'instruction.desc.rule_mandatory_bg': "ЗАПРЕЩЕНО оставлять фон пустым или писать просто 'размытый фон'. Всегда описывайте локацию и освещение полностью, даже для макро-снимков.",
+    'instruction.rule_mandatory_bg': 'Манифест Дизайна Сцены',
+    'instruction.desc.rule_mandatory_bg': "ОБЯЗАТЕЛЬНО: Описывайте не просто фон, а ФИЗИЧЕСКУЮ СЦЕНУ. 1. Локация (Дом/Улица). 2. Мебель (Цвет, Материал, Положение). 3. Освещение (Тепло/Холод) и Палитра. Этот контекст фиксируется и применяется ко всем кадрам.",
     'instruction.desc.rule_mandatory_bg_wide': "ЗАПРЕЩЕНО оставлять фон пустым. Так как вы работаете ТОЛЬКО с общими планами, описывайте географию, горизонт и погоду в каждом кадре.",
     'instruction.shot_filter_wide': 'Только Общие Планы',
     'instruction.desc.shot_filter_wide': 'СТРОГИЙ ФИЛЬТР: Использовать ТОЛЬКО Общие (WS), Дальние (LS) и Средние (MS). Крупные планы (CU/ECU) запрещены.',
@@ -42,6 +33,8 @@ export const analyzer = {
     'instruction.desc.tech_directives_wide': 'Строгая терминология. Только аббревиатуры: WS, MS, LS. Без CU/ECU.',
     'instruction.use_aliases': 'Псевдонимы',
     'instruction.desc.use_aliases': 'Используйте формат Entity-N (строго на английском). Остальной текст на целевом языке.',
+    'instruction.character_array_integrity': 'Целостность Массива',
+    'instruction.desc.character_array_integrity': 'КРИТИЧНО: Массив `characters` ОБЯЗАН содержать каждого Entity-N, упомянутого в тексте промпта.',
     'instruction.action_phase_breakdown': 'Атомная Декомпозиция',
     'instruction.desc.action_phase_breakdown': 'КРИТИЧНО: Запрещено сжимать действие в 1 кадр. "Открыл дверь" = 3 кадра (Рука тянется, Поворот ручки, Дверь открывается). Расширяйте каждое действие.',
     'instruction.desc.action_phase_breakdown_wide': 'Декомпозиция фаз, но СТРОГО ОБЩИМ планом. Показывайте удар/реакцию через позу всего тела, а не зум.',

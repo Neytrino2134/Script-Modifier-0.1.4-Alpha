@@ -1,4 +1,6 @@
 
+
+
 import { GenerateContentResponse, Type } from "@google/genai";
 import { getAiClient, withRetry, cleanJsonString, safeJsonParse } from "./client";
 import { PROMPT_MODIFIER_INSTRUCTIONS, LAYERED_CONSTRUCTION_NO_STYLE_TEXT, LAYERED_CONSTRUCTION_NO_CHAR_TEXT } from "../../utils/prompts/promptModifier";
@@ -42,6 +44,7 @@ export const generateScript = async (
     
     // --- CREATIVE EXPANSION RULES ---
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.IMPROVE_CONCEPT.text);
+    instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text); // NEW INSTRUCTION
     
     if (scenelessMode) {
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SCENELESS_MODE.text);
@@ -149,7 +152,7 @@ export const generateScript = async (
     // Repeated constraint at the end for "attention sink" effect
     instructions.push(`REMINDER: Output Language MUST be ${languageName}. Describe the scene events visually and chronologically.`);
     instructions.push(`REMINDER: Use entity format: "Entity-Index" (e.g. "Entity-1"). Do NOT write the name.`);
-    instructions.push(`REMINDER: Objects do not move themselves. Use character hands/paws.`);
+    instructions.push(`REMINDER: DO NOT OMIT DETAILS. If input mentions specific items, smells, or actions, they MUST be present.`);
     instructions.push("Return JSON with keys: 'summary', 'visualStyle' (must be a detailed description), 'detailedCharacters' (array of objects with keys: 'index', 'name', 'fullDescription', 'prompt'), 'scenes' (array of objects with 'title', 'description', 'recommendedFrames', 'narratorText', 'characters' (array of strings)).");
 
     const fullPrompt = instructions.join('\n\n');
@@ -199,6 +202,7 @@ export const analyzeScript = async (
         instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.TECHNICAL_DIRECTIVES.text);
     }
     
+    instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.MANDATORY_BG.text); // Force specific Set Design instruction
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.BATCH_PROCESSING.text);
     
     if (options.extendedAnalysis) {
@@ -207,6 +211,7 @@ export const analyzeScript = async (
     
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.ACTION_PHASE_BREAKDOWN.text);
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.USE_ALIASES.text);
+    instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.CHARACTER_ARRAY_INTEGRITY.text); // NEW INSTRUCTION
     
     // STRICT LANGUAGE ENFORCEMENT
     instructions.push(`**TARGET LANGUAGE:** The entire analysis (sceneContext, imagePrompt, environmentPrompt, videoPrompt) MUST be written in **${languageName}**. \n**EXCEPTION:** The Character Tags must remain in English: 'Entity-1', 'Entity-2'. Do not translate the word 'Entity' to ${languageName}.`);
@@ -231,7 +236,7 @@ export const analyzeScript = async (
         Return JSON array of scene objects.
         Each scene object MUST contain:
         1. "sceneNumber": (integer)
-        2. "sceneContext": (string in ${languageName}) A concise visual summary of the scene's location, lighting, time of day, and overall mood.
+        2. "sceneContext": (string in ${languageName}) **VISUAL MANIFEST.** You MUST describe: Location type (In/Out), Furniture (Specific Size/Color/Material/Position), Flooring/Walls, Lighting (Temp/Source/Intensity), and overall Color Palette. This context will be applied to every frame.
         3. "frames": (array of frame objects)
         
         Each frame object has: 'frameNumber', 'imagePrompt' (in ${languageName}), 'environmentPrompt' (in ${languageName}), 'videoPrompt' (in ${languageName}), 'characters' (array of indices e.g. "Entity-1"), 'shotType', 'duration' (integer, seconds, e.g. 2).
@@ -350,7 +355,7 @@ export const modifyScriptPrompt = async (
         ${instructions.join('\n\n')}
 
         **INPUTS:**
-        - **Global Scene Context:** "${sceneContext.replace(/`/g, '')}"
+        - **MASTER SET DESIGN (MANDATORY CONTEXT):** "${sceneContext.replace(/`/g, '')}"
         ${styleContext}
         - **Entities / Characters:** ${characterInfo.replace(/`/g, '')}
         - **Frame Action & Subject Detail:** ${basePrompt.replace(/`/g, '')}
@@ -494,7 +499,7 @@ export const modifyScriptSceneBatch = async (
     const prompt = `
         ${instructions.join('\n\n')}
 
-        **GLOBAL SCENE CONTEXT:** "${sceneContext.replace(/`/g, '')}"
+        **MASTER SCENE SET DESIGN (MANDATORY CONTEXT):** "${sceneContext.replace(/`/g, '')}"
         ${styleContext}
         
         **SCENE CAST VISUAL PROFILES (REFERENCE):**

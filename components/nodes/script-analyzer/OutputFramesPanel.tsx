@@ -32,7 +32,7 @@ const AnalyzerFrameItem: React.FC<{
         const found = availableCharacters.find(ac => ac.name === c);
         if (found) {
              // Prefer index if available, fall back to alias (legacy), then match name
-             const sourceIndex = found.index || found.alias;
+             const sourceIndex = found.index || (found as any).alias;
              if (sourceIndex) {
                  const aliasMatch = sourceIndex.match(/(?:Entity|Character|Персонаж)[-\s]?(\d+)/i);
                  if (aliasMatch) return `ENT-${aliasMatch[1]}`;

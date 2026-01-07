@@ -773,7 +773,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     handleCharacterClick={(e, id) => {
                         setSelectedCharacters(prev => {
                             const newSet = new Set(prev);
-                            if (newSet.has(id)) newSet.delete(id); else newSet.add(id);
+                            if (newSet.has(String(id))) newSet.delete(String(id)); else newSet.add(String(id));
                             return newSet;
                         });
                     }}

@@ -14,3 +14,7 @@ export interface PromptItemData {
     prompt?: string;
     videoPrompt?: string;
 }
+
+export interface SceneContextMap {
+    [sceneNumber: string]: string;
+}

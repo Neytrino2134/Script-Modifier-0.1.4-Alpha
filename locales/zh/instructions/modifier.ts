@@ -1,12 +1,14 @@
 
+
+
 export const modifier = {
     'instruction.inputs': '输入',
     'instruction.desc.inputs': '来源：分析器帧，视觉档案，场景风格。',
     'instruction.role': '角色：首席环境艺术家',
     'instruction.desc.role': '提示词工程专家。将输入合成为最终的视觉描述。',
     'instruction.layered': '算法：统一流',
-    'instruction.desc.layered': '生成单个无缝文本块。合并交互。',
-    'instruction.desc.layered_no_char': '结构：[环境] -> [动作]。省略外观，仅保留索引和动作。',
+    'instruction.desc.layered': '生成单个无缝文本块。结构：[风格] -> [主场景设计] -> [视觉效果] + [姿势与动作] -> [相机]。',
+    'instruction.desc.layered_no_char': '结构：[主场景设计] -> [动作]。省略外观，仅保留索引和动作。',
     'instruction.visuals': '风格：饱和度',
     'instruction.desc.visuals': '使用丰富的视觉描述符：体积光，8k 纹理，景深。',
     'instruction.process_whole_scene': '批量场景',
@@ -21,8 +23,8 @@ export const modifier = {
     'instruction.desc.atmosphere_fix': '将情绪描述为空气和光线的物理属性。',
     'instruction.subject_focus': '上下文层级',
     'instruction.desc.subject_focus': '关键：即使是特写：1. 完整角色。2. 姿势。3. 细节。AI 需要身体上下文。',
-    'instruction.always_env': '关键：环境层级',
-    'instruction.desc.always_env': '关键：严格从远到近描述环境：1. 地平线。2. 中景。3. 前景。',
+    'instruction.always_env': '强制场景设计',
+    'instruction.desc.always_env': '关键：使用提供的“全局场景上下文”作为背景的绝对真理。您必须将上下文中的具体家具、照明和纹理注入每个提示词的环境层中。不要凭空想象通用的背景。',
     'instruction.pm_anthro': 'Anthro 细节',
     'instruction.desc.pm_anthro': '强制：在图像和视频中，物种前必须有 "anthropomorphic" 一词。增强纹理/解剖结构。',
     'instruction.pm_subscribe': '清晰文本',

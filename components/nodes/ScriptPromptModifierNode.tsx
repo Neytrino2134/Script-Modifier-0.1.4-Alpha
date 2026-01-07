@@ -32,7 +32,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
     // State for highlighting instruction bricks
     const [targetScrollId, setTargetScrollId] = useState<string | null>(null);
     
-    const [localSettingsHeight, setLocalSettingsHeight] = useState<number>(200);
+    const [localSettingsHeight, setLocalSettingsHeight] = useState<number>(360);
 
     const isStyleConnected = connectedInputs?.has('style');
     // Check if main data input is connected
@@ -71,6 +71,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
             return {
                 finalPrompts: Array.isArray(parsed.finalPrompts) ? parsed.finalPrompts.sort((a: any, b: any) => a.frameNumber - b.frameNumber) : [],
                 videoPrompts: Array.isArray(parsed.videoPrompts) ? parsed.videoPrompts.sort((a: any, b: any) => a.frameNumber - b.frameNumber) : [],
+                sceneContexts: parsed.sceneContexts || {}, // New Field for Master Env Prompts
                 usedCharacters: Array.isArray(parsed.usedCharacters) ? parsed.usedCharacters : [],
                 targetLanguage: parsed.targetLanguage || language,
                 startFrameNumber: parsed.startFrameNumber || null,
@@ -87,18 +88,18 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                 thinkingEnabled: !!parsed.thinkingEnabled, 
                 propEnhancementEnabled: parsed.propEnhancementEnabled !== false, // Default true
                 uiState: parsed.uiState || { isSettingsCollapsed: true, isCharStyleCollapsed: false },
-                settingsPaneHeight: parsed.settingsPaneHeight || 200,
+                settingsPaneHeight: parsed.settingsPaneHeight || 360,
             };
         } catch {
             return { 
-                finalPrompts: [], videoPrompts: [], usedCharacters: [], targetLanguage: language, startFrameNumber: null, endFrameNumber: null, startSceneNumber: null, endSceneNumber: null, generationProgress: null, styleOverride: '', characterPaneHeight: 160, model: 'gemini-3-flash-preview', 
+                finalPrompts: [], videoPrompts: [], sceneContexts: {}, usedCharacters: [], targetLanguage: language, startFrameNumber: null, endFrameNumber: null, startSceneNumber: null, endSceneNumber: null, generationProgress: null, styleOverride: '', characterPaneHeight: 160, model: 'gemini-3-flash-preview', 
                 disabledInstructionIds: [PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.id, PROMPT_MODIFIER_INSTRUCTIONS.ANTHRO_REINFORCEMENT.id, PROMPT_MODIFIER_INSTRUCTIONS.SUBSCRIBE_REINFORCEMENT.id, PROMPT_MODIFIER_INSTRUCTIONS.VISUAL_SATURATION.id], // Disable new features by default
-                charDescMode: 'general', safeGeneration: false, thinkingEnabled: false, propEnhancementEnabled: true, uiState: { isSettingsCollapsed: true, isCharStyleCollapsed: false }, settingsPaneHeight: 200 
+                charDescMode: 'general', safeGeneration: false, thinkingEnabled: false, propEnhancementEnabled: true, uiState: { isSettingsCollapsed: true, isCharStyleCollapsed: false }, settingsPaneHeight: 360 
             };
         }
     }, [node.value, language]);
 
-    const { finalPrompts, videoPrompts, usedCharacters, targetLanguage, startFrameNumber, endFrameNumber, startSceneNumber, endSceneNumber, generationProgress, styleOverride, characterPaneHeight: savedPaneHeight, model, disabledInstructionIds, charDescMode, safeGeneration, thinkingEnabled, propEnhancementEnabled, uiState, settingsPaneHeight } = parsedValue;
+    const { finalPrompts, videoPrompts, sceneContexts, usedCharacters, targetLanguage, startFrameNumber, endFrameNumber, startSceneNumber, endSceneNumber, generationProgress, styleOverride, characterPaneHeight: savedPaneHeight, model, disabledInstructionIds, charDescMode, safeGeneration, thinkingEnabled, propEnhancementEnabled, uiState, settingsPaneHeight } = parsedValue;
     
     useEffect(() => {
         let interval: number;
@@ -126,8 +127,8 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
     }, [isLoading, generationProgress]);
 
     useEffect(() => {
-        if (Math.abs((settingsPaneHeight || 200) - localSettingsHeight) > 1) {
-            setLocalSettingsHeight(settingsPaneHeight || 200);
+        if (Math.abs((settingsPaneHeight || 360) - localSettingsHeight) > 1) {
+            setLocalSettingsHeight(settingsPaneHeight || 360);
         }
     }, [settingsPaneHeight]);
     
@@ -204,18 +205,38 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                 }
             }
             setUpstreamAnalyzerData(newAnalyzerData);
+            
+            // Sync Scene Contexts
             if (newAnalyzerData?.scenes) {
                  const allKeys = new Set<string>();
                  const allSceneIndices = new Set<number>();
                  const allContextIndices = new Set<number>();
+                 const newSceneContexts: Record<string, string> = { ...sceneContexts };
+                 let hasContextUpdates = false;
+
                  newAnalyzerData.scenes.forEach((scene: any, sIdx: number) => {
+                    const sceneNum = scene.sceneNumber || sIdx + 1;
                     allSceneIndices.add(sIdx);
                     allContextIndices.add(sIdx);
                     (scene.frames || []).forEach((frame: any) => allKeys.add(`${sIdx}-${frame.frameNumber}`));
+                    
+                    // Auto-import scene context if it exists upstream
+                    if (scene.sceneContext) {
+                        // Strict Sync: Update if upstream provides context and it differs from local
+                        if (newSceneContexts[sceneNum] !== scene.sceneContext) {
+                            newSceneContexts[sceneNum] = scene.sceneContext;
+                            hasContextUpdates = true;
+                        }
+                    }
                  });
+                 
                  setCollapsedInputFrames(allKeys);
                  setCollapsedInputScenes(allSceneIndices);
                  setCollapsedInputContexts(allContextIndices);
+
+                 if (hasContextUpdates) {
+                     handleValueUpdate({ sceneContexts: newSceneContexts });
+                 }
             }
             const styleConnection = connections.find(c => c.toNodeId === node.id && c.toHandleId === 'style');
             if (styleConnection) {
@@ -226,7 +247,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
             setIsRefreshing(false);
         }
         return { analyzerData: newAnalyzerData, styleVal: newStyleValue };
-    }, [connections, getUpstreamTextValue, node.id]);
+    }, [connections, getUpstreamTextValue, node.id, sceneContexts, handleValueUpdate]);
 
     useEffect(() => { refreshUpstreamData(); }, [connections, node.id, refreshUpstreamData, inputData]);
 
@@ -299,6 +320,16 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
     const groupedPrompts = useMemo(() => {
         const groups: Record<string, { final: any, video: any }[]> = {};
         const sceneTitles: Record<string, string> = {};
+        
+        // 1. Initialize groups from Upstream Data (so panels exist before generation)
+        if (upstreamAnalyzerData?.scenes) {
+            upstreamAnalyzerData.scenes.forEach((scene: any) => {
+                const key = scene.sceneNumber.toString();
+                groups[key] = [];
+                sceneTitles[key] = scene.title || `Scene ${scene.sceneNumber}`;
+            });
+        }
+
         finalPrompts.forEach((p: any) => {
             const sceneNum = p.sceneNumber !== undefined ? p.sceneNumber : 0;
             const key = sceneNum.toString();
@@ -308,7 +339,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
             groups[key].push({ final: p, video: videoP });
         });
         return Object.entries(groups).sort((a, b) => Number(a[0]) - Number(b[0])).map(([key, items]) => ({ sceneNum: key, title: sceneTitles[key], prompts: items }));
-    }, [finalPrompts, videoPrompts]);
+    }, [finalPrompts, videoPrompts, upstreamAnalyzerData]);
 
     const handleToggleOutputSceneCollapse = (key: string) => { setCollapsedOutputScenes(prev => { const n = new Set(prev); n.has(key)?n.delete(key):n.add(key); return n; }); };
     const handleToggleInputSceneCollapse = (idx: number) => { setCollapsedInputScenes(prev => { const n = new Set(prev); n.has(idx)?n.delete(idx):n.add(idx); return n; }); };
@@ -433,6 +464,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
             type: 'script-prompt-modifier-data', 
             finalPrompts, 
             videoPrompts,
+            sceneContexts, // Add Contexts
             usedCharacters,
             visualStyle: activeStyle, 
             title: node.title 
@@ -455,13 +487,52 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
     };
 
     const handleStartRangeChange = (val: number) => { 
-        if (isProcessWholeScene) handleValueUpdate({ startSceneNumber: val });
-        else handleValueUpdate({ startFrameNumber: val });
+        const newStart = Math.max(1, val);
+        
+        if (isProcessWholeScene) {
+            const updates: any = { startSceneNumber: newStart };
+            // Smart Push: If start > end, move end to start
+            if (endSceneNumber !== null && newStart > endSceneNumber) {
+                updates.endSceneNumber = newStart;
+            }
+            handleValueUpdate(updates);
+        } else {
+            const updates: any = { startFrameNumber: newStart };
+            // Smart Push: If start > end, move end to start
+            if (endFrameNumber !== null && newStart > endFrameNumber) {
+                updates.endFrameNumber = newStart;
+            }
+            handleValueUpdate(updates);
+        }
     };
     
     const handleEndRangeChange = (val: number) => { 
-        if (isProcessWholeScene) handleValueUpdate({ endSceneNumber: val });
-        else handleValueUpdate({ endFrameNumber: val });
+        // Handle input clearing (allow null temporarily via UI interaction if needed, though type implies number here usually)
+        if (!val && val !== 0) {
+             if (isProcessWholeScene) handleValueUpdate({ endSceneNumber: null });
+             else handleValueUpdate({ endFrameNumber: null });
+             return;
+        }
+
+        const newEnd = Math.max(1, val);
+
+        if (isProcessWholeScene) {
+            const updates: any = { endSceneNumber: newEnd };
+            const currentStart = startSceneNumber || 1;
+            // Smart Pull: If end < start, move start down to end
+            if (newEnd < currentStart) {
+                updates.startSceneNumber = newEnd;
+            }
+            handleValueUpdate(updates);
+        } else {
+            const updates: any = { endFrameNumber: newEnd };
+            const currentStart = startFrameNumber || 1;
+            // Smart Pull: If end < start, move start down to end
+            if (newEnd < currentStart) {
+                updates.startFrameNumber = newEnd;
+            }
+            handleValueUpdate(updates);
+        }
     };
     
     const handleClearRange = () => handleValueUpdate({ startSceneNumber: null, endSceneNumber: null, startFrameNumber: null, endFrameNumber: null });
@@ -510,6 +581,11 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
 
     const handlePropEnhancementChange = () => {
          onValueChange(node.id, JSON.stringify({ ...parsedValue, propEnhancementEnabled: !propEnhancementEnabled }));
+    };
+    
+    const handleUpdateSceneContext = (sceneNum: string, newValue: string) => {
+        const newContexts = { ...sceneContexts, [sceneNum]: newValue };
+        handleValueUpdate({ sceneContexts: newContexts });
     };
 
     const totalIncomingFrames = useMemo(() => {
@@ -817,7 +893,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                 onRefresh={refreshUpstreamData}
             />
             
-            <div className="flex-grow flex flex-row min-h-0 items-stretch bg-gray-900 rounded-b-md overflow-hidden pt-1 border-t border-gray-600">
+            <div className="flex-grow flex flex-row min-h-0 items-stretch bg-gray-900 rounded-b-md overflow-hidden border-t border-gray-600">
                  <InputFramesPanel 
                     verticalDividerPos={verticalDividerPos}
                     isProcessWholeScene={isProcessWholeScene}
@@ -844,6 +920,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                     collapsedPrompts={collapsedPrompts}
                     areAllOutputScenesCollapsed={areAllOutputScenesCollapsed}
                     areAllOutputPromptsCollapsed={areAllOutputPromptsCollapsed}
+                    sceneContexts={sceneContexts} // Pass context map
                     onToggleOutputSceneCollapse={handleToggleOutputSceneCollapse}
                     onTogglePromptCollapse={handleTogglePromptCollapse}
                     onToggleAllOutputScenes={handleToggleAllOutputScenes}
@@ -852,7 +929,9 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                     onDeleteScenePrompts={handleDeleteScenePrompts}
                     onDownloadJson={handleDownloadJson}
                     onCopy={handleCopy}
+                    onUpdateSceneContext={handleUpdateSceneContext} // Pass update handler
                     t={t}
+                    deselectAllNodes={deselectAllNodes}
                  />
             </div>
         </div>

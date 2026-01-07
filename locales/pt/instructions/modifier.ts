@@ -1,12 +1,14 @@
 
+
+
 export const modifier = {
     'instruction.inputs': 'Entradas',
     'instruction.desc.inputs': 'Fonte: Quadros do analisador, Perfis visuais, Estilo de cena.',
     'instruction.role': 'Papel: Artista de Ambiente Líder',
     'instruction.desc.role': 'Especialista em Engenharia de Prompt. Sintetize as entradas em uma descrição visual definitiva.',
     'instruction.layered': 'Algoritmo: Fluxo Unificado',
-    'instruction.desc.layered': 'Gera UM SÓ bloco de texto fluido. Funde interações: "[Character-1] is catching [Character-2]".',
-    'instruction.desc.layered_no_char': 'Estrutura: [Ambiente] -> [Ação]. Omite aparência, mantém apenas índices e ações.',
+    'instruction.desc.layered': 'Gera UM SÓ bloco de texto fluido. Estrutura: [Estilo] -> [DESIGN DE CENÁRIO MESTRE] -> [Visuais] + [POSE & AÇÃO] -> [Câmera].',
+    'instruction.desc.layered_no_char': 'Estrutura: [DESIGN DE CENÁRIO MESTRE] -> [Ação]. Omite aparência, mantém apenas índices e ações.',
     'instruction.visuals': 'Estilo: Saturação',
     'instruction.desc.visuals': 'Usa descritores ricos: luz volumétrica, texturas 8k, profundidade de campo.',
     'instruction.process_whole_scene': 'Lote de Cena',
@@ -21,8 +23,8 @@ export const modifier = {
     'instruction.desc.atmosphere_fix': 'Descrever humor como propriedades físicas do ar e luz.',
     'instruction.subject_focus': 'Hierarquia Contexto',
     'instruction.desc.subject_focus': 'CRÍTICO: Mesmo para Close-ups: 1. Perso Completo. 2. Pose. 3. Detalhe. A IA precisa do contexto corporal.',
-    'instruction.always_env': 'CRÍTICO: HIERARQUIA AMB',
-    'instruction.desc.always_env': 'CRÍTICO: Descrever ambiente ESTRITAMENTE de Longe para Perto: 1. Horizonte. 2. Plano Médio. 3. Primeiro plano.',
+    'instruction.always_env': 'DESIGN DE CENÁRIO OBRIGATÓRIO',
+    'instruction.desc.always_env': "CRÍTICO: Use o 'Contexto Global de Cena' fornecido como a VERDADE ABSOLUTA para o fundo. Você DEVE injetar os detalhes específicos de móveis, iluminação e texturas do contexto na camada de ambiente de CADA prompt. Não alucine fundos genéricos.",
     'instruction.pm_anthro': 'Detalhe Anthro',
     'instruction.desc.pm_anthro': 'OBRIGATÓRIO: Palavra "anthropomorphic" antes da espécie em Imagem E Vídeo. Texturas/anatomia melhoradas.',
     'instruction.pm_subscribe': 'Texto Legível',

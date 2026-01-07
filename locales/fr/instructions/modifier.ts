@@ -1,12 +1,14 @@
 
+
+
 export const modifier = {
     'instruction.inputs': 'Entrées',
     'instruction.desc.inputs': 'Source : Plans de l\'analyseur, Profils visuels, Style de scène.',
     'instruction.role': 'Rôle : Lead Environment Artist',
     'instruction.desc.role': 'Expert en Prompt Engineering. Synthétisez les entrées en une description visuelle définitive.',
     'instruction.layered': 'Algorithme : Flux Unifié',
-    'instruction.desc.layered': 'Génère un SEUL bloc de texte fluide. Fusionne les interactions : "[Character-1] is catching [Character-2]".',
-    'instruction.desc.layered_no_char': 'Structure : [Environnement] -> [Action]. Omet l\'apparence, garde seulement indices et actions.',
+    'instruction.desc.layered': 'Génère un SEUL bloc de texte fluide. Structure : [Style] -> [DESIGN DÉCOR MAÎTRE] -> [Visuels] + [POSE & ACTION] -> [Caméra].',
+    'instruction.desc.layered_no_char': 'Structure : [DESIGN DÉCOR MAÎTRE] -> [Index] + [POSE & ACTION]. Omet l\'apparence, garde seulement indices et actions.',
     'instruction.visuals': 'Style : Saturation',
     'instruction.desc.visuals': 'Utiliser des descripteurs riches : lumière volumétrique, textures 8k, profondeur de champ.',
     'instruction.process_whole_scene': 'Lot de Scène',
@@ -21,8 +23,8 @@ export const modifier = {
     'instruction.desc.atmosphere_fix': 'Décrire l\'humeur comme propriété physique de l\'air et de la lumière.',
     'instruction.subject_focus': 'Hiérarchie Contexte',
     'instruction.desc.subject_focus': 'CRITIQUE : Même pour Gros plans : 1. Perso Complet. 2. Pose. 3. Détail. L\'IA a besoin du contexte corporel.',
-    'instruction.always_env': 'CRITIQUE : HIÉRARCHIE ENV',
-    'instruction.desc.always_env': 'CRITIQUE : Décrire l\'environnement STRICTEMENT de Loin à Près : 1. Horizon. 2. Plan Moyen. 3. Premier plan.',
+    'instruction.always_env': 'DESIGN DÉCOR OBLIGATOIRE',
+    'instruction.desc.always_env': "CRITIQUE : Utilisez le 'Contexte Global de la Scène' fourni comme la VÉRITÉ ABSOLUE pour l'arrière-plan. Vous DEVEZ injecter les détails spécifiques des meubles, de l'éclairage et des textures du contexte dans la couche d'environnement de CHAQUE prompt. N'inventez pas d'arrière-plans génériques.",
     'instruction.pm_anthro': 'Détail Anthro',
     'instruction.desc.pm_anthro': 'OBLIGATOIRE : Mot "anthropomorphic" avant l\'espèce dans Image ET Vidéo. Textures/anatomie améliorées.',
     'instruction.pm_subscribe': 'Texte Lisible',

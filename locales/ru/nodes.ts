@@ -1,4 +1,5 @@
 
+
 export const nodes = {
     'node.title.text_input': 'Текстовый ввод',
     'node.title.prompt_processor': 'Обработчик промпта',
@@ -109,6 +110,7 @@ export const nodes = {
     'node.output.default': 'Выход',
     'node.output.allCharacters': 'Все персонажи',
     'node.output.primaryCharacter': 'Основной персонаж',
+    'node.content.prompt': 'Промпт', // Added
     'node.content.action': 'Действие',
     'node.content.actionPlaceholder': 'Промпт действия...',
     'node.content.allScriptParts': 'Все части сценария (вместе)',
@@ -333,11 +335,9 @@ export const nodes = {
     'instruction.desc.commercial_safe': 'Строго избегает известных торговых марок.',
     'node.content.findStack': 'Найти в стеке...',
     
-    // Analyzer Stack Headers
-    'node.content.stack.system': '1. Система и Контекст',
-    'node.content.stack.role': '2. Роль и Логика',
-    'node.content.stack.cinematography': '3. Кинематография и Кадр',
-    'node.content.stack.world': '4. Мир и Непрерывность',
-    'node.action.locateInStack': 'Найти в стеке',
-    'node.content.notePlaceholder': 'Введите текст здесь...',
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. Прайминг и Контекст',
+    'node.content.spm_stack.physics': '2. Физика и Логика',
+    'node.content.spm_stack.hierarchy': '3. Иерархия Субъекта',
+    'node.content.spm_stack.construction': '4. Сборка и Формат',
 };

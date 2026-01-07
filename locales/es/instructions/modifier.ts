@@ -1,12 +1,14 @@
 
+
+
 export const modifier = {
     'instruction.inputs': 'Entradas',
     'instruction.desc.inputs': 'Fuente de Datos: Cuadros del guion, Visuales de personajes, Estilo de escena, Contexto Global.',
     'instruction.role': 'Rol: Artista de Entornos Principal',
     'instruction.desc.role': 'Eres un experto Artista de Entornos e Ingeniero de Prompts. Sintetiza las entradas en una descripción visual definitiva.',
     'instruction.layered': 'Algoritmo: Flujo Unificado',
-    'instruction.desc.layered': 'Genera un bloque ÚNICO y continuo de texto sin encabezados. Fusiona múltiples personajes en una INTERACCIÓN unificada. Simplifica micro-acciones complejas para mejor comprensión de la IA.',
-    'instruction.desc.layered_no_char': 'Estructura: [Entorno] -> [Acción]. Omite la apariencia del personaje, manteniendo solo índices y acciones.',
+    'instruction.desc.layered': 'Genera un bloque ÚNICO y continuo de texto. Estructura: [Estilo] -> [DISEÑO MAESTRO DEL SET] -> [Visuales] + [POSE Y ACCIÓN] -> [Cámara].',
+    'instruction.desc.layered_no_char': 'Estructura: [DISEÑO MAESTRO] -> [Índice] + [POSE Y ACCIÓN]. Omite la apariencia del personaje, manteniendo solo índices y acciones.',
     'instruction.visuals': 'Estilo: Saturación',
     'instruction.desc.visuals': 'Usa descriptores visuales ricos: iluminación volumétrica, claroscuro, texturas 8k, profundidad de campo.',
     'instruction.process_whole_scene': 'Lote de Escena',
@@ -16,13 +18,13 @@ export const modifier = {
     'instruction.stateless': 'Regla: Sin Estado',
     'instruction.desc.stateless': 'Trata cada cuadro como independiente. Redescribe completamente el entorno incluso si estaba en el cuadro anterior. OBLIGATORIO: Redescribe completamente la acción de CADA personaje desde cero (Postura -> Extremidades -> Cara).',
     'instruction.rule_static': 'Regla: Estático',
-    'instruction.desc.rule_static': 'Describe solo el momento congelado. Sin transiciones narrativas.',
+    'instruction.desc.rule_static': 'Describe solo el momento congelado. Sin transições narrativas.',
     'instruction.atmosphere_fix': 'Ancla Atmosférica',
     'instruction.desc.atmosphere_fix': 'Describe el estado de ánimo como propiedades físicas del aire y la luz.',
     'instruction.subject_focus': 'Jerarquía de Contexto',
     'instruction.desc.subject_focus': 'CRÍTICO: Incluso para Primeros Planos, describe 1. Personaje Completo. 2. Pose. 3. Detalle. La IA necesita el contexto corporal completo para renderizar partes correctamente.',
-    'instruction.always_env': 'CRÍTICO: JERARQUÍA ENTORNO',
-    'instruction.desc.always_env': 'CRÍTICO: Describe el entorno ESTRICTAMENTE de Lejos a Cerca: 1. Horizonte/Cielo. 2. Plano Medio (Arquitectura/Árboles). 3. Primer Plano (Texturas). Incluso para tomas Macro, describe el fondo borroso usando este orden.',
+    'instruction.always_env': 'DISEÑO DE SET OBLIGATORIO',
+    'instruction.desc.always_env': "CRÍTICO: Usa el 'Contexto Global de Escena' como la VERDAD ABSOLUTA para el fondo. DEBES inyectar los detalles específicos de muebles, iluminación y texturas del contexto en la capa de entorno de CADA prompt. No inventes fondos genéricos.",
     'instruction.pm_anthro': 'Detalle Anthro',
     'instruction.desc.pm_anthro': 'OBLIGATORIO: Palabra "anthropomorphic" antes de especie en Imagen Y Video. Texturas/anatomía mejoradas.',
     'instruction.pm_subscribe': 'Texto Legible',

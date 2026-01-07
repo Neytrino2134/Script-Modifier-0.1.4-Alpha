@@ -31,7 +31,7 @@ export const nodes = {
     'node.help.character_analyzer': 'Analiza la descripción de un personaje y la divide en apariencia física y vestimenta.',
     'node.help.character_generator': 'Toma un prompt y genera una o más descripciones detalladas de personajes.',
     'node.help.image_generator': 'Genera una imagen a partir de un texto usando la API de Gemini.',
-    'node.help.image_preview': 'Muestra una imagen. Arrastra y suelta un archivo de imagen en el nodo o el lienzo.',
+    'node.help.image_preview': 'Muestra una imagen desde un archivo. Arrastra y suelta un archivo de imagen en el nodo o el lienzo.',
     'node.help.character_card': 'Almacena la imagen, nombre y prompt de un personaje. Permite generar, guardar y cargar imágenes.',
     'node.help.gemini_chat': 'Nodo para conversar directamente con Gemini. Mantiene el historial del chat.',
     'node.help.translator': 'Traduce el texto entrante al idioma seleccionado.',
@@ -80,7 +80,7 @@ export const nodes = {
     'node.action.executeChain': 'Ejecutar Cadena',
     'node.action.executeFullChain': 'Ejecutar Cadena Completa',
     'node.action.processChainForward': 'Procesar Cadena Adelante',
-    'node.action.executeChainTitle': 'Ejecutar todos los nodos conectados hacia esta salida.',
+    'node.action.executeChainTitle': 'Ejecutar todos los nodos conectados.',
     'node.action.addCharacter': 'Añadir Personaje',
     'node.action.addScene': 'Añadir Escena',
     'node.action.addFrame': 'Añadir Cuadro',
@@ -328,8 +328,14 @@ export const nodes = {
     'instruction.desc.sceneless_mode': 'Desactiva el motor narrativo. Genera lista de escenas directamente desde el concepto.',
     'instruction.sceneless_mode': 'Modo Lista de Escenas',
     'node.content.microActionBreakdown': 'Micro-Acciones',
-    'node.content.microActionBreakdownInfo': 'Descompone acciones complejas en fases (Prep, Acción, Reacción).',
+    'node.content.microActionBreakdownInfo': 'Descompone acciones complejas en fases (Preparação, Acción, Reacción).',
     'node.content.commercialSafe': 'Seguro Comercial',
     'instruction.desc.commercial_safe': 'Evita estrictamente marcas registradas (Disney, Pixar, etc.) y nombres de personajes con derechos de autor.',
     'node.content.findStack': 'Buscar en pila...',
+
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. Preparación y Contexto',
+    'node.content.spm_stack.physics': '2. Física y Lógica',
+    'node.content.spm_stack.hierarchy': '3. Jerarquía del Sujeto',
+    'node.content.spm_stack.construction': '4. Construcción y Formato',
 };

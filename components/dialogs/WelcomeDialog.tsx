@@ -114,7 +114,8 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
     
     await deleteDB();
 
-    // 3. Reload Application
+    // 3. Set flag to bypass beforeunload check and Reload Application
+    (window as any).isReloading = true;
     window.location.reload();
   };
 
@@ -227,7 +228,7 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
 
           {/* GitHub Badge */}
           <a
-            href="https://github.com/Neytrino2134/Script-Modifier-0.1.4-Alpha"
+            href="https://github.com/Neytrino2134/Script-Modifier"
             target="_blank"
             rel="noopener noreferrer"
             className="opacity-70 hover:opacity-100 transition-opacity"
@@ -340,7 +341,7 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
                 <h1 
                     className="font-black tracking-tighter select-none leading-tight whitespace-nowrap text-center text-transparent bg-clip-text px-4"
                     style={{ 
-                        fontSize: 'clamp(2rem, 8vw, 6rem)', 
+                        fontSize: 'clamp(2.5rem, 10vw, 8rem)', 
                         backgroundImage: 'linear-gradient(90deg, #34d399, #22d3ee, #34d399)',
                         backgroundSize: '200% auto',
                         animation: 'textShimmer 3s linear infinite reverse',

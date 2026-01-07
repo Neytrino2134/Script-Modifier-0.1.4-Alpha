@@ -332,4 +332,10 @@ export const nodes = {
     'node.content.commercialSafe': 'Kommerziell sicher',
     'instruction.desc.commercial_safe': 'Vermeidet strikt Marken (Disney, Pixar) und ersetzt sie durch generische Beschreibungen.',
     'node.content.findStack': 'Im Stapel suchen...',
+
+    // Prompt Finalizer Stack Headers
+    'node.content.spm_stack.priming': '1. Priming & Kontext',
+    'node.content.spm_stack.physics': '2. Physik & Logik',
+    'node.content.spm_stack.hierarchy': '3. Subjekt-Hierarchie',
+    'node.content.spm_stack.construction': '4. Konstruktion & Format',
 };

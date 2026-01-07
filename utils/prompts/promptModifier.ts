@@ -1,13 +1,13 @@
 
-export const LAYERED_CONSTRUCTION_NO_STYLE_TEXT = "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Environment/Background] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background (Horizon, Lighting, Weather). \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry (e.g. 'kneeling', 'reaching', 'twisted torso') and movement.\n- **Technical:** End with lens, angle, and quality tags.";
+export const LAYERED_CONSTRUCTION_NO_STYLE_TEXT = "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [**Master Set Design/Background**] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** You MUST start by establishing the physical set defined in the input (Furniture, Lighting, Textures). \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry (e.g. 'kneeling', 'reaching', 'twisted torso') and movement.\n- **Technical:** End with lens, angle, and quality tags.";
 
-export const LAYERED_CONSTRUCTION_NO_CHAR_TEXT = "**MASTER CONSTRUCTION ALGORITHM (No Entity Vis):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO ENTITY VISUALS:** Do NOT include physical descriptions (clothing, face, hair) of the entities. Refer to them ONLY by their Index (e.g. `[Entity-1]`).\n2. **FLOW:** [Environment/Background] -> [Subject Index] + [**Full Pose & Action**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background. \n- **Action:** Describe **POSE, GESTURE, and MOVEMENT**. You MUST describe the physical body geometry (e.g. 'sitting cross-legged', 'running', 'arms raised') even without describing the clothes/face.\n- **Technical:** End with lens, angle, and quality tags.";
+export const LAYERED_CONSTRUCTION_NO_CHAR_TEXT = "**MASTER CONSTRUCTION ALGORITHM (No Entity Vis):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO ENTITY VISUALS:** Do NOT include physical descriptions (clothing, face, hair) of the entities. Refer to them ONLY by their Index (e.g. `[Entity-1]`).\n2. **FLOW:** [**Master Set Design/Background**] -> [Subject Index] + [**Full Pose & Action**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background and physical set details. \n- **Action:** Describe **POSE, GESTURE, and MOVEMENT**. You MUST describe the physical body geometry (e.g. 'sitting cross-legged', 'running', 'arms raised') even without describing the clothes/face.\n- **Technical:** End with lens, angle, and quality tags.";
 
 export const PROMPT_MODIFIER_INSTRUCTIONS = {
     INPUTS: {
         id: 'inputs',
         label: 'Inputs',
-        text: "Source Data: Script Frames, Entity Visuals, Scene Style, Global Scene Context."
+        text: "Source Data: Script Frames, Entity Visuals, Scene Style, Master Set Design (Context)."
     },
     ROLE: {
         id: 'role_artist',
@@ -61,13 +61,13 @@ export const PROMPT_MODIFIER_INSTRUCTIONS = {
     },
     ALWAYS_ENV: {
         id: 'rule_always_env',
-        label: 'Env Depth',
-        text: "**CRITICAL RULE: ENVIRONMENT DEPTH HIERARCHY.** You MUST describe the environment from Far to Near, regardless of the shot size.\n1. **FAR:** Global Biome/Location, Sky, Horizon, Weather.\n2. **MID:** Surrounding Architecture, Vegetation, Props.\n3. **NEAR:** Immediate textures, ground surface, lighting effects.\n\n*Even for a Macro shot, you MUST describe the background context (bokeh/blur) first.*"
+        label: 'Mandatory Set Design',
+        text: "**CRITICAL RULE: MANDATORY SET DESIGN INJECTION.** The provided 'Global Scene Context' is the **PHYSICAL TRUTH**. You MUST incorporate its specific details (Furniture type/color, Floor texture, Wall material, Lighting source) into the environment layer of EVERY prompt.\n\n**HIERARCHY:**\n1. **SET DESIGN:** Establish the room/location details from the Context FIRST.\n2. **DEPTH:** Then describe Far -> Mid -> Near elements.\n\n*Do not hallucinate a generic background. Use the specific one provided.*"
     },
     LAYERED_CONSTRUCTION: {
         id: 'rule_layers',
         label: 'Layered',
-        text: "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Style] -> [Environment/Background] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background (Horizon, Lighting, Weather). \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry and movement.\n- **Technical:** End with lens, angle, and quality tags."
+        text: "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Style] -> [**Master Set Design/Background**] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the specific physical set details (Furniture, Light, Texture) defined in the Scene Context. \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry and movement.\n- **Technical:** End with lens, angle, and quality tags."
     },
     VISUAL_SATURATION: {
         id: 'rule_saturation',
@@ -87,7 +87,7 @@ export const PROMPT_MODIFIER_INSTRUCTIONS = {
     BREAK_PARAGRAPHS: {
         id: 'break_paragraphs',
         label: 'Formatting',
-        text: "**FORMATTING OVERRIDE:**\nIgnore the 'seamless block' rule. You MUST structure the output into distinct sections using explicit headers and line breaks:\n\n**ENVIRONMENT:** [Description]\n**INTERACTION:** [Entities & Action Description]\n**TECHNICAL:** [Camera & Style]"
+        text: "**FORMATTING OVERRIDE:**\nIgnore the 'seamless block' rule. You MUST structure the output into distinct sections using explicit headers and line breaks:\n\n**ENVIRONMENT:** [Set Design & Description]\n**INTERACTION:** [Entities & Action Description]\n**TECHNICAL:** [Camera & Style]"
     },
     // New Stacks
     ANTHRO_REINFORCEMENT: {
