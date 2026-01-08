@@ -7,6 +7,7 @@ import { CopyIcon } from './icons/AppIcons';
 
 interface LinkGroup {
   category: string;
+  headerColor: string;
   links: {
     label: string;
     url: string;
@@ -88,6 +89,7 @@ const HelpPanel: React.FC = () => {
   const linkGroups: LinkGroup[] = useMemo(() => [
       {
           category: t('help.category.socials'),
+          headerColor: 'text-red-400',
           links: [
               { label: t('help.link.youtube'), subLabel: "@MurcelloNovaes", url: "https://www.youtube.com/@MurcelloNovaes", iconType: 'youtube' },
               { label: "Linktree", subLabel: "meowmasterart", url: "https://linktr.ee/meowmasterart", iconType: 'linktree' },
@@ -97,13 +99,23 @@ const HelpPanel: React.FC = () => {
       },
       {
           category: t('help.category.gh_pages'),
+          headerColor: 'text-purple-400',
           links: [
               { label: "Script Modifier", subLabel: "GitHub Pages", url: "https://neytrino2134.github.io/Script-Modifier/", iconType: 'github' },
               { label: "Prompt Modifier", subLabel: "GitHub Pages", url: "https://neytrino2134.github.io/Prompt-Modifier/", iconType: 'github' },
           ]
       },
       {
+          category: t('help.category.web'),
+          headerColor: 'text-cyan-400',
+          links: [
+              { label: "Script Modifier Web", subLabel: "scriptmodifier2.netlify.app", url: "https://scriptmodifier2.netlify.app/", iconType: 'netlify' },
+              { label: "Prompt Modifier Web", subLabel: "promptmodifier2.netlify.app", url: "https://promptmodifier2.netlify.app/", iconType: 'netlify' },
+          ]
+      },
+      {
           category: t('help.category.stable'),
+          headerColor: 'text-blue-400',
           links: [
               { label: "Script Modifier 0.1.3", subLabel: t('help.sub.stable'), url: "https://ai.studio/apps/drive/1enTmQ5Wz9RBArkZMZm5s5nYQcKxQ9L8M?fullscreenApplet=true", iconType: 'google' },
               { label: "Prompt Modifier 0.1.7", subLabel: t('help.sub.stable'), url: "https://ai.studio/apps/drive/1YCO0DaA4BTm9p0j5XqvpBhX_XTg9ClwC?fullscreenApplet=true", iconType: 'google' },
@@ -111,20 +123,15 @@ const HelpPanel: React.FC = () => {
       },
       {
           category: t('help.category.alpha'),
+          headerColor: 'text-blue-400',
           links: [
                { label: "Script Modifier 0.1.5", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1y9CSUmlVQK2xq7ckses7fpM6wpbZdBnB?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
                { label: "Prompt Modifier 0.1.8", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1OJfPP9wUKlnjvZ5_2_Fxq_v1dW0iftlW?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
           ]
       },
       {
-          category: t('help.category.web'),
-          links: [
-              { label: "Script Modifier Web", subLabel: "scriptmodifier2.netlify.app", url: "https://scriptmodifier2.netlify.app/", iconType: 'netlify' },
-              { label: "Prompt Modifier Web", subLabel: "promptmodifier2.netlify.app", url: "https://promptmodifier2.netlify.app/", iconType: 'netlify' },
-          ]
-      },
-      {
           category: t('help.category.github'),
+          headerColor: 'text-yellow-400',
           links: [
               { label: "Script Modifier Repo", subLabel: "v0.1.5 Alpha", url: "https://github.com/Neytrino2134/Script-Modifier", iconType: 'github' },
               { label: "Prompt Modifier Repo", subLabel: "v0.1.8 Alpha", url: "https://github.com/Neytrino2134/Prompt-Modifier", iconType: 'github' },
@@ -216,7 +223,7 @@ const HelpPanel: React.FC = () => {
       <div className="space-y-4">
           {linkGroups.map(group => (
               <div key={group.category} className="space-y-2">
-                  <h4 className="font-bold text-xs text-gray-400 uppercase tracking-wider pl-1 select-none border-b border-gray-700/50 pb-1">{group.category}</h4>
+                  <h4 className={`font-bold text-xs uppercase tracking-wider select-none border-b border-gray-700/50 pb-1 text-center ${group.headerColor}`}>{group.category}</h4>
                   <div className="grid grid-cols-2 gap-2">
                       {group.links.map((link, idx) => (
                           <div 
