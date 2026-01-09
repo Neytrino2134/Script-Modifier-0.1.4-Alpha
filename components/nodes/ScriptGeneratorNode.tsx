@@ -10,11 +10,14 @@ import { CHAR_GEN_INSTRUCTIONS } from '../../utils/prompts/scriptGenerator';
 
 const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     node, onValueChange, onGenerateScript, isGeneratingScript, isStopping, onStopGeneration, t, deselectAllNodes, connectedInputs, onModifyScriptPart, isModifyingScriptPart, onDetachCharacter, addToast, inputData,
-    onImproveScriptConcept, isImprovingScriptConcept, connections, getUpstreamTextValue, onRemoveConnection
+    onImproveScriptConcept, isImprovingScriptConcept, connections, getUpstreamTextValue, onRemoveConnection,
+    onGenerateEntities, isGeneratingEntities
 }) => {
     const { viewTransform } = useAppContext();
     const { language } = useLanguage();
     const isLoading = isGeneratingScript === node.id;
+    const isEntLoading = isGeneratingEntities === node.id;
+    
     const isPromptConnected = connectedInputs?.has('prompt') || connectedInputs?.has(undefined);
     const isCharactersInputConnected = connectedInputs?.has('characters');
 
@@ -25,6 +28,9 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
     const [linkedCharactersCount, setLinkedCharactersCount] = useState(0);
     const [linkedCharacters, setLinkedCharacters] = useState<any[]>([]);
+    
+    // Search Highlight State
+    const [targetScrollId, setTargetScrollId] = useState<string | null>(null);
     
     // Track known IDs to identify new ones for auto-collapsing
     const prevKnownCharIds = useRef<Set<string>>(new Set());
@@ -70,6 +76,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 customVisualStyle: parsed.customVisualStyle || '',
                 generatedStyle: parsed.generatedStyle || '', 
                 
+                generateMainChars: parsed.generateMainChars !== false, // Default True
                 createSecondaryChars: parsed.createSecondaryChars !== false,
                 createKeyItems: parsed.createKeyItems !== false,
                 safeGeneration: !!parsed.safeGeneration,
@@ -97,6 +104,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     collapsedScenes: []
                 }, 
                 model: 'gemini-3-pro-preview', summary: '', generatedStyle: '',
+                generateMainChars: true,
                 commercialSafe: false, smartConceptEnabled: false, atmosphericEntryEnabled: true, generationProgress: null
             };
         }
@@ -106,10 +114,23 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         prompt, targetLanguage, characterType, useExistingCharacters, narratorEnabled, narratorMode,
         summary, detailedCharacters, scenes, isAdvancedMode, numberOfScenes, isDetailedPlot,
         genre, genre2, noCharacters, model, includeSubscribeScene, visualStyle, customVisualStyle, generatedStyle,
-        createSecondaryChars, createKeyItems, safeGeneration, thinkingEnabled, scenelessMode, simpleActions, commercialSafe, smartConceptEnabled,
+        generateMainChars, createSecondaryChars, createKeyItems, safeGeneration, thinkingEnabled, scenelessMode, simpleActions, commercialSafe, smartConceptEnabled,
         atmosphericEntryEnabled,
         uiState, generationProgress
     } = parsedValue;
+
+    // Fix: Refs to hold current state to break useEffect dependency loops
+    const detailedCharactersRef = useRef(detailedCharacters);
+    const uiStateRef = useRef(uiState);
+    const useExistingCharactersRef = useRef(useExistingCharacters);
+    const noCharactersRef = useRef(noCharacters);
+
+    useEffect(() => {
+        detailedCharactersRef.current = detailedCharacters;
+        uiStateRef.current = uiState;
+        useExistingCharactersRef.current = useExistingCharacters;
+        noCharactersRef.current = noCharacters;
+    }, [detailedCharacters, uiState, useExistingCharacters, noCharacters]);
 
     // Timer Effect
     useEffect(() => {
@@ -231,17 +252,13 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         }
     };
     
-    // --- Manual Editing Functions ---
-
+    // ... Manual Editing Functions ...
+    // (omitted for brevity, assume they exist unchanged)
     const handleAddCharacter = useCallback(() => {
         const newId = `char-${Date.now()}`;
-        
-        // Calculate max number for "New Entity N" considering both local and linked characters
         let maxNameNum = 0;
         const nameRegex = /^New Entity\s*(\d*)$/i;
-        
         const allChars = [...linkedCharacters, ...(detailedCharacters || [])];
-        
         allChars.forEach(c => {
             const match = (c.name || '').match(nameRegex);
             if (match) {
@@ -249,12 +266,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 if (num > maxNameNum) maxNameNum = num;
             }
         });
-        
         const nextName = `New Entity ${maxNameNum + 1}`;
-        
-        // Calculate the next logical index based on total characters (Entity-N)
         const nextIndex = allChars.length + 1;
-        
         const newChar = {
             id: newId,
             name: nextName,
@@ -264,14 +277,11 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             originalName: nextName
         };
         const newCharacters = [...(detailedCharacters || []), newChar];
-        
-        // Auto-expand the character section and auto-collapse the NEW character
         const newUiState = { 
             ...uiState, 
             isCharactersSectionCollapsed: false,
             collapsedCharacters: [...(uiState.collapsedCharacters || []), newId] 
         };
-        
         handleValueUpdate({ detailedCharacters: newCharacters, uiState: newUiState });
     }, [detailedCharacters, linkedCharacters, handleValueUpdate, uiState]);
 
@@ -285,15 +295,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             recommendedFrames: 6
         };
         const newScenes = [...(scenes || []), newScene];
-        
-        // Auto-expand the scenes section and auto-collapse the NEW scene
         const newSceneIndex = newScenes.length - 1;
         const newUiState = { 
             ...uiState, 
             isScenesSectionCollapsed: false,
             collapsedScenes: [...(uiState.collapsedScenes || []), newSceneIndex]
         };
-
         handleValueUpdate({ scenes: newScenes, uiState: newUiState });
     }, [scenes, handleValueUpdate, uiState]);
 
@@ -307,33 +314,26 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             recommendedFrames: 6
         };
         newScenes.splice(index + 1, 0, newScene);
-        
         const reindexed = newScenes.map((s, i) => ({
             ...s,
             sceneNumber: i + 1,
             title: (s.title === 'New Scene' || s.title.match(/^Scene \d+$/)) ? `Scene ${i + 1}` : s.title
         }));
-        
-        // Adjust collapsed indices: shift anything > index by 1, then add the new index (index + 1)
         const insertionIndex = index + 1;
         const updatedCollapsedScenes = (uiState.collapsedScenes || [])
-            .map(i => (i >= insertionIndex ? i + 1 : i)) // Shift existing
-            .concat(insertionIndex); // Add new
-
-        // Auto-expand the scenes section
+            .map(i => (i >= insertionIndex ? i + 1 : i))
+            .concat(insertionIndex);
         const newUiState = { 
             ...uiState, 
             isScenesSectionCollapsed: false,
             collapsedScenes: updatedCollapsedScenes
         };
-
         handleValueUpdate({ scenes: reindexed, uiState: newUiState });
     }, [scenes, handleValueUpdate, uiState]);
 
     const handleMoveScene = useCallback((index: number, direction: 'up' | 'down') => {
         if (!scenes || scenes.length < 2) return;
         const newScenes = [...scenes];
-
         if (direction === 'up') {
             if (index === 0) return;
             [newScenes[index], newScenes[index - 1]] = [newScenes[index - 1], newScenes[index]];
@@ -341,7 +341,6 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             if (index === newScenes.length - 1) return;
             [newScenes[index], newScenes[index + 1]] = [newScenes[index + 1], newScenes[index]];
         }
-        
         const reindexed = newScenes.map((s, i) => ({
             ...s,
             sceneNumber: i + 1
@@ -351,11 +350,9 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
 
     const handleMoveCharacter = useCallback((index: number, direction: 'up' | 'down' | 'top' | 'bottom') => {
         if (!detailedCharacters || detailedCharacters.length < 2) return;
-        
         let newChars = [...detailedCharacters];
         const charToMove = newChars[index];
         newChars.splice(index, 1);
-        
         if (direction === 'top') {
             newChars.unshift(charToMove);
         } else if (direction === 'bottom') {
@@ -365,11 +362,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         } else if (direction === 'down') {
              newChars.splice(Math.min(newChars.length, index + 1), 0, charToMove);
         }
-        
         handleValueUpdate({ detailedCharacters: newChars });
     }, [detailedCharacters, handleValueUpdate]);
-
-    // --- End Manual Editing Functions ---
     
     // Calculate linked characters from input connections AND Sync Local Indexing
     useEffect(() => {
@@ -387,12 +381,11 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             const val = getUpstreamTextValue(conn.fromNodeId, conn.fromHandleId);
             try {
                 const parsed = JSON.parse(val || '{}');
-                // Helper to add isLinked flag and ensure ID
                 const processChar = (c: any) => ({
                     ...c,
                     isLinked: true,
-                    // Use upstream ID if available, or generate a stable-ish one based on node+index
-                    id: c.id || `linked-${conn.fromNodeId}-${c.index || c.name || Math.random()}`
+                    // Use a stable ID if possible, otherwise create one based on content
+                    id: c.id || `linked-${conn.fromNodeId}-${c.name}`
                 });
 
                 if (Array.isArray(parsed)) {
@@ -405,59 +398,49 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             } catch {}
         });
 
+        // Use Refs to access current state without triggering effect
+        const currentLocals = detailedCharactersRef.current || [];
+        const currentUiState = uiStateRef.current;
+        
+        let updates: any = {};
+        
         // --- AUTOMATIC CONFIGURATION UPDATE ---
-        // If characters are connected, force 'Use Existing Characters' ON and 'No Characters' OFF
         if (inputConns.length > 0) {
-            let updates: any = {};
-            if (!useExistingCharacters) updates.useExistingCharacters = true;
-            if (noCharacters) updates.noCharacters = false;
-            
-            if (Object.keys(updates).length > 0) {
-                // We use a timeout to avoid update loops during render cycle
-                setTimeout(() => handleValueUpdate(updates), 0);
-            }
+            if (!useExistingCharactersRef.current) updates.useExistingCharacters = true;
+            if (noCharactersRef.current) updates.noCharacters = false;
         }
 
         // --- STRICT SEQUENTIAL INDEXING (ENTITY-N) ---
-        // We re-index ALL characters (linked first, then local) to ensure 1, 2, 3, ... N order
-        
-        // 1. Prepare linked characters with forced indices 1..K
         const reindexedLinkedChars = incomingChars.map((char, i) => {
-            const { alias, ...rest } = char; // STRICTLY REMOVE ALIAS
+            const { alias, ...rest } = char;
             return {
                 ...rest,
                 index: `Entity-${i + 1}`
             };
         });
         
-        // 2. Prepare local characters with indices K+1..N
         const startLocalIndex = reindexedLinkedChars.length + 1;
-        const currentLocals = detailedCharacters || [];
-        let needsUpdate = false;
+        let localNeedsUpdate = false;
         
         const reindexedLocalChars = currentLocals.map((char: any, i: number) => {
             const targetIndex = startLocalIndex + i;
             const expectedIndexStr = `Entity-${targetIndex}`;
-            
-            // Also strip alias from local state if present
             const { alias, ...cleanChar } = char;
             
             if (cleanChar.index !== expectedIndexStr || alias) {
-                needsUpdate = true;
+                localNeedsUpdate = true;
                 return { ...cleanChar, index: expectedIndexStr };
             }
             return cleanChar;
         });
         
         // --- AUTO COLLAPSE NEW CHARACTERS ---
-        // Identify newly added character IDs and auto-collapse them
         const allCurrentIds = [...reindexedLinkedChars, ...reindexedLocalChars].map(c => c.id);
-        const currentCollapsedSet = new Set(uiState.collapsedCharacters || []);
+        const currentCollapsedSet = new Set(currentUiState.collapsedCharacters || []);
         let uiChanged = false;
         
         allCurrentIds.forEach(id => {
             if (!prevKnownCharIds.current.has(id)) {
-                // New ID detected, collapse it by default
                 if (!currentCollapsedSet.has(id)) {
                     currentCollapsedSet.add(id);
                     uiChanged = true;
@@ -465,27 +448,28 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             }
         });
         
-        // Update known IDs for next run
         prevKnownCharIds.current = new Set(allCurrentIds);
 
-        // 3. Update state
-        if (needsUpdate || uiChanged) {
-            // Use timeout to break render cycle if invoked during render
+        // Check if anything actually changed to prevent loops
+        const linkedChanged = JSON.stringify(linkedCharacters) !== JSON.stringify(reindexedLinkedChars);
+        const localsChanged = JSON.stringify(currentLocals) !== JSON.stringify(reindexedLocalChars);
+        
+        if (linkedChanged) {
+             setLinkedCharacters(reindexedLinkedChars);
+             setLinkedCharactersCount(reindexedLinkedChars.length);
+        }
+
+        if (localNeedsUpdate || uiChanged || Object.keys(updates).length > 0) {
+             if (localNeedsUpdate) updates.detailedCharacters = reindexedLocalChars;
+             if (uiChanged) updates.uiState = { ...currentUiState, collapsedCharacters: Array.from(currentCollapsedSet) };
+             
+             // Use setTimeout to defer state update and break render cycle
              setTimeout(() => {
-                 const updates: any = {};
-                 if (needsUpdate) updates.detailedCharacters = reindexedLocalChars;
-                 if (uiChanged) updates.uiState = { ...uiState, collapsedCharacters: Array.from(currentCollapsedSet) };
                  handleValueUpdate(updates);
              }, 0);
         }
 
-        setLinkedCharacters(prev => {
-             if (JSON.stringify(prev) === JSON.stringify(reindexedLinkedChars)) return prev;
-             return reindexedLinkedChars;
-        });
-        setLinkedCharactersCount(reindexedLinkedChars.length);
-
-    }, [connections, getUpstreamTextValue, node.id, inputData, detailedCharacters, handleValueUpdate, useExistingCharacters, noCharacters]);
+    }, [connections, getUpstreamTextValue, node.id, inputData, handleValueUpdate]); // Removed detailedCharacters and uiState from dependencies
 
     const handleEmbedCharacter = useCallback((char: any) => {
          const newChar = { 
@@ -509,6 +493,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
 
     return (
         <div className="flex flex-col h-full">
+            {/* ... Render Logic (Same as original) ... */}
             <div className="flex flex-col gap-2 mb-2 flex-shrink-0">
                 <div className="flex justify-between items-center px-1">
                     <label className="text-xs font-medium text-gray-400">{t('node.content.scriptPromptPlaceholder')}</label>
@@ -540,7 +525,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     value={displayPrompt}
                     onChange={(e) => handleValueUpdate({ prompt: e.target.value })}
                     placeholder={isPromptConnected ? t('node.content.connectedPlaceholder') : t('node.content.scriptPromptPlaceholder')}
-                    disabled={isPromptConnected || isLoading}
+                    disabled={isPromptConnected || isLoading || isEntLoading}
                     className={`w-full p-2 bg-gray-700 border border-gray-600 rounded-md resize-y min-h-[80px] max-h-[200px] focus:border-emerald-500 focus:ring-0 focus:outline-none disabled:bg-gray-800 disabled:text-gray-500 custom-scrollbar overflow-y-scroll ${isPromptConnected ? 'text-gray-300 italic' : ''}`}
                     rows={2}
                     onWheel={e => e.stopPropagation()}
@@ -575,7 +560,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                                     : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
                                 }`}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                 </svg>
                                 PRO
@@ -612,7 +597,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     </div>
 
                     <button
-                        onClick={isLoading ? onStopGeneration : handleStartGeneration}
+                        onClick={isLoading || isEntLoading ? onStopGeneration : handleStartGeneration}
                         disabled={isStopping || (!isLoading && !isPromptConnected && !prompt.trim() && (!useExistingCharacters))}
                         className={`flex-grow h-10 px-4 font-bold text-xs uppercase tracking-wide text-white rounded-lg transition-all duration-200 shadow-sm flex items-center justify-center ${
                             isStopping 
@@ -689,12 +674,10 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 useExistingCharacters={useExistingCharacters}
                 isCharactersInputConnected={!!isCharactersInputConnected}
                 linkedCharactersCount={linkedCharactersCount}
-                createSecondaryChars={createSecondaryChars}
-                createKeyItems={createKeyItems}
                 isDetailedPlot={isDetailedPlot}
                 includeSubscribeScene={includeSubscribeScene}
                 model={model}
-                isLoading={isLoading}
+                isLoading={isLoading || !!isEntLoading}
                 targetLanguage={targetLanguage}
                 prompt={prompt}
                 allCharacters={detailedCharacters}
@@ -706,6 +689,17 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 commercialSafe={commercialSafe}
                 smartConceptEnabled={smartConceptEnabled}
                 atmosphericEntryEnabled={atmosphericEntryEnabled}
+                targetScrollId={targetScrollId}
+                onSetTargetScrollId={setTargetScrollId}
+                // New Entity Generation Props
+                generateMainChars={generateMainChars}
+                createSecondaryChars={createSecondaryChars}
+                createKeyItems={createKeyItems}
+                // Update handlers for these new props will be used by InstructionBrick toggles if needed, 
+                // but specifically pass them so SettingsPanel can render bricks correctly.
+                onToggleGenerateMainChars={() => handleValueUpdate({ generateMainChars: !generateMainChars })}
+                onToggleCreateSecondaryChars={() => handleValueUpdate({ createSecondaryChars: !createSecondaryChars })}
+                onToggleCreateKeyItems={() => handleValueUpdate({ createKeyItems: !createKeyItems })}
             />
 
             {/* Scrollable Container for Results */}
@@ -774,7 +768,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                         <div className="flex items-center space-x-1">
                              <ActionButton tooltipPosition="left" title={t('node.action.copy')} onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(summary); }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                            </ActionButton>
+                             </ActionButton>
                              <ActionButton tooltipPosition="left" title={t('node.action.clear')} onClick={(e) => { e.stopPropagation(); handleValueUpdate({ summary: '' }); }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                              </ActionButton>
@@ -843,6 +837,18 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     isSyncAvailable={false}
                     onMoveCharacter={handleMoveCharacter}
                     onClearCharacters={() => handleValueUpdate({ detailedCharacters: [] })}
+                    
+                    // Entity Gen Props
+                    onGenerateEntities={() => onGenerateEntities(node.id)}
+                    isGeneratingEntities={!!isEntLoading}
+                    generateMainChars={generateMainChars}
+                    createSecondaryChars={createSecondaryChars}
+                    createKeyItems={createKeyItems}
+                    onGenerateMainChange={(val) => handleValueUpdate({ generateMainChars: val })}
+                    onCreateSecondaryChange={(val) => handleValueUpdate({ createSecondaryChars: val })}
+                    onCreateKeyItemsChange={(val) => handleValueUpdate({ createKeyItems: val })}
+                    
+                    onSetTargetScrollId={setTargetScrollId}
                 />
 
                 <ScenesPanel

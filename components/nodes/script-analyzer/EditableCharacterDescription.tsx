@@ -46,12 +46,12 @@ export const EditableCharacterDescription: React.FC<{
         <div className="space-y-2 text-sm">
             {(['Appearance', 'Personality', 'Clothing'] as const).map(key => (
                 <div key={key}>
-                    <h5 className="font-semibold text-gray-400 text-xs uppercase tracking-wider">{key}</h5>
+                    <h5 className="font-semibold text-gray-400 text-xs uppercase tracking-wider">{t(`node.content.${key.toLowerCase()}`) || key}</h5>
                     <textarea
                         value={sections[key] || ''}
                         onChange={e => handleSectionChange(key, e.target.value)}
                         readOnly={readOnly}
-                        className="w-full text-sm p-2 bg-gray-800 border-none rounded-md resize-y min-h-[60px] focus:outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar overflow-y-scroll read-only:bg-gray-800/50 read-only:text-gray-400"
+                        className="w-full text-sm p-2 bg-gray-900 border-none rounded-md resize-y min-h-[60px] focus:outline-none focus:ring-1 focus:ring-emerald-500 custom-scrollbar overflow-y-scroll read-only:bg-gray-900/50 read-only:text-gray-400"
                         onWheel={e => e.stopPropagation()}
                         onFocus={onFocus}
                     />

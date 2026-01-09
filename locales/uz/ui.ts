@@ -1,4 +1,6 @@
 
+
+
 export const ui = {
     'toolbar.edit': 'Tahrirlash (V)',
     'toolbar.cutter': 'Ulanishni Kesish (C)',
@@ -131,7 +133,6 @@ export const ui = {
     'search.node.music_idea_generator.title': 'Musiqa G‘oyasi Generatori',
     'search.node.music_idea_generator.description': 'Qo‘shiq matni yoki musiqa promptini yaratadi. (Shift+M)',
     'search.node.youtube_analytics': 'YouTube Analitika',
-    'search.node.youtube_analytics.description': 'Kanal statistikasini tahlil qiladi va o\'sish bo\'yicha maslahatlar beradi.',
     'search.node.image_editor.title': 'Rasm Tahrirchisi',
     'search.node.image_editor.description': 'AI yordamida rasmlarni tahrirlash (Inpainting, Outpainting).',
     'search.group.input': 'Kiritish',
@@ -176,4 +177,18 @@ export const ui = {
     'help.sub.discussion': 'Muhokama',
     'help.sub.stable': 'Barqaror Versiya',
     'help.sub.alpha': 'Alpha Versiya',
+    'imageViewer.title': 'Rasmni Ko‘rish',
+
+    // Language Names
+    'languages.ru': 'Ruscha',
+    'languages.en': 'Inglizcha',
+    'languages.es': 'Ispancha',
+    'languages.fr': 'Fransuzcha',
+    'languages.de': 'Nemischa',
+    'languages.it': 'Italyancha',
+    'languages.pt': 'Portugalcha',
+    'languages.zh': 'Xitoycha',
+    'languages.ja': 'Yaponcha',
+    'languages.ko': 'Koreyscha',
+    'languages.uz': 'O‘zbekcha',
 };

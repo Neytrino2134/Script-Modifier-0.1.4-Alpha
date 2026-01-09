@@ -10,4 +10,8 @@ export const youtube = {
     'instruction.desc.yt_channel_mode': 'Создание названия, описания и хэндла.',
     'instruction.yt_format': 'JSON Формат',
     'instruction.desc.yt_format': 'Строгая структура JSON для интеграции.',
+    'instruction.yt_hashtags': 'Внедрить Хештеги',
+    'instruction.desc.yt_hashtags': 'Добавляет #хештеги в конец поля описания.',
+    'instruction.yt_thumbnail': 'Промпт Обложки',
+    'instruction.desc.yt_thumbnail': 'Генерирует описание для кликабельной обложки видео.',
 };

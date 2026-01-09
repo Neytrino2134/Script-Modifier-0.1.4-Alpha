@@ -1,4 +1,6 @@
 
+
+
 export const ui = {
     'toolbar.edit': 'Éditer (V)',
     'toolbar.cutter': 'Couper la connexion (C)',
@@ -131,7 +133,7 @@ export const ui = {
     'search.node.music_idea_generator.title': 'Générateur d\'Idées Musicales',
     'search.node.music_idea_generator.description': 'Génère des paroles ou des prompts musicaux. (Shift+M)',
     'search.node.youtube_analytics': 'YouTube Analytics',
-    'search.node.youtube_analytics.description': 'Analyse les statistiques de la chaîne et donne des conseils de croissance.',
+    'search.node.youtube_analytics.description': 'Analyse les stats de la chaîne et donne des conseils de croissance.',
     'search.node.image_editor.title': 'Éditeur d\'Image',
     'search.node.image_editor.description': 'Éditez des images avec l\'IA (Inpainting, Outpainting).',
     'search.group.input': 'Entrée',
@@ -176,4 +178,17 @@ export const ui = {
     'help.sub.discussion': 'Discussion',
     'help.sub.stable': 'Version Stable',
     'help.sub.alpha': 'Version Alpha',
+
+    // Language Names
+    'languages.ru': 'Russe',
+    'languages.en': 'Anglais',
+    'languages.es': 'Espagnol',
+    'languages.fr': 'Français',
+    'languages.de': 'Allemand',
+    'languages.it': 'Italien',
+    'languages.pt': 'Portugais',
+    'languages.zh': 'Chinois',
+    'languages.ja': 'Japonais',
+    'languages.ko': 'Coréen',
+    'languages.uz': 'Ouzbek',
 };

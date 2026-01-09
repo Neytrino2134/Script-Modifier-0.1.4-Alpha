@@ -119,6 +119,9 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
             case NodeType.MUSIC_IDEA_GENERATOR:
                 newValue = { ...currentValue, idea: '', generatedLyrics: {}, generatedMusicPrompts: {}, generatedTitles: {} };
                 break;
+            case NodeType.AUDIO_TRANSCRIBER:
+                newValue = { audioBase64: null, mimeType: null, transcription: '', segments: [], fileName: null };
+                break;
             case NodeType.TEXT_INPUT:
             case NodeType.NOTE:
             case NodeType.ERROR_ANALYZER:
@@ -435,7 +438,7 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                         
                         {(node.type === NodeType.TEXT_INPUT || node.type === NodeType.NOTE || node.type === NodeType.CHARACTER_CARD) && (
                             <ActionButton title={t('node.action.paste')} onClick={() => { onPasteNodeValue(node.id); addToast(t('toast.pasted')); }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                             </ActionButton>
                         )}
                         
@@ -443,7 +446,7 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                         </ActionButton>
 
-                        {(node.type === NodeType.PROMPT_ANALYZER || node.type === NodeType.CHARACTER_ANALYZER || node.type === NodeType.SCRIPT_GENERATOR || node.type === NodeType.SCRIPT_ANALYZER || node.type === NodeType.CHARACTER_GENERATOR || node.type === NodeType.SCRIPT_PROMPT_MODIFIER || node.type === NodeType.CHARACTER_CARD || node.type === NodeType.TEXT_INPUT || node.type === NodeType.NOTE || node.type === NodeType.ERROR_ANALYZER || node.type === NodeType.NARRATOR_TEXT_GENERATOR || node.type === NodeType.SPEECH_SYNTHESIZER || node.type === NodeType.IDEA_GENERATOR || node.type === NodeType.YOUTUBE_ANALYTICS || node.type === NodeType.YOUTUBE_TITLE_GENERATOR || node.type === NodeType.MUSIC_IDEA_GENERATOR || node.type === NodeType.GEMINI_CHAT) && (<ActionButton title={t('node.action.clear')} onClick={handleClear}><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></ActionButton>)}
+                        {(node.type === NodeType.PROMPT_ANALYZER || node.type === NodeType.CHARACTER_ANALYZER || node.type === NodeType.SCRIPT_GENERATOR || node.type === NodeType.SCRIPT_ANALYZER || node.type === NodeType.CHARACTER_GENERATOR || node.type === NodeType.SCRIPT_PROMPT_MODIFIER || node.type === NodeType.CHARACTER_CARD || node.type === NodeType.TEXT_INPUT || node.type === NodeType.NOTE || node.type === NodeType.ERROR_ANALYZER || node.type === NodeType.NARRATOR_TEXT_GENERATOR || node.type === NodeType.SPEECH_SYNTHESIZER || node.type === NodeType.IDEA_GENERATOR || node.type === NodeType.YOUTUBE_ANALYTICS || node.type === NodeType.YOUTUBE_TITLE_GENERATOR || node.type === NodeType.MUSIC_IDEA_GENERATOR || node.type === NodeType.GEMINI_CHAT || node.type === NodeType.AUDIO_TRANSCRIBER) && (<ActionButton title={t('node.action.clear')} onClick={handleClear}><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></ActionButton>)}
 
                         <ActionButton title={t('node.action.duplicateWithContent')} onClick={() => onDuplicateNode(node.id)}>
                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>

@@ -1,4 +1,6 @@
 
+
+
 export const ui = {
     'toolbar.edit': 'Bearbeiten (V)',
     'toolbar.cutter': 'Verbindung trennen (C)',
@@ -121,9 +123,9 @@ export const ui = {
     'search.node.speech_synthesizer.title': 'Sprachsynthesizer',
     'search.node.speech_synthesizer.description': 'Wandelt Text in Sprache um. (Shift+N)',
     'search.node.idea_generator.title': 'Ideen-Generator',
-    'search.node.idea_generator.description': 'Generiert Kategorien und kombiniert sie zu einer Story-Idee.',
+    'search.node.idea_generator.description': 'Generiert Kategorien und kombiniert sie zu einer Idee.',
     'search.node.narrator_text_generator.title': 'Erzählertext-Generator',
-    'search.node.narrator_text_generator.description': 'Generiert Text für einen Erzähler oder Sprecher. (Shift+G)',
+    'search.node.narrator_text_generator.description': 'Generiert Text für Erzähler oder Sprecher. (Shift+G)',
     'search.node.audio_transcriber.title': 'Audio-Transkribierer',
     'search.node.audio_transcriber.description': 'Wandelt Audio-/Videodateien in Text um. (Shift+B)',
     'search.node.youtube_title_generator.title': 'YouTube Titel-Generator',
@@ -176,4 +178,17 @@ export const ui = {
     'help.sub.discussion': 'Diskussion',
     'help.sub.stable': 'Stabile Version',
     'help.sub.alpha': 'Alpha Version',
+
+    // Language Names
+    'languages.ru': 'Russisch',
+    'languages.en': 'Englisch',
+    'languages.es': 'Spanisch',
+    'languages.fr': 'Französisch',
+    'languages.de': 'Deutsch',
+    'languages.it': 'Italienisch',
+    'languages.pt': 'Portugiesisch',
+    'languages.zh': 'Chinesisch',
+    'languages.ja': 'Japanisch',
+    'languages.ko': 'Koreanisch',
+    'languages.uz': 'Usbekisch',
 };

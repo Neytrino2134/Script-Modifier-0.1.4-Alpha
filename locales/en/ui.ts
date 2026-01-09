@@ -1,5 +1,6 @@
 
 
+
 export const ui = {
     'toolbar.edit': 'Edit (V)',
     'toolbar.cutter': 'Cut Connection (C)',
@@ -178,4 +179,17 @@ export const ui = {
     'help.sub.stable': 'Stable Version',
     'help.sub.alpha': 'Alpha Version',
     'imageViewer.title': 'Image Viewer',
+
+    // Language Names
+    'languages.ru': 'Russian',
+    'languages.en': 'English',
+    'languages.es': 'Spanish',
+    'languages.fr': 'French',
+    'languages.de': 'German',
+    'languages.it': 'Italian',
+    'languages.pt': 'Portuguese',
+    'languages.zh': 'Chinese',
+    'languages.ja': 'Japanese',
+    'languages.ko': 'Korean',
+    'languages.uz': 'Uzbek',
 };

@@ -40,7 +40,7 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
         }
     }, [node.value]);
 
-    const { audioBase64, transcription, fileName, segments } = parsedValue;
+    const { audioBase64, transcription, fileName, segments, mimeType } = parsedValue;
     
     const handleValueUpdate = (updates: Partial<typeof parsedValue>) => {
         onValueChange(node.id, JSON.stringify({ ...parsedValue, ...updates }));
@@ -110,26 +110,6 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
     };
     
     const handleTranscribeClick = async () => {
-         // Because we need to process the raw JSON response from the service which the generic hook might handle differently,
-         // we might need to intercept the response.
-         // However, assuming `onTranscribeAudio` calls the service and sets the node value:
-         // The service `transcribeAudio` now returns a JSON string of segments.
-         // We need the `useGeminiGeneration` hook to handle this.
-         // Wait, `useGeminiGeneration` sets the node value directly with the result of `transcribeAudio`.
-         // `transcribeAudio` returns a JSON string representing an array of segments.
-         // So `node.value` becomes that string.
-         // But `parsedValue` expects an object { audioBase64, transcription, ... }.
-         // This implies `useGeminiGeneration` logic for `handleTranscribeAudio` needs to merge the result properly, 
-         // OR we adapt here.
-         
-         // Looking at `useGeminiGeneration.ts` (implied from context):
-         // It likely does: `const transcription = await transcribeAudio(...)` then `setNodes(... value: JSON.stringify({ ...currentVal, transcription }))`.
-         // Since `transcribeAudio` now returns a JSON string of segments, `transcription` in the state will be that JSON string.
-         
-         // We need to parse that JSON string, extract the text for display, and keep the segments.
-         // Since we can't easily change the hook logic from here without providing that file, we will adapt:
-         // If `transcription` looks like a JSON array of segments, we parse it here and update the node value correctly to split it into `segments` and `plain text transcription`.
-         
          onTranscribeAudio(node.id);
     };
 
@@ -139,10 +119,6 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
              try {
                  const potentialSegments = JSON.parse(transcription);
                  if (Array.isArray(potentialSegments) && potentialSegments.length > 0 && potentialSegments[0].startTime) {
-                     // It is the raw segment data. Let's reformat the node value.
-                     // We need to trigger an update. Since we can't call onValueChange inside render, we'll do it via a microtask or effect if this component re-renders.
-                     // Actually, let's just parse it for display here, but we really should update the stored state for persistence.
-                     // Better: check if `segments` is empty but `transcription` has JSON.
                      const plainText = potentialSegments.map((s: any) => s.text).join(' ');
                      // Call update asynchronously to avoid render loop
                      setTimeout(() => {
@@ -172,8 +148,7 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
                 return `${index + 1}\n${start} --> ${end}\n${s.text}\n`;
             }).join('\n');
         } else {
-             // Fallback if no segments but text exists (unlikely with new logic, but safe)
-             // Create a dummy subtitle
+             // Fallback if no segments but text exists
              srtContent = `1\n00:00:00,000 --> 00:00:05,000\n${transcription}`;
         }
 
@@ -215,9 +190,29 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
         }
     };
 
+    const handleRemoveMedia = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        handleValueUpdate({
+            audioBase64: null,
+            mimeType: null,
+            fileName: null
+        });
+    };
+    
+    // Helper to determine icon based on mime type
+    const getMediaIcon = () => {
+        if (!mimeType) return null;
+        // Check if it was converted to wav from video (mimeType might be audio/wav but fileName implies video source if original)
+        // Or strictly check original mime
+        if (fileName?.endsWith('.mp4') || mimeType.startsWith('video/')) {
+             return <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" /></svg>;
+        }
+        return <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.414z" clipRule="evenodd" /></svg>;
+    };
+
     return (
         <div 
-            className={`flex flex-col h-full space-y-2 rounded-md transition-all duration-200 ${isDragOver ? 'ring-2 ring-emerald-400' : ''}`}
+            className={`flex flex-col h-full space-y-2 rounded-md transition-all duration-200 ${isDragOver ? 'ring-2 ring-blue-400' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -230,14 +225,64 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
                 className="hidden"
             />
             
-            {/* Top: Transcribe Button */}
+            {/* Top: Upload Button */}
+            <div className="flex flex-col gap-1 flex-shrink-0">
+                <button
+                    onClick={handleUploadClick}
+                    disabled={isLoading || isConverting}
+                    className="w-full px-4 py-2 font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-md disabled:bg-gray-700 disabled:text-gray-500 transition-colors text-sm flex items-center justify-center gap-2"
+                >
+                    {isConverting ? (
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                    )}
+                    {isConverting ? t('node.content.convertingVideo') : t('node.content.uploadAudio')}
+                </button>
+                
+                {/* File Status - Cyan text if loaded */}
+                <div className={`text-center text-[10px] p-1 bg-gray-900/30 rounded truncate flex items-center justify-between gap-1 h-6 relative ${fileName ? 'text-cyan-400 font-medium' : 'text-gray-500'}`}>
+                    <div className="flex items-center justify-center w-full gap-1 truncate px-4">
+                        {fileName && getMediaIcon()}
+                        <span className="truncate">
+                            {isConverting ? t('node.content.convertingVideo') : (fileName ? `${fileName}` : t('node.content.noAudioLoaded'))}
+                        </span>
+                    </div>
+                    {fileName && !isConverting && (
+                        <button 
+                            onClick={handleRemoveMedia}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 p-0.5 hover:text-red-400 text-gray-500 rounded-full transition-colors flex items-center justify-center"
+                            title="Remove file"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+            </div>
+            
+            {/* Middle: Transcribe Button - Green normally, Blue when loading */}
              <button
                 onClick={isLoading ? onStopGeneration : handleTranscribeClick}
                 disabled={isStopping || !audioBase64 || isConverting}
-                className={`w-full px-4 py-2 font-bold text-white rounded-md transition-colors duration-200 flex-shrink-0 ${
-                    isStopping ? 'bg-yellow-600' : (isLoading ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-500')
+                className={`w-full px-4 py-2 font-bold text-white rounded-md transition-colors duration-200 flex-shrink-0 flex items-center justify-center gap-2 ${
+                    isStopping 
+                    ? 'bg-yellow-600' 
+                    : (isLoading 
+                        ? 'bg-blue-600 hover:bg-blue-500' 
+                        : 'bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500')
                 }`}
             >
+                {isLoading && !isStopping ? (
+                     <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                )}
                 {isStopping ? t('node.action.stopping') : (isLoading ? t('node.content.transcribing') : t('node.content.transcribe'))}
             </button>
 
@@ -252,34 +297,19 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
                 onWheel={e => e.stopPropagation()}
             />
             
-            {/* Bottom Section: Download & Upload */}
-            <div className="flex flex-col gap-2 flex-shrink-0">
-                 {transcription && (
-                    <button
-                        onClick={handleDownloadSRT}
-                        className="w-full px-4 py-2 font-bold text-white bg-cyan-600 rounded-md hover:bg-cyan-700 transition-colors duration-200 flex items-center justify-center gap-2"
-                        title={t('node.action.downloadSRT')}
-                    >
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        <span>{t('node.action.downloadSRT')}</span>
-                    </button>
-                )}
-                
-                <div className="flex flex-col gap-1">
-                    <button
-                        onClick={handleUploadClick}
-                        disabled={isLoading || isConverting}
-                        className="w-full px-4 py-2 font-semibold text-white bg-gray-600 hover:bg-gray-500 rounded-md disabled:bg-gray-700 transition-colors text-sm"
-                    >
-                        {isConverting ? t('node.content.convertingVideo') : t('node.content.uploadAudio')}
-                    </button>
-                    <div className="text-center text-[10px] text-gray-500 p-1 bg-gray-900/30 rounded truncate">
-                        {isConverting ? <span className="animate-pulse">{t('node.content.convertingVideo')}</span> : (fileName ? `${t('node.content.audioLoaded')}: ${fileName}` : t('node.content.noAudioLoaded'))}
-                    </div>
-                </div>
-            </div>
+            {/* Bottom Section: Download SRT */}
+             {transcription && (
+                <button
+                    onClick={handleDownloadSRT}
+                    className="w-full px-4 py-2 font-bold text-white bg-cyan-600 rounded-md hover:bg-cyan-700 transition-colors duration-200 flex items-center justify-center gap-2 flex-shrink-0"
+                    title={t('node.action.downloadSRT')}
+                >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>{t('node.action.downloadSRT')}</span>
+                </button>
+            )}
         </div>
     );
 };

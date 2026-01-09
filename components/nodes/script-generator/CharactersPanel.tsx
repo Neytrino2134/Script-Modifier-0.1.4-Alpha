@@ -5,6 +5,7 @@ import { EditableCharacterDescription } from './EditableCharacterDescription';
 import { GeneratorUiState } from './types';
 import CustomCheckbox from '../../ui/CustomCheckbox';
 import Tooltip from '../../ui/Tooltip';
+import { CHAR_GEN_INSTRUCTIONS } from '../../../utils/prompts/scriptGenerator';
 
 const CharacterItem: React.FC<{
     char: any;
@@ -45,9 +46,9 @@ const CharacterItem: React.FC<{
                             value={char.name} 
                             readOnly={char.isLinked} 
                             onChange={e => onUpdate(currentId, 'name', e.target.value)} 
-                            className={`font-semibold text-white bg-transparent w-64 rounded px-1 border border-transparent focus:border-emerald-500 focus:ring-0 focus:bg-gray-800 focus:outline-none transition-colors ${char.isLinked ? 'cursor-not-allowed text-gray-400 focus:border-transparent' : ''}`} 
+                            className={`font-semibold text-white bg-gray-900 w-64 rounded px-2 py-0.5 border border-transparent focus:border-emerald-500 focus:ring-0 focus:outline-none transition-colors ${char.isLinked ? 'cursor-not-allowed text-gray-400 focus:border-transparent !bg-transparent !px-1' : ''}`} 
                             onMouseDown={e => e.stopPropagation()} 
-                            onFocus={deselectAllNodes}
+                            onFocus={deselectAllNodes} 
                          />
                          <span className="text-[9px] text-gray-500 font-mono ml-2 opacity-50 select-none">#{String(currentId)}</span>
                     </div>
@@ -57,8 +58,9 @@ const CharacterItem: React.FC<{
                     <input
                         type="text"
                         value={char.index || char.alias || ''}
-                        readOnly={true}
-                        className={`font-semibold text-gray-400 bg-gray-900/50 w-24 rounded px-1 text-xs py-0.5 border border-transparent cursor-not-allowed focus:outline-none focus:ring-0 ${hasDuplicateIndex ? 'border-red-500 ring-1 ring-red-500' : ''}`}
+                        readOnly={char.isLinked}
+                        onChange={e => onUpdate(currentId, 'index', e.target.value)}
+                        className={`font-semibold text-white bg-gray-900/50 w-24 rounded px-1 text-xs py-0.5 border border-transparent cursor-not-allowed focus:outline-none focus:ring-0 ${hasDuplicateIndex ? 'border-red-500 ring-1 ring-red-500' : ''}`}
                         onFocus={deselectAllNodes}
                         onMouseDown={e => e.stopPropagation()}
                     />
@@ -134,6 +136,17 @@ interface CharactersPanelProps {
     isSyncAvailable?: boolean;
     onMoveCharacter: (index: number, direction: 'up' | 'down' | 'top' | 'bottom') => void;
     onClearCharacters: () => void;
+    
+    // New Props for Entity Generation
+    onGenerateEntities?: () => void;
+    isGeneratingEntities?: boolean;
+    generateMainChars?: boolean;
+    createSecondaryChars?: boolean;
+    createKeyItems?: boolean;
+    onGenerateMainChange?: (val: boolean) => void;
+    onCreateSecondaryChange?: (val: boolean) => void;
+    onCreateKeyItemsChange?: (val: boolean) => void;
+    onSetTargetScrollId?: (id: string | null) => void;
 }
 
 export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
@@ -142,7 +155,9 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
     allCharacters, selectedCharacters, collapsedCharacters, areAllCharactersCollapsed,
     handleToggleAllCharacters, handleCharacterClick, handleToggleCharacterCollapse,
     updateCharacter, deleteCharacter, onAddCharacter, handleEmbedCharacter,
-    deselectAllNodes, t, onDetachCharacter, onMoveCharacter, onClearCharacters
+    deselectAllNodes, t, onDetachCharacter, onMoveCharacter, onClearCharacters,
+    onGenerateEntities, isGeneratingEntities, generateMainChars, createSecondaryChars, createKeyItems, onGenerateMainChange, onCreateSecondaryChange, onCreateKeyItemsChange,
+    onSetTargetScrollId
 }) => {
     
     // Calculate duplicate indices
@@ -157,6 +172,17 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
         const name = (c.name || '').trim().toLowerCase();
         nameCounts[name] = (nameCounts[name] || 0) + 1;
     });
+
+    const handleSearchClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (onSetTargetScrollId) {
+             onSetTargetScrollId(id);
+             // Auto open settings if collapsed
+             if (uiState.isSettingsCollapsed) {
+                 onUpdateUiState({ isSettingsCollapsed: false });
+             }
+        }
+    };
 
     return (
         <div 
@@ -224,6 +250,68 @@ export const CharactersPanel: React.FC<CharactersPanelProps> = React.memo(({
             
             {!isCharactersSectionCollapsed && (
                 <div style={{ contentVisibility: 'auto' }} className="p-2 space-y-2 overflow-y-auto custom-scrollbar flex-grow" onWheel={e => e.stopPropagation()}>
+                    
+                    {/* Entity Generation Toolbar */}
+                    {onGenerateEntities && (
+                         <div className="flex items-center justify-between gap-2 p-2 bg-gray-800/50 rounded-md border border-gray-700 mb-2">
+                             <div className="flex gap-3 items-center">
+                                {/* Main Chars Toggle */}
+                                 <div className="flex items-center gap-1 group" title="Create Main Characters">
+                                     <CustomCheckbox id="gen_main_chars" checked={!!generateMainChars} onChange={(val) => onGenerateMainChange?.(val)} disabled={!!isGeneratingEntities} className="h-3.5 w-3.5" />
+                                     <label htmlFor="gen_main_chars" className="text-[10px] text-gray-300 font-bold uppercase cursor-pointer select-none hover:text-emerald-400 transition-colors">{t('node.content.mainChars')}</label>
+                                     <button 
+                                        onClick={(e) => handleSearchClick(e, CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.id)}
+                                        className="p-0.5 text-gray-500 hover:text-emerald-400 opacity-50 hover:opacity-100 transition-all focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </button>
+                                 </div>
+                                 
+                                 {/* Secondary Chars Toggle */}
+                                 <div className="flex items-center gap-1 group" title={t('instruction.create_secondary_chars')}>
+                                     <CustomCheckbox id="create_secondary" checked={!!createSecondaryChars} onChange={(val) => onCreateSecondaryChange?.(val)} disabled={!!isGeneratingEntities} className="h-3.5 w-3.5" />
+                                     <label htmlFor="create_secondary" className="text-[10px] text-gray-300 font-bold uppercase cursor-pointer select-none hover:text-emerald-400 transition-colors">{t('node.content.secChars')}</label>
+                                     <button 
+                                        onClick={(e) => handleSearchClick(e, CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.id)}
+                                        className="p-0.5 text-gray-500 hover:text-emerald-400 opacity-50 hover:opacity-100 transition-all focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </button>
+                                 </div>
+                                 
+                                 {/* Key Items Toggle */}
+                                 <div className="flex items-center gap-1 group" title={t('instruction.create_key_items')}>
+                                     <CustomCheckbox id="create_items" checked={!!createKeyItems} onChange={(val) => onCreateKeyItemsChange?.(val)} disabled={!!isGeneratingEntities} className="h-3.5 w-3.5" />
+                                     <label htmlFor="create_items" className="text-[10px] text-gray-300 font-bold uppercase cursor-pointer select-none hover:text-cyan-400 transition-colors">{t('node.content.keyItems')}</label>
+                                     <button 
+                                        onClick={(e) => handleSearchClick(e, CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.id)}
+                                        className="p-0.5 text-gray-500 hover:text-emerald-400 opacity-50 hover:opacity-100 transition-all focus:outline-none"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </button>
+                                 </div>
+                             </div>
+
+                             <button 
+                                onClick={onGenerateEntities}
+                                disabled={isGeneratingEntities}
+                                className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-cyan-600 hover:bg-cyan-500 text-white transition-colors flex items-center justify-center ${isGeneratingEntities ? 'opacity-50 cursor-not-allowed' : ''}`}
+                             >
+                                 {isGeneratingEntities ? (
+                                    <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                 ) : (
+                                     t('node.content.generateEntities')
+                                 )}
+                             </button>
+                         </div>
+                    )}
+                    
                 {allCharacters.map((char: any, index: number) => {
                     const charId = char.id || `char-idx-${index}`;
                     const hasDuplicateName = nameCounts[(char.name || '').trim().toLowerCase()] > 1;

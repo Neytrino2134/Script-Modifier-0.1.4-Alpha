@@ -330,17 +330,18 @@ const MusicIdeaGeneratorNode: React.FC<NodeContentProps> = ({
             <div className="flex-shrink-0 bg-gray-700/50 p-1.5 rounded-md border border-gray-600/30">
                 <div className="flex flex-wrap gap-1">
                     {LANGUAGES.map((lang) => (
-                        <button
-                            key={lang.code}
-                            onClick={() => handleLangChange(lang.code)}
-                            className={`flex-1 min-w-[30px] py-1 px-2 rounded text-[10px] font-bold uppercase transition-colors ${
-                                targetLanguages[lang.code] 
-                                    ? 'bg-emerald-600 text-white shadow-sm' 
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-600 hover:text-gray-200'
-                            }`}
-                        >
-                            {lang.label}
-                        </button>
+                        <Tooltip key={lang.code} title={t(`languages.${lang.code}`)} position="top">
+                            <button
+                                onClick={() => handleLangChange(lang.code)}
+                                className={`flex-1 min-w-[30px] py-1 px-2 rounded text-[10px] font-bold uppercase transition-colors ${
+                                    targetLanguages[lang.code] 
+                                        ? 'bg-emerald-600 text-white shadow-sm' 
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-600 hover:text-gray-200'
+                                }`}
+                            >
+                                {lang.label}
+                            </button>
+                        </Tooltip>
                     ))}
                 </div>
             </div>

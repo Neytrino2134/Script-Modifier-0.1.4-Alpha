@@ -1,4 +1,6 @@
 
+
+
 export const ui = {
     'toolbar.edit': 'Modifica (V)',
     'toolbar.cutter': 'Taglia connessione (C)',
@@ -176,4 +178,17 @@ export const ui = {
     'help.sub.discussion': 'Discussione',
     'help.sub.stable': 'Versione Stabile',
     'help.sub.alpha': 'Versione Alpha',
+
+    // Language Names
+    'languages.ru': 'Russo',
+    'languages.en': 'Inglese',
+    'languages.es': 'Spagnolo',
+    'languages.fr': 'Francese',
+    'languages.de': 'Tedesco',
+    'languages.it': 'Italiano',
+    'languages.pt': 'Portoghese',
+    'languages.zh': 'Cinese',
+    'languages.ja': 'Giapponese',
+    'languages.ko': 'Coreano',
+    'languages.uz': 'Uzbeco',
 };

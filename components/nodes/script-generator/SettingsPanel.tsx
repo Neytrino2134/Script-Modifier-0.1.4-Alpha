@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState, useRef, useCallback } from 'react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { SCRIPT_GENERATOR_INSTRUCTIONS, CHAR_GEN_INSTRUCTIONS } from '../../../utils/prompts/scriptGenerator';
 import { SAFE_GENERATION_INSTRUCTIONS } from '../../../utils/prompts/common';
 import { InstructionBrick } from './InstructionBrick';
@@ -30,8 +30,7 @@ interface SettingsPanelProps {
     useExistingCharacters: boolean;
     isCharactersInputConnected: boolean;
     linkedCharactersCount: number;
-    createSecondaryChars?: boolean;
-    createKeyItems?: boolean;
+    // createSecondaryChars & createKeyItems REMOVED from here
     isDetailedPlot: boolean;
     includeSubscribeScene: boolean;
     model: string;
@@ -47,6 +46,17 @@ interface SettingsPanelProps {
     commercialSafe?: boolean;
     smartConceptEnabled?: boolean;
     atmosphericEntryEnabled?: boolean;
+    
+    // Entity Generation Props passed from parent for stack visualization
+    generateMainChars?: boolean;
+    createSecondaryChars?: boolean;
+    createKeyItems?: boolean;
+    onToggleGenerateMainChars?: () => void;
+    onToggleCreateSecondaryChars?: () => void;
+    onToggleCreateKeyItems?: () => void;
+    
+    targetScrollId: string | null;
+    onSetTargetScrollId: (id: string | null) => void;
 }
 
 // Defined outside to prevent re-mounting and flickering
@@ -67,8 +77,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     uiState, onUpdateUiState, onUpdateValue, nodeId, t, deselectAllNodes,
     numberOfScenes, visualStyle, customVisualStyle, genre, genre2, characterType, narratorMode,
     narratorEnabled, noCharacters, useExistingCharacters, isCharactersInputConnected, linkedCharactersCount,
-    createSecondaryChars = true, createKeyItems = true, isDetailedPlot, includeSubscribeScene, model, isLoading, targetLanguage,
-    prompt, allCharacters, estimateFrames = true, safeGeneration = false, thinkingEnabled = false, scenelessMode = false, simpleActions = false, commercialSafe = false, smartConceptEnabled = true, atmosphericEntryEnabled = true
+    isDetailedPlot, includeSubscribeScene, model, isLoading, targetLanguage,
+    prompt, allCharacters, estimateFrames = true, safeGeneration = false, thinkingEnabled = false, scenelessMode = false, simpleActions = false, commercialSafe = false, smartConceptEnabled = true, atmosphericEntryEnabled = true,
+    generateMainChars, createSecondaryChars, createKeyItems, onToggleGenerateMainChars, onToggleCreateSecondaryChars, onToggleCreateKeyItems,
+    targetScrollId, onSetTargetScrollId
 }) => {
     
     // Search & Filter State
@@ -111,22 +123,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         return map[code] || code.toUpperCase();
     };
 
-    const getStyleEnglishName = (style: string) => {
-        const map: Record<string, string> = {
-            'none': 'None',
-            'simple': 'Simple',
-            'realistic': 'Cinematic Realism',
-            '3d_cartoon': '3D Cartoon',
-            '3d_realistic': '3D Realistic',
-            '2d_animation': '2D Animation',
-            'anime': 'Anime',
-            'comics': 'Comics',
-            'custom': 'Custom'
-        };
-        return map[style] || style;
-    };
-
-    const getGenreEnglishName = (genre: string) => {
+    const getGenreEnglishName = (genreKey: string) => {
         const map: Record<string, string> = {
             'general': 'General',
             'comedy': 'Comedy',
@@ -138,9 +135,24 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             'thriller': 'Thriller',
             'childrens_animation': 'Children\'s Animation',
             'shorts_story': 'Shorts Story',
-            'scientific_historical': 'Scientific/Historical'
+            'scientific_historical': 'Scientific Historical'
         };
-        return map[genre] || genre;
+        return map[genreKey] || genreKey;
+    };
+
+    const getStyleEnglishName = (styleKey: string) => {
+        const map: Record<string, string> = {
+            'none': 'None',
+            'simple': 'Simple',
+            'realistic': 'Realistic',
+            '3d_cartoon': '3D Cartoon',
+            '3d_realistic': '3D Realistic',
+            '2d_animation': '2D Animation',
+            'anime': 'Anime',
+            'comics': 'Comics',
+            'custom': 'Custom'
+        };
+        return map[styleKey] || styleKey;
     };
 
     // Prepare Options for Custom Selects
@@ -192,8 +204,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             includeSubscribeScene: false,
             visualStyle: 'none',
             customVisualStyle: '',
-            createSecondaryChars: true,
-            createKeyItems: true,
             estimateFrames: true,
             safeGeneration: false,
             thinkingEnabled: false,
@@ -201,7 +211,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             simpleActions: false,
             commercialSafe: false,
             smartConceptEnabled: true,
-            atmosphericEntryEnabled: true
+            atmosphericEntryEnabled: true,
+            generateMainChars: true,
+            createSecondaryChars: true,
+            createKeyItems: true
         });
     };
 
@@ -397,18 +410,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 <SearchTrigger id="no_duplicates" onClick={handleScrollToBrick} t={t} />
                             </div>
                             
-                            {/* NEW: Split Controls for Secondary & Items */}
-                             <div className="flex items-center space-x-2 h-6">
-                                <CustomCheckbox id={`create-secondary-chars-${nodeId}`} checked={createSecondaryChars} onChange={(checked) => onUpdateValue({ createSecondaryChars: checked })} disabled={isLoading} className="h-3.5 w-3.5" />
-                                <label className="text-xs text-gray-300 select-none truncate cursor-pointer flex-grow" htmlFor={`create-secondary-chars-${nodeId}`}>{t('node.content.createSecondaryChars')}</label>
-                                <SearchTrigger id="create_secondary_chars" onClick={handleScrollToBrick} t={t} />
-                            </div>
-                            <div className="flex items-center space-x-2 h-6">
-                                <CustomCheckbox id={`create-key-items-${nodeId}`} checked={createKeyItems} onChange={(checked) => onUpdateValue({ createKeyItems: checked })} disabled={isLoading} className="h-3.5 w-3.5" />
-                                <label className="text-xs text-gray-300 select-none truncate cursor-pointer flex-grow" htmlFor={`create-key-items-${nodeId}`}>{t('node.content.createKeyItems')}</label>
-                                <SearchTrigger id="create_key_items" onClick={handleScrollToBrick} t={t} />
-                            </div>
-                            
                             <div className="flex items-center space-x-2 h-6">
                                 <CustomCheckbox id={`narrator-enabled-${nodeId}`} checked={narratorEnabled} onChange={(checked) => onUpdateValue({ narratorEnabled: checked })} className="h-3.5 w-3.5" />
                                 <label className="text-xs text-gray-300 select-none truncate cursor-pointer flex-grow" htmlFor={`narrator-enabled-${nodeId}`}>{t('node.content.narratorEnabled')}</label>
@@ -457,9 +458,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         </div>
 
                         <div ref={scrollContainerRef} className="p-2 overflow-y-auto custom-scrollbar space-y-1 flex-grow relative">
-                            <h5 className="text-[10px] text-gray-500 uppercase font-bold mb-1">{t('node.content.activePromptStack')}</h5>
-                            
-                            <div className="space-y-1 pb-2 border-b border-gray-700/30 mb-2">
+                            {/* --- TOP: SCRIPT GENERATION STACK --- */}
+                            <h5 className="text-[10px] text-gray-500 uppercase font-bold mb-1 border-b border-gray-700 pb-1">{t('node.content.scriptGenerationStack')}</h5>
+
+                            <div className="space-y-1 pb-2 mb-2 border-b border-gray-700/30">
                                 {shouldShow(model, t('node.content.model')) && (
                                     <InstructionBrick 
                                         ref={el => { brickRefs.current['model-brick'] = el; }}
@@ -838,37 +840,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                             />
                                         )}
                                         
-                                        {/* Secondary Characters Toggle */}
-                                        {shouldShow(t('instruction.create_secondary_chars'), t('instruction.create_secondary_chars')) && (
-                                            <InstructionBrick 
-                                                ref={el => { brickRefs.current['create_secondary_chars'] = el; }}
-                                                id="create_secondary_chars"
-                                                index={createSecondaryChars ? ++stepCount : undefined}
-                                                label={t('instruction.create_secondary_chars')} 
-                                                text={CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.text} 
-                                                translatedText={t('instruction.desc.create_secondary_chars')} 
-                                                isEnabled={createSecondaryChars} 
-                                                onToggle={() => onUpdateValue({ createSecondaryChars: !createSecondaryChars })}
-                                                color='emerald' 
-                                                isHighlighted={highlightedId === 'create_secondary_chars'}
-                                            />
-                                        )}
-
-                                        {/* Key Items Toggle */}
-                                        {shouldShow(t('instruction.create_key_items'), t('instruction.create_key_items')) && (
-                                            <InstructionBrick 
-                                                ref={el => { brickRefs.current['create_key_items'] = el; }}
-                                                id="create_key_items"
-                                                index={createKeyItems ? ++stepCount : undefined}
-                                                label={t('instruction.create_key_items')} 
-                                                text={CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.text} 
-                                                translatedText={t('instruction.desc.create_key_items')} 
-                                                isEnabled={createKeyItems} 
-                                                onToggle={() => onUpdateValue({ createKeyItems: !createKeyItems })}
-                                                color='cyan' 
-                                                isHighlighted={highlightedId === 'create_key_items'}
-                                            />
-                                        )}
+                                        {/* SECONDARY/KEY ITEMS REMOVED FROM HERE */}
                                     </>
                                 )}
                                 
@@ -936,6 +908,61 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                     />
                                 )}
                             </div>
+
+                            {/* --- BOTTOM: ENTITY GENERATION STACK --- */}
+                            <h5 className="text-[10px] text-gray-500 uppercase font-bold mb-1 pt-2 border-t border-gray-700">{t('node.content.entityGenerationStack')}</h5>
+                            
+                            <div className="space-y-1 mb-3">
+                                <InstructionBrick 
+                                    label="Entity Mode" 
+                                    text="Focus: Generating Entities based on the story concept."
+                                    translatedText="Фокус: Генерация сущностей на основе концепции истории."
+                                    isMandatory color='purple'
+                                />
+
+                                {shouldShow(t('instruction.create_main_chars'), t('instruction.create_main_chars')) && (
+                                    <InstructionBrick 
+                                        ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.id] = el; }}
+                                        id={CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.id}
+                                        label={t('instruction.create_main_chars')} 
+                                        text={CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.text} 
+                                        translatedText={t('instruction.desc.create_main_chars')} 
+                                        isEnabled={generateMainChars} // Use prop
+                                        onToggle={onToggleGenerateMainChars}
+                                        color='emerald'
+                                        isHighlighted={targetScrollId === CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.id}
+                                    />
+                                )}
+
+                                {shouldShow(t('instruction.create_secondary_chars'), t('instruction.create_secondary_chars')) && (
+                                    <InstructionBrick 
+                                        ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.id] = el; }}
+                                        id={CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.id}
+                                        label={t('instruction.create_secondary_chars')} 
+                                        text={CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.text} 
+                                        translatedText={t('instruction.desc.create_secondary_chars')} 
+                                        isEnabled={createSecondaryChars} // Use prop
+                                        onToggle={onToggleCreateSecondaryChars}
+                                        color='emerald'
+                                        isHighlighted={targetScrollId === CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.id}
+                                    />
+                                )}
+
+                                {shouldShow(t('instruction.create_key_items'), t('instruction.create_key_items')) && (
+                                    <InstructionBrick 
+                                        ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.id] = el; }}
+                                        id={CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.id}
+                                        label={t('instruction.create_key_items')} 
+                                        text={CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.text} 
+                                        translatedText={t('instruction.desc.create_key_items')} 
+                                        isEnabled={createKeyItems}
+                                        onToggle={onToggleCreateKeyItems}
+                                        color='cyan' 
+                                        isHighlighted={targetScrollId === CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.id}
+                                    />
+                                )}
+                            </div>
+
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,6 @@
 
+
+
 export const ui = {
     'toolbar.edit': 'Editar (V)',
     'toolbar.cutter': 'Cortar Conexión (C)',
@@ -176,4 +178,17 @@ export const ui = {
     'help.sub.discussion': 'Discusión',
     'help.sub.stable': 'Versión Estable',
     'help.sub.alpha': 'Versión Alpha',
+
+    // Language Names
+    'languages.ru': 'Ruso',
+    'languages.en': 'Inglés',
+    'languages.es': 'Español',
+    'languages.fr': 'Francés',
+    'languages.de': 'Alemán',
+    'languages.it': 'Italiano',
+    'languages.pt': 'Portugués',
+    'languages.zh': 'Chino',
+    'languages.ja': 'Japonés',
+    'languages.ko': 'Coreano',
+    'languages.uz': 'Uzbeko',
 };

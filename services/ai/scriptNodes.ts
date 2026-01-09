@@ -1,8 +1,4 @@
 
-
-
-
-
 import { GenerateContentResponse, Type } from "@google/genai";
 import { getAiClient, withRetry, cleanJsonString, safeJsonParse } from "./client";
 import { PROMPT_MODIFIER_INSTRUCTIONS, LAYERED_CONSTRUCTION_NO_STYLE_TEXT, LAYERED_CONSTRUCTION_NO_CHAR_TEXT } from "../../utils/prompts/promptModifier";
@@ -10,6 +6,87 @@ import { SCRIPT_GENERATOR_INSTRUCTIONS, CHAR_GEN_INSTRUCTIONS } from "../../util
 import { SCRIPT_ANALYZER_INSTRUCTIONS } from "../../utils/prompts/scriptAnalyzer";
 import { SAFE_GENERATION_INSTRUCTIONS } from "../../utils/prompts/common";
 import { getLanguageName } from "../../utils/languageUtils";
+
+export const generateScriptEntities = async (
+    prompt: string,
+    targetLanguage: string,
+    characterType: string,
+    existingCharacters: any[] | undefined,
+    advancedOptions: any,
+    model: string,
+    visualStyle: string,
+    customVisualStyle: string,
+    createSecondaryChars: boolean,
+    createKeyItems: boolean,
+    thinkingEnabled: boolean
+) => {
+    const ai = getAiClient();
+    const languageName = getLanguageName(targetLanguage);
+    const instructions = [];
+
+    // System Core - Entity Generation Specialist
+    instructions.push("You are an expert Character Designer and Prop Master for film production. Your goal is to analyze the story concept and existing cast to generate necessary additional entities (Main Characters, Secondary Characters, and Key Items).");
+    
+    // Inputs Data
+    instructions.push(`${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} "${prompt}"`);
+
+    // Existing Cast context
+    if (existingCharacters && existingCharacters.length > 0) {
+        const charList = existingCharacters.map(c => 
+            `- **Name:** ${c.name}\n  **Index:** ${c.index}\n  **Description:** ${c.fullDescription}`
+        ).join('\n\n');
+        instructions.push(`EXISTING CAST (Do NOT duplicate these unless updating look): \n${charList}`);
+    } else {
+        instructions.push("No existing cast provided.");
+    }
+
+    // Rules
+    instructions.push(`**OUTPUT LANGUAGE:** Character names can remain in their original language/English, but descriptions must be in ${languageName}.`);
+
+    // Check for Main Character Generation flag in advancedOptions
+    if (advancedOptions.generateMainChars) {
+        instructions.push(CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.text);
+    }
+
+    if (createSecondaryChars) {
+        instructions.push(CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.text);
+    } else {
+        instructions.push("Do NOT generate secondary characters unless absolutely necessary for the main plot.");
+    }
+
+    if (createKeyItems) {
+        instructions.push(CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.text);
+    } else {
+        instructions.push("Do NOT generate key items.");
+    }
+
+    instructions.push(CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.text);
+    instructions.push(CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.text);
+    
+    // Style Context
+    if (visualStyle === 'custom' && customVisualStyle) {
+         instructions.push(`TARGET VISUAL STYLE: ${customVisualStyle}`);
+         instructions.push(CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE.text);
+    } else if (visualStyle && visualStyle !== 'none') {
+         instructions.push(`TARGET VISUAL STYLE: ${visualStyle}`);
+         instructions.push(CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE.text);
+    }
+
+    instructions.push("Return JSON object with key: 'detailedCharacters' (array of objects with keys: 'name', 'fullDescription', 'prompt', 'index' (optional - will be assigned automatically if missing)).");
+
+    const fullPrompt = instructions.join('\n\n');
+    
+    const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
+        model: model,
+        contents: fullPrompt,
+        config: { 
+            responseMimeType: 'application/json',
+            thinkingConfig: thinkingEnabled ? { thinkingBudget: 4000 } : undefined 
+        }
+    }));
+    
+    return safeJsonParse(response.text || '{}');
+};
 
 export const generateScript = async (
     prompt: string, 
@@ -22,8 +99,6 @@ export const generateScript = async (
     model: string,
     visualStyle: string,
     customVisualStyle: string,
-    createSecondaryChars: boolean,
-    createKeyItems: boolean,
     thinkingEnabled: boolean,
     scenelessMode: boolean,
     simpleActions: boolean,
@@ -38,15 +113,15 @@ export const generateScript = async (
     // System Core
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.CORE.text);
     
-    // Explicit Language Instruction - PLACED EARLY FOR EMPHASIS
-    instructions.push(`**OUTPUT LANGUAGE:** You MUST write the 'summary', scene 'title', 'description', and 'narratorText' strictly in ${languageName}. If the input is in another language, TRANSLATE the concept to ${languageName}.`);
+    // Explicit Language Instruction
+    instructions.push(`**OUTPUT LANGUAGE:** You MUST write the 'summary', scene 'title', 'description', and 'narratorText' strictly in ${languageName}.`);
     
-    // Inputs Data - explicitly labeled
+    // Inputs Data
     instructions.push(`${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} "${prompt}"`);
     
     // --- CREATIVE EXPANSION RULES ---
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.IMPROVE_CONCEPT.text);
-    instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text); // NEW INSTRUCTION
+    instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text);
     
     if (scenelessMode) {
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SCENELESS_MODE.text);
@@ -54,27 +129,21 @@ export const generateScript = async (
         // Core Narrative Stack
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.ANALYSIS.text);
         
-        // --- NEW ATMOSPHERIC ENTRY RULE ---
         if (atmosphericEntryEnabled) {
             instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.EXPOSITION.text);
         }
         
-        // --- NEW REVEAL LOGIC ---
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.DELAYED_REVEAL.text);
-        
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.VISUALS_FIRST.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SEAMLESS_FLOW.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.ATMOSPHERE.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.VISUAL_METAPHOR.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.PACING_RHYTHM.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SUBTEXT.text);
-        
-        // CRITICAL UPDATE: Forbid Camera Terms, Enforce Object Physics
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.NO_CAMERA_DIRECTIVES.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.OBJECT_AGENCY.text);
     }
 
-    // Critical Frame Estimation Rule
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.FRAME_ESTIMATION.text);
 
     if (advancedOptions.safeGeneration) {
@@ -89,37 +158,20 @@ export const generateScript = async (
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SIMPLE_ACTIONS.text);
     }
 
-    // Apply Strict Name Persistence Rule
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.STRICT_NAME_PERSISTENCE.text);
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SCENE_CHARACTERS_LIST.text);
-    instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.CHARACTER_JSON_INDEX.text);
-
+    
+    // --- CHARACTER LOCK ---
     if (existingCharacters && existingCharacters.length > 0) {
-        // Strict mapping of input characters to ensure Index is part of the context
         const charList = existingCharacters.map(c => 
             `- **Name:** ${c.name}\n  **Index:** ${c.index}\n  **Description:** ${c.fullDescription}`
         ).join('\n\n');
         
-        instructions.push(`EXISTING ENTITIES LIST (Use ONLY the 'Index' to refer to them):\n${charList}`);
-        instructions.push(CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.text);
-        
-        if (!createSecondaryChars) {
-            instructions.push(CHAR_GEN_INSTRUCTIONS.STRICT_NO_NEW.text);
-        } else {
-            instructions.push(CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.text);
-        }
+        instructions.push(`**CAST LIST (LOCKED):**\n${charList}`);
+        instructions.push(`**CRITICAL RULE: NO NEW CHARACTERS.** You must write the script using ONLY the entities listed above. If the story requires a generic person, describe them as "a waiter" or "a guard" without capitalization or index. Do not add them to the character list.`);
     } else if (advancedOptions.noCharacters) {
-        // No characters specific logic handled by model context
-    } else if (smartConceptEnabled) {
-        instructions.push(CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.text);
+        // No characters handled by model
     }
-    
-    if (createKeyItems) {
-        instructions.push(CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.text);
-    }
-
-    // Removed unconditional GRAY_BG instruction. It is now handled by SMART_CONCEPT logic above.
-    instructions.push(CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE.text);
 
     // Style Generation Logic
     if (visualStyle === 'custom' && customVisualStyle) {
@@ -151,11 +203,9 @@ export const generateScript = async (
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.LIVING_WORLD.text);
     }
 
-    // Repeated constraint at the end for "attention sink" effect
-    instructions.push(`REMINDER: Output Language MUST be ${languageName}. Describe the scene events visually and chronologically.`);
-    instructions.push(`REMINDER: Use entity format: "Entity-Index" (e.g. "Entity-1"). Do NOT write the name.`);
-    instructions.push(`REMINDER: DO NOT OMIT DETAILS. If input mentions specific items, smells, or actions, they MUST be present.`);
-    instructions.push("Return JSON with keys: 'summary', 'visualStyle' (must be a detailed description), 'detailedCharacters' (array of objects with keys: 'index', 'name', 'fullDescription', 'prompt'), 'scenes' (array of objects with 'title', 'description', 'recommendedFrames', 'narratorText', 'characters' (array of strings)).");
+    instructions.push(`REMINDER: Output Language MUST be ${languageName}.`);
+    instructions.push(`REMINDER: Use entity format: "Entity-Index" (e.g. "Entity-1").`);
+    instructions.push("Return JSON with keys: 'summary', 'visualStyle', 'scenes' (array of objects with 'title', 'description', 'recommendedFrames', 'narratorText', 'characters' (array of strings)). Note: 'detailedCharacters' should be omitted or empty in this response as we are using the locked list.");
 
     const fullPrompt = instructions.join('\n\n');
     
@@ -357,7 +407,7 @@ export const modifyScriptPrompt = async (
         ${instructions.join('\n\n')}
 
         **INPUTS:**
-        - **MASTER SET DESIGN (MANDATORY CONTEXT):** "${sceneContext.replace(/`/g, '')}"
+        - **MASTER SCENE SET DESIGN (MANDATORY CONTEXT):** "${sceneContext.replace(/`/g, '')}"
         ${styleContext}
         - **Entities / Characters:** ${characterInfo.replace(/`/g, '')}
         - **Frame Action & Subject Detail:** ${basePrompt.replace(/`/g, '')}

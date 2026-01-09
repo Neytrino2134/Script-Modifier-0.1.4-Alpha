@@ -1,4 +1,3 @@
-
 import React, { createContext, useCallback, useMemo, useState, ReactNode, useContext, useRef, useEffect } from 'react';
 import type { Node, Connection, Point, Group, LibraryItem, LineStyle, Tool, CatalogItem, TabState, ConnectingInfo } from '../types';
 import { NodeType, LibraryItemType, CatalogItemType } from '../types';
@@ -169,6 +168,8 @@ export interface AppContextType {
     handleSendMessage: (nodeId: string) => Promise<void> | void;
     handleTranslate: (nodeId: string) => Promise<void> | void;
     handleGenerateScript: (nodeId: string) => Promise<void> | void;
+    handleGenerateEntities: (nodeId: string) => Promise<void> | void;
+    isGeneratingEntities: string | null;
     handleModifyScriptPart: (nodeId: string, partId: string, originalText: string, modificationPrompt: string) => Promise<void> | void;
     handleModifyAnalyzerFramePart: (nodeId: string, frameNumber: number, partKey: string, modificationPrompt: string) => Promise<void> | void;
     handleFixErrors: (nodeId: string) => Promise<void> | void;
@@ -216,7 +217,7 @@ export interface AppContextType {
     isGeneratingMusicIdeas: string | null;
     handleExtractTextFromImage: (nodeId: string) => void;
     isExtractingText: string | null;
-    onAnalyzeYouTubeStats: (nodeId: string) => void;
+    onAnalyzeYouTubeStats: (nodeId: string) => Promise<void> | void;
     isAnalyzingYouTubeStats: string | null;
     handleImproveScriptConcept: (nodeId: string, currentConcept: string) => void;
     isImprovingScriptConcept: string | null;
@@ -640,7 +641,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         onConnectionReleased,
     });
     
-    const { onAddNode, handleAddNodeFromToolbar, deleteNodeAndConnections, handleSplitConnection, handleGroupSelection, handleRemoveGroup, handleSaveGroupToCatalog, handleSaveGroupToDisk, handleAddGroupFromCatalog, handleApplyAliases, handleDetachCharacter, addCharacterCardFromFile, addImagePreviewNodeFromFile, handlePasteFromClipboard, handleAddGroupFromTemplate, handleDuplicateNode: handleDuplicateNodeFromEntityActions, handleDuplicateNodeEmpty: handleDuplicateNodeEmptyFromEntityActions, saveDataToCatalog, handleCopyGroup, handleDuplicateGroup } = useEntityActions({
+    const { onAddNode, handleAddNodeFromToolbar, deleteNodeAndConnections, handleSplitConnection, handleGroupSelection, handleRemoveGroup, handleSaveGroupToCatalog, handleSaveGroupToDisk, handleCopyGroup, handleDuplicateGroup, handleAddGroupFromCatalog, handleApplyAliases, handleDetachCharacter, addCharacterCardFromFile, addImagePreviewNodeFromFile, handlePasteFromClipboard, handleAddGroupFromTemplate, handleDuplicateNode: handleDuplicateNodeFromEntityActions, handleDuplicateNodeEmpty: handleDuplicateNodeEmptyFromEntityActions, saveDataToCatalog } = useEntityActions({
       nodes, connections, groups, addNodeFromHook, t,
       clientPointerPosition, clientPointerPositionRef, viewTransform, setCreationLine, setLastAddedNodeId, handleDeleteNode, removeConnectionsByNodeId,
       addConnection: addConnectionWithLogic, handleValueChange, nodeIdCounter, setNodes, setConnections, addGroup, selectedNodeIds, setSelectedNodeIds: setSelectedNodeIds, removeGroup, saveGroupToCatalog, catalogItems, currentCatalogItems, handleCloseCatalog,
@@ -850,6 +851,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         navigateBack, navigateToFolder, createLibraryItem, updateLibraryItem, deleteLibraryItem: (id: string) => handleDeleteLibraryItem(id), saveLibraryItemToDisk, triggerLoadLibraryFromFile, moveLibraryItem,
         handleValueChange, connectedInputs, t, lastAddedNodeId, creationLine, clearSelectionsSignal,
         ...geminiContext,
+        handleGenerateEntities: geminiContext.handleGenerateEntities,
+        isGeneratingEntities: geminiContext.isGeneratingEntities,
         onAnalyzeYouTubeStats: geminiContext.handleAnalyzeYouTubeStats,
         handleApplyAliases, handleDetachCharacter,
         addCharacterCardFromFile, addImagePreviewNodeFromFile,
@@ -880,6 +883,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         onSaveCharacterCard,
         onLoadCharacterCard,
         onSaveCharacterToCatalog,
+        handleGenerateMusicIdeas: geminiContext.handleGenerateMusicIdeas,
+        isGeneratingMusicIdeas: geminiContext.isGeneratingMusicIdeas,
+        handleExtractTextFromImage: geminiContext.handleExtractTextFromImage,
+        isExtractingText: geminiContext.isExtractingText,
+        isAnalyzingYouTubeStats: geminiContext.isAnalyzingYouTubeStats,
     };
 
     return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

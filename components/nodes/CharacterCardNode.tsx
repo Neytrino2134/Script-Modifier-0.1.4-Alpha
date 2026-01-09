@@ -38,6 +38,7 @@ const CharacterCardNode: React.FC<NodeContentProps> = ({
     onDetachCharacter,
     onGenerateImage,
     isGeneratingImage,
+    isGeneratingCharacterImage, // Use this for per-card loading state
     onAddNode,
     onDeleteNode
 }) => {
@@ -441,7 +442,7 @@ const CharacterCardNode: React.FC<NodeContentProps> = ({
             let cardData = Array.isArray(parsed) ? parsed[0] : parsed;
             if (cardData && (cardData.type === 'character-card' || cardData.name || cardData.prompt)) {
                 // ... (Logic from original file to update thumbnails cache) ...
-                // Simplified for brevity - assumes logic is reused
+                // Simplified for brevity, same as original logic
                 const loadedSources = cardData.imageSources || { '1:1': null, '16:9': null, '9:16': null };
                 const newThumbnails: Record<string, string | null> = { '1:1': null, '16:9': null, '9:16': null };
                 if (cardData.image && !cardData.imageSources) loadedSources['1:1'] = cardData.image;
@@ -601,7 +602,7 @@ const CharacterCardNode: React.FC<NodeContentProps> = ({
                             onSetOutput={() => handleSetAsOutput(idx)}
                             onDragStart={(e) => handleCardDragStart(e, idx)}
                             onGenerateImage={() => onGenerateImage(nodeId, idx)}
-                            isGeneratingImage={isGeneratingImage === `${nodeId}-${idx}`}
+                            isGeneratingImage={isGeneratingCharacterImage === `${nodeId}-${idx}`} // Use specific character loading state
                             onSyncFromConnection={() => { /* Not implemented in this refactor, kept for prop signature */ }} 
                             onCopyImageToClipboard={onCopyImageToClipboard}
                             onDetach={() => onDetachCharacter(char, { id: nodeId } as any)}
@@ -625,7 +626,24 @@ const CharacterCardNode: React.FC<NodeContentProps> = ({
                             onPasteImageToSlot={() => handlePasteImageToSlot(idx)}
                             onClearImage={() => handleUpdateCard(idx, { thumbnails: { ...char.thumbnails, [char.selectedRatio]: null }, image: null })}
                             onViewImage={() => {
-                                 if (getFullSizeImage) { setImageViewer({ sources: [{ src: getFullSizeImage(nodeId, (idx * 10) + (RATIO_INDICES[char.selectedRatio] || 1)) || char.image!, frameNumber: 0 }], initialIndex: 0 }); }
+                                if (setImageViewer) { 
+                                     const ratioIdx = RATIO_INDICES[char.selectedRatio] || 1;
+                                     // Try Full Res Cache -> Thumbnail for Ratio -> Base Image
+                                     const src = (getFullSizeImage ? getFullSizeImage(nodeId, (idx * 10) + ratioIdx) : null)
+                                                 || char.thumbnails[char.selectedRatio] 
+                                                 || char.image;
+
+                                     if (src) {
+                                         setImageViewer({
+                                             sources: [{
+                                                 src: src.startsWith('data:') ? src : `data:image/png;base64,${src}`,
+                                                 frameNumber: 0,
+                                                 prompt: char.name
+                                             }],
+                                             initialIndex: 0
+                                         });
+                                     }
+                                }
                             }}
                             onUploadImage={() => {
                                 setUploadTargetIndex(idx);

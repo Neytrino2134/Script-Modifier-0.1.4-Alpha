@@ -139,8 +139,10 @@ export interface NodeContentProps {
   onProcessChainForward: (nodeId: string) => void;
   onGenerateScript: (nodeId: string) => void;
   isGeneratingScript: string | null;
-  onModifyScriptPart: (nodeId: string, partId: string, originalText: string, modificationPrompt: string) => Promise<void>;
-  onModifyAnalyzerFramePart: (nodeId: string, frameNumber: number, partKey: string, modificationPrompt: string) => Promise<void>;
+  onGenerateEntities: (nodeId: string) => void;
+  isGeneratingEntities: string | null;
+  onModifyScriptPart: (nodeId: string, partId: string, originalText: string, modificationPrompt: string) => Promise<void> | void;
+  onModifyAnalyzerFramePart: (nodeId: string, frameNumber: number, partKey: string, modificationPrompt: string) => Promise<void> | void;
   isModifyingScriptPart: string | null;
   handleCursor: string;
   onOutputHandleMouseDown: (e: React.MouseEvent<HTMLDivElement>, nodeId: string, handleId?: string, isSubNode?: boolean, subNodePosition?: Point) => void;

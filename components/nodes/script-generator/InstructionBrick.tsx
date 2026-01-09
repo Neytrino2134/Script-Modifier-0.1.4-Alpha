@@ -9,7 +9,7 @@ interface InstructionBrickProps {
     isEnabled?: boolean;
     isMandatory?: boolean;
     onToggle?: () => void;
-    color?: 'emerald' | 'cyan' | 'gray';
+    color?: 'emerald' | 'cyan' | 'gray' | 'purple';
     className?: string;
     index?: number;
     isHighlighted?: boolean;
@@ -58,6 +58,13 @@ export const InstructionBrick = forwardRef<HTMLDivElement, InstructionBrickProps
                 headerTextClass = 'text-cyan-400';
                 indicatorClass = 'bg-cyan-500';
                 badgeBgClass = 'bg-cyan-900/50 text-cyan-200';
+                break;
+            case 'purple':
+                bgClass = 'bg-purple-900/20';
+                borderClass = 'border-purple-700/50';
+                headerTextClass = 'text-purple-400';
+                indicatorClass = 'bg-purple-500';
+                badgeBgClass = 'bg-purple-900/50 text-purple-200';
                 break;
             default: // emerald
                 bgClass = 'bg-emerald-900/20';

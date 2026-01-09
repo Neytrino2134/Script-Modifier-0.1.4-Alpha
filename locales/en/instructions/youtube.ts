@@ -10,4 +10,8 @@ export const youtube = {
     'instruction.desc.yt_channel_mode': 'Creates consistent Name, Bio, and Handle.',
     'instruction.yt_format': 'JSON Output',
     'instruction.desc.yt_format': 'Strict JSON structure for integration.',
+    'instruction.yt_hashtags': 'Embed Hashtags',
+    'instruction.desc.yt_hashtags': 'Appends #hashtags to the description field.',
+    'instruction.yt_thumbnail': 'Thumbnail Prompt',
+    'instruction.desc.yt_thumbnail': 'Generates a visual description for a click-worthy cover image.',
 };

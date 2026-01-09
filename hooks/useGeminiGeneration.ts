@@ -3,13 +3,14 @@ import React, { useState, useCallback, useRef } from 'react';
 import { Node, Connection, NodeType } from '../types';
 import { 
     generateScript, 
+    generateScriptEntities,
     generateCharacters, 
     generateImage, 
     generateSpeech, 
     generateNarratorText, 
     transcribeAudio, 
     generateYouTubeTitles, 
-    generateYouTubeChannelInfo,
+    generateYouTubeChannelInfo, 
     generateMusicIdeas,
     extractTextFromImage,
     generateIdeaCategories,
@@ -32,6 +33,7 @@ export const useGeminiGeneration = ({
     executionStopRequested: React.MutableRefObject<boolean>;
 }) => {
     const [isGeneratingScript, setIsGeneratingScript] = useState<string | null>(null);
+    const [isGeneratingEntities, setIsGeneratingEntities] = useState<string | null>(null);
     const [isGeneratingCharacters, setIsGeneratingCharacters] = useState<string | null>(null);
     const [isGeneratingImage, setIsGeneratingImage] = useState<string | null>(null);
     const [isGeneratingCharacterImage, setIsGeneratingCharacterImage] = useState<string | null>(null);
@@ -45,6 +47,99 @@ export const useGeminiGeneration = ({
     const [isGeneratingIdeaCategories, setIsGeneratingIdeaCategories] = useState<string | null>(null);
     const [isCombiningStoryIdea, setIsCombiningStoryIdea] = useState<string | null>(null);
 
+    const handleGenerateEntities = useCallback(async (nodeId: string) => {
+        executionStopRequested.current = false;
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node) return;
+
+        let parsedValue;
+        try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
+
+        const {
+            prompt, targetLanguage, characterType,
+            model, visualStyle, customVisualStyle, createSecondaryChars,
+            createKeyItems, thinkingEnabled,
+            useExistingCharacters, detailedCharacters
+        } = parsedValue;
+
+        const inputConnection = connections.find(c => c.toNodeId === nodeId && (c.toHandleId === 'prompt' || c.toHandleId === undefined));
+        const finalPrompt = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : prompt;
+
+        // Gather upstream characters if useExistingCharacters is true (manual + linked are usually merged in node state)
+        // Here we just use what is in state, which is correct
+        
+        if (!finalPrompt.trim() && (!detailedCharacters || detailedCharacters.length === 0)) {
+            setError("No prompt or existing characters provided.");
+            return;
+        }
+
+        setIsGeneratingEntities(nodeId);
+        setError(null);
+
+        try {
+            const result = await generateScriptEntities(
+                finalPrompt,
+                targetLanguage,
+                characterType,
+                detailedCharacters,
+                parsedValue,
+                model,
+                visualStyle,
+                customVisualStyle,
+                createSecondaryChars,
+                createKeyItems,
+                thinkingEnabled
+            );
+
+            if (executionStopRequested.current) throw new Error("Generation stopped.");
+
+            // Post-process new entities: Assign IDs and Indices
+            let newEntities = result.detailedCharacters || [];
+            
+            // Calculate starting index
+            const currentMaxIndex = detailedCharacters.reduce((max: number, c: any) => {
+                const match = (c.index || '').match(/(\d+)/);
+                const num = match ? parseInt(match[1], 10) : 0;
+                return Math.max(max, num);
+            }, 0);
+
+            newEntities = newEntities.map((c: any, index: number) => ({
+                ...c,
+                id: `gen-ent-${Date.now()}-${index}`,
+                index: `Entity-${currentMaxIndex + index + 1}`
+            }));
+
+            // Merge with existing characters
+            const updatedDetailedCharacters = [...(detailedCharacters || []), ...newEntities];
+            
+            // Expand UI to show characters
+            const newUiState = { 
+                ...(parsedValue.uiState || {}), 
+                isCharactersSectionCollapsed: false 
+            };
+
+            setNodes(prev => prev.map(n => {
+                if (n.id === nodeId) {
+                    return { 
+                        ...n, 
+                        value: JSON.stringify({ 
+                            ...parsedValue, 
+                            detailedCharacters: updatedDetailedCharacters,
+                            uiState: newUiState
+                        }) 
+                    };
+                }
+                return n;
+            }));
+
+        } catch (e: any) {
+            setError(e.message || "Entity generation failed.");
+        } finally {
+             setIsGeneratingEntities(null);
+        }
+
+    }, [nodes, connections, getUpstreamTextValue, setNodes, setError, executionStopRequested]);
+
     const handleGenerateScript = useCallback(async (nodeId: string) => {
         executionStopRequested.current = false;
         const node = nodes.find(n => n.id === nodeId);
@@ -55,8 +150,8 @@ export const useGeminiGeneration = ({
 
         const {
             prompt, targetLanguage, characterType, narratorEnabled, narratorMode,
-            model, visualStyle, customVisualStyle, createSecondaryChars,
-            createKeyItems, thinkingEnabled, scenelessMode, simpleActions,
+            model, visualStyle, customVisualStyle, 
+            thinkingEnabled, scenelessMode, simpleActions,
             commercialSafe, smartConceptEnabled, atmosphericEntryEnabled,
             useExistingCharacters, detailedCharacters
         } = parsedValue;
@@ -64,15 +159,7 @@ export const useGeminiGeneration = ({
         const inputConnection = connections.find(c => c.toNodeId === nodeId && (c.toHandleId === 'prompt' || c.toHandleId === undefined));
         const finalPrompt = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : prompt;
 
-        // Gather upstream characters if useExistingCharacters is true
-        let existingCharacters = undefined;
-        if (useExistingCharacters) {
-            existingCharacters = detailedCharacters || []; 
-            // In a real flow, we might want to refresh from upstream connections here too, 
-            // but usually they are synced to state by the ScriptGeneratorNode's useEffect.
-        }
-
-        if (!finalPrompt.trim() && (!existingCharacters || existingCharacters.length === 0)) {
+        if (!finalPrompt.trim() && (!detailedCharacters || detailedCharacters.length === 0)) {
             setError("No prompt or existing characters provided.");
             return;
         }
@@ -91,13 +178,11 @@ export const useGeminiGeneration = ({
                 characterType,
                 narratorEnabled,
                 narratorMode,
-                existingCharacters,
-                parsedValue, // Pass full advanced options
+                detailedCharacters, // STRICTLY PASS EXISTING CHARACTERS
+                parsedValue,
                 model,
                 visualStyle,
                 customVisualStyle,
-                createSecondaryChars,
-                createKeyItems,
                 thinkingEnabled,
                 scenelessMode,
                 simpleActions,
@@ -108,51 +193,10 @@ export const useGeminiGeneration = ({
 
             if (executionStopRequested.current) throw new Error("Generation stopped.");
 
-            // --- Post-Process Generated Characters (Filter Duplicates) ---
-            let finalGeneratedCharacters = script.detailedCharacters || [];
-            
-            // 1. Assign IDs to all new characters immediately
-            finalGeneratedCharacters = finalGeneratedCharacters.map((c: any, index: number) => ({
-                ...c,
-                id: c.id || `gen-char-${Date.now()}-${index}`
-            }));
-
-            // 2. Filter logic if using existing characters
-            if (useExistingCharacters && existingCharacters) {
-                const existingNames = new Set(existingCharacters.map((c: any) => c.name.trim().toLowerCase()));
-
-                finalGeneratedCharacters = finalGeneratedCharacters.filter((newChar: any) => {
-                    const newNameClean = newChar.name.trim().toLowerCase();
-                    const isExactDuplicate = existingNames.has(newNameClean);
-                    
-                    // Check for variations like "Name (Outfit)"
-                    // If name has parens, check base name
-                    const baseName = newNameClean.split('(')[0].trim();
-                    const isVariation = newNameClean.includes('(') && existingNames.has(baseName);
-
-                    // Logic Table:
-                    // 1. Exact Duplicate -> REJECT (It's already linked upstream)
-                    // 2. Variation -> KEEP (It's a costume change)
-                    // 3. New Name:
-                    //    - If createSecondaryChars is TRUE -> KEEP
-                    //    - If createSecondaryChars is FALSE -> REJECT
-
-                    if (isExactDuplicate) return false;
-                    
-                    if (!createSecondaryChars) {
-                        // Strict mode: Only allow if it is a recognized variation of an existing char
-                        return isVariation;
-                    }
-                    
-                    // If allowed to create new chars, keep it
-                    return true;
-                });
-            }
-
-            // Update the script object with filtered list
+            // Update the script object, but DO NOT modify the characters list (Scene Only Mode)
             const finalScriptData = {
                 ...script,
-                detailedCharacters: finalGeneratedCharacters
+                detailedCharacters: detailedCharacters // Preserve existing
             };
 
             setNodes(prev => prev.map(n => {
@@ -228,6 +272,9 @@ export const useGeminiGeneration = ({
         } else if (node.type === NodeType.CHARACTER_CARD && characterId !== undefined) {
              const charData = Array.isArray(parsedValue) ? parsedValue[characterId as number] : parsedValue;
              prompt = charData.prompt;
+             if (charData.additionalPrompt && charData.additionalPrompt.trim()) {
+                 prompt = `${prompt}, ${charData.additionalPrompt}`;
+             }
         }
 
         if (!prompt) {
@@ -418,7 +465,7 @@ export const useGeminiGeneration = ({
         if (!node) return;
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
-        const { idea, targetLanguages } = parsedValue;
+        const { idea, targetLanguages, includeHashtags, generateThumbnail } = parsedValue;
         
         const inputConnection = connections.find(c => c.toNodeId === nodeId);
         const finalIdea = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : idea;
@@ -429,7 +476,11 @@ export const useGeminiGeneration = ({
         setError(null);
         try {
             const selectedLangs = Object.keys(targetLanguages).filter(k => targetLanguages[k]);
-            const result = await generateYouTubeTitles(finalIdea, selectedLangs);
+            const result = await generateYouTubeTitles(
+                finalIdea, 
+                selectedLangs,
+                { includeHashtags, generateThumbnail }
+            );
             setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: JSON.stringify({ ...parsedValue, generatedTitleOutputs: result }) } : n));
         } catch (e: any) {
             setError(e.message || "Title generation failed.");
@@ -586,6 +637,7 @@ export const useGeminiGeneration = ({
 
     const stop = useCallback(() => {
         setIsGeneratingScript(null);
+        setIsGeneratingEntities(null);
         setIsGeneratingCharacters(null);
         setIsGeneratingImage(null);
         setIsGeneratingCharacterImage(null);
@@ -602,6 +654,7 @@ export const useGeminiGeneration = ({
 
     return {
         handleGenerateScript,
+        handleGenerateEntities,
         handleGenerateCharacters,
         handleGenerateImage,
         handleGenerateCharacterImage: (nodeId: string, characterId: string) => handleGenerateImage(nodeId, characterId),
@@ -617,6 +670,7 @@ export const useGeminiGeneration = ({
         stop,
         states: {
              isGeneratingScript,
+             isGeneratingEntities,
              isGeneratingCharacters,
              isGeneratingImage,
              isGeneratingCharacterImage,

@@ -1,5 +1,6 @@
 
 
+
 export const ui = {
     'toolbar.edit': 'Редактировать (V)',
     'toolbar.cutter': 'Резак (C)',
@@ -135,7 +136,7 @@ export const ui = {
     'search.node.music_idea_generator.description': 'Генерирует текст песни или музыкальный промпт на основе идеи.',
     'search.node.youtube_analytics': 'YouTube Аналитика',
     'search.node.image_editor.title': 'Редактор Изображений',
-    'search.node.image_editor.description': 'Редактируйте изображения с помощью ИИ (inpainting, outpainting).',
+    'search.node.image_editor.description': 'Редактируйте изображения с помощью ИИ (Inpainting, Outpainting).',
     'search.group.input': 'Ввод',
     'search.group.process': 'Обработка и Анализ',
     'search.group.scripting': 'Сценарии',
@@ -182,4 +183,17 @@ export const ui = {
     'help.sub.stable': 'Стабильная версия',
     'help.sub.alpha': 'Альфа версия',
     'imageViewer.title': 'Просмотр изображения',
+
+    // Language Names
+    'languages.ru': 'Русский',
+    'languages.en': 'Английский',
+    'languages.es': 'Испанский',
+    'languages.fr': 'Французский',
+    'languages.de': 'Немецкий',
+    'languages.it': 'Итальянский',
+    'languages.pt': 'Португальский',
+    'languages.zh': 'Китайский',
+    'languages.ja': 'Японский',
+    'languages.ko': 'Корейский',
+    'languages.uz': 'Узбекский',
 };

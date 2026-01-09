@@ -83,8 +83,10 @@ interface NodeViewProps {
   isReadingData: string | null;
   onGenerateScript: (nodeId: string) => void;
   isGeneratingScript: string | null;
-  onModifyScriptPart: (nodeId: string, partId: string, originalText: string, modificationPrompt: string) => Promise<void>;
-  onModifyAnalyzerFramePart: (nodeId: string, frameNumber: number, partKey: string, modificationPrompt: string) => Promise<void>;
+  onGenerateEntities: (nodeId: string) => void;
+  isGeneratingEntities: string | null;
+  onModifyScriptPart: (nodeId: string, partId: string, originalText: string, modificationPrompt: string) => Promise<void> | void;
+  onModifyAnalyzerFramePart: (nodeId: string, frameNumber: number, partKey: string, modificationPrompt: string) => Promise<void> | void;
   isModifyingScriptPart: string | null;
   onAnalyzeScript: (nodeId: string) => void;
   isAnalyzingScript: string | null;
@@ -242,6 +244,8 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
         isExtractingText: props.isExtractingText === node.id,
         isAnalyzingYouTubeStats: props.isAnalyzingYouTubeStats === node.id,
         isImprovingScriptConcept: props.isImprovingScriptConcept === node.id,
+        // Ensure isGeneratingEntities remains a string | null matching NodeContentProps
+        isGeneratingEntities: props.isGeneratingEntities === node.id ? props.isGeneratingEntities : null,
         inputData: inputData,
         // Pass Image props down
         onSaveCharacterCard,
@@ -413,6 +417,7 @@ function arePropsEqual(prev: NodeViewProps, next: NodeViewProps) {
     if (prev.isFixingErrors !== next.isFixingErrors) return false;
     if (prev.isReadingData !== next.isReadingData) return false;
     if (prev.isGeneratingScript !== next.isGeneratingScript) return false;
+    if (prev.isGeneratingEntities !== next.isGeneratingEntities) return false;
     if (prev.isModifyingScriptPart !== next.isModifyingScriptPart) return false;
     if (prev.isAnalyzingScript !== next.isAnalyzingScript) return false;
     if (prev.isGeneratingCharacters !== next.isGeneratingCharacters) return false;

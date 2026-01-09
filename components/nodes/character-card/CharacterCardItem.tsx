@@ -139,7 +139,11 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                 </div>
 
                 <div className="flex flex-col flex-shrink-0 mb-1">
-                    <div className="flex items-end justify-between pr-2 h-7 z-0">
+                    {/* Image Header / Ratio Selector - Clickable Area */}
+                    <div 
+                        className="flex items-end justify-between pr-2 h-7 z-0 cursor-pointer hover:bg-gray-700/30 transition-colors rounded-t-md select-none"
+                        onClick={(e) => { e.stopPropagation(); onUpdate({ isImageCollapsed: !char.isImageCollapsed }); }}
+                    >
                          <div className="flex items-end pl-2 gap-1 h-full">
                             {['1:1', '16:9', '9:16'].map(r => (
                                 <button 
@@ -153,7 +157,6 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                             ))}
                         </div>
                         <button 
-                             onClick={(e) => { e.stopPropagation(); onUpdate({ isImageCollapsed: !char.isImageCollapsed }); }}
                              className="p-1 mb-0.5 text-gray-500 hover:text-emerald-400 transition-colors"
                              title={char.isImageCollapsed ? "Show Image" : "Hide Image"}
                         >
@@ -181,7 +184,8 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                                 if (e.dataTransfer.types.includes('application/prompt-modifier-card')) return;
                                 e.preventDefault(); e.stopPropagation(); setIsDragOver(true); 
                             }}
-                            className={`flex-shrink-0 h-[256px] bg-gray-700/50 rounded-xl flex items-center justify-center cursor-pointer transition-all group relative overflow-hidden z-10 hover:z-20 hover:bg-gray-600/70 ${isDragOver ? 'border-2 border-emerald-500 ring-2 ring-emerald-500/20' : ''}`} 
+                            style={{ cursor: hasImage ? 'zoom-in' : 'pointer' }}
+                            className={`flex-shrink-0 h-[256px] bg-gray-700/50 rounded-xl flex items-center justify-center transition-all group relative overflow-hidden z-10 hover:z-20 hover:bg-gray-600/70 ${isDragOver ? 'border-2 border-emerald-500 ring-2 ring-emerald-500/20' : ''}`} 
                             onDragLeave={() => setIsDragOver(false)} 
                             onDrop={(e) => { 
                                  if (e.dataTransfer.types.includes('application/prompt-modifier-card')) return;
@@ -236,9 +240,20 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                             onGenerateImage(); 
                         }} 
                         disabled={!!isGeneratingImage || !char.prompt} 
-                        className="flex-grow h-8 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-[10px] uppercase transition-colors disabled:opacity-50 shadow-sm"
+                        className={`flex-grow h-8 font-bold rounded text-[10px] uppercase transition-all shadow-sm flex items-center justify-center gap-2
+                            ${isGeneratingImage 
+                                ? 'bg-gray-600 text-gray-300 cursor-not-allowed opacity-75' 
+                                : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                            }
+                            disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                        {isGeneratingImage ? '...' : t('node.content.generateImage')}
+                        {isGeneratingImage && (
+                            <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        )}
+                        {isGeneratingImage ? t('node.content.generating') : t('node.content.generateImage')}
                     </button>
                 </div>
 

@@ -10,10 +10,17 @@ interface SettingsPanelProps {
     onUpdateUiState: (updates: Partial<YouTubeUiState>) => void;
     mode: 'title' | 'channel';
     t: (key: string) => string;
+    // New Props
+    includeHashtags?: boolean;
+    onToggleHashtags?: () => void;
+    generateThumbnail?: boolean;
+    onToggleThumbnail?: () => void;
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ 
-    uiState, onUpdateUiState, mode, t
+    uiState, onUpdateUiState, mode, t,
+    includeHashtags = true, onToggleHashtags,
+    generateThumbnail = false, onToggleThumbnail
 }) => {
     let stepCount = 0;
 
@@ -62,14 +69,36 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                          <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">2. Strategy</h6>
                          
                          {mode === 'title' && (
-                             <InstructionBrick 
-                                label={t(`instruction.${YOUTUBE_GENERATOR_INSTRUCTIONS.TITLE_MODE_RULES.id}`)} 
-                                text={YOUTUBE_GENERATOR_INSTRUCTIONS.TITLE_MODE_RULES.text} 
-                                translatedText={t(`instruction.desc.${YOUTUBE_GENERATOR_INSTRUCTIONS.TITLE_MODE_RULES.id}`)} 
-                                isMandatory 
-                                color='cyan' 
-                                index={++stepCount}
-                            />
+                             <>
+                                 <InstructionBrick 
+                                    label={t(`instruction.${YOUTUBE_GENERATOR_INSTRUCTIONS.TITLE_MODE_RULES.id}`)} 
+                                    text={YOUTUBE_GENERATOR_INSTRUCTIONS.TITLE_MODE_RULES.text} 
+                                    translatedText={t(`instruction.desc.${YOUTUBE_GENERATOR_INSTRUCTIONS.TITLE_MODE_RULES.id}`)} 
+                                    isMandatory 
+                                    color='cyan' 
+                                    index={++stepCount}
+                                />
+                                {/* Hashtag Toggle */}
+                                <InstructionBrick 
+                                    label={t(`instruction.${YOUTUBE_GENERATOR_INSTRUCTIONS.HASHTAGS.id}`)} 
+                                    text={YOUTUBE_GENERATOR_INSTRUCTIONS.HASHTAGS.text} 
+                                    translatedText={t(`instruction.desc.${YOUTUBE_GENERATOR_INSTRUCTIONS.HASHTAGS.id}`)} 
+                                    isEnabled={includeHashtags}
+                                    onToggle={onToggleHashtags}
+                                    color='emerald' 
+                                    index={includeHashtags ? ++stepCount : undefined}
+                                />
+                                {/* Thumbnail Prompt Toggle */}
+                                <InstructionBrick 
+                                    label={t(`instruction.${YOUTUBE_GENERATOR_INSTRUCTIONS.THUMBNAIL.id}`)} 
+                                    text={YOUTUBE_GENERATOR_INSTRUCTIONS.THUMBNAIL.text} 
+                                    translatedText={t(`instruction.desc.${YOUTUBE_GENERATOR_INSTRUCTIONS.THUMBNAIL.id}`)} 
+                                    isEnabled={generateThumbnail}
+                                    onToggle={onToggleThumbnail}
+                                    color='emerald' 
+                                    index={generateThumbnail ? ++stepCount : undefined}
+                                />
+                            </>
                          )}
 
                          {mode === 'channel' && (

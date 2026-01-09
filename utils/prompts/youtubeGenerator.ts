@@ -15,6 +15,16 @@ export const YOUTUBE_GENERATOR_INSTRUCTIONS = {
         label: 'Title Strategy',
         text: "Generate catchy, high-CTR metadata. \n1. **Titles:** Must be punchy, under 60 chars where possible, evoking curiosity or benefit. \n2. **Description:** First 2 lines must be the hook. Include keywords naturally. \n3. **Tags:** Mix of broad and specific keywords."
     },
+    HASHTAGS: {
+        id: 'yt_hashtags',
+        label: 'Hashtags',
+        text: "HASHTAG INTEGRATION: You MUST append 3-5 highly relevant hashtags (format: #Hashtag) at the very end of the 'description' field. Choose high-volume tags related to the niche."
+    },
+    THUMBNAIL: {
+        id: 'yt_thumbnail',
+        label: 'Thumbnail Prompt',
+        text: "THUMBNAIL GENERATION: Generate a separate field 'thumbnailPrompt'. Describe a high-CTR YouTube thumbnail image. \n- **Focus:** Facial expression, emotional hook, bright colors, text overlay (keep it short), and contrast. \n- **Style:** High saturation, clean background, 4k quality."
+    },
     CHANNEL_MODE_RULES: {
         id: 'yt_channel_mode',
         label: 'Branding Strategy',
@@ -23,6 +33,6 @@ export const YOUTUBE_GENERATOR_INSTRUCTIONS = {
     FORMAT: {
         id: 'yt_format',
         label: 'Output Format',
-        text: "Return a JSON object where keys are language codes. For 'Title Mode' provide: title, description, tags. For 'Channel Mode' provide: channelName, channelDescription, channelKeywords, channelHandle."
+        text: "Return a JSON object where keys are language codes. For 'Title Mode' provide: title, description (with hashtags included), tags, and optional thumbnailPrompt. For 'Channel Mode' provide: channelName, channelDescription, channelKeywords, channelHandle."
     }
 };

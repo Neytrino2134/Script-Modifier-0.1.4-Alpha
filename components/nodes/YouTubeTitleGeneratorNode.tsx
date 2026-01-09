@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import type { NodeContentProps } from '../../types'; 
 import { ActionButton } from '../ActionButton'; 
 import { SettingsPanel } from './youtube-title-generator/SettingsPanel';
+import Tooltip from '../ui/Tooltip';
 
 const LANGUAGES = [
     { code: 'ru', label: 'RU' },
@@ -52,6 +53,8 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
                 generatedTitleOutputs: parsed.generatedTitleOutputs || {},
                 generatedChannelOutputs: parsed.generatedChannelOutputs || {},
                 languageSelectionOrder,
+                includeHashtags: parsed.includeHashtags !== false, // Default true
+                generateThumbnail: parsed.generateThumbnail !== false, // Default true
                 uiState: parsed.uiState || { isSettingsCollapsed: true }
             };
         } catch {
@@ -62,12 +65,14 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
                 generatedTitleOutputs: {}, 
                 generatedChannelOutputs: {},
                 languageSelectionOrder: ['ru'],
+                includeHashtags: true,
+                generateThumbnail: true,
                 uiState: { isSettingsCollapsed: true }
             };
         }
     }, [node.value]);
 
-    const { mode, idea, targetLanguages, generatedTitleOutputs, generatedChannelOutputs, languageSelectionOrder, uiState } = parsedValue;
+    const { mode, idea, targetLanguages, generatedTitleOutputs, generatedChannelOutputs, languageSelectionOrder, includeHashtags, generateThumbnail, uiState } = parsedValue;
 
     const handleValueUpdate = (updates: Partial<typeof parsedValue>) => {
         onValueChange(node.id, JSON.stringify({ ...parsedValue, ...updates }));
@@ -127,6 +132,7 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
                 { key: 'title', label: t('youtube_title_generator.title') },
                 { key: 'description', label: t('youtube_title_generator.description') },
                 { key: 'tags', label: t('youtube_title_generator.tags') },
+                ...(generateThumbnail ? [{ key: 'thumbnailPrompt', label: t('node.content.thumbnailPrompt') }] : [])
               ]
             : [
                 { key: 'channelName', label: t('youtube_title_generator.channelName') },
@@ -137,24 +143,27 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
 
         return (
             <div key={lang} className="flex flex-col flex-1 min-h-0 space-y-2">
-                <h4 className="font-semibold text-gray-300 text-sm">{langName}</h4>
-                {fields.map(field => (
-                    <div key={field.key} className="flex flex-col flex-1 min-h-0">
-                        <div className="flex justify-between items-center mb-1">
-                            <label className="text-xs font-medium text-gray-400">{field.label}</label>
-                            <ActionButton title={t('node.action.copy')} onClick={() => handleCopy(data[field.key] || '')}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                            </ActionButton>
+                <h4 className="font-semibold text-gray-300 text-sm border-b border-gray-700/50 pb-1">{langName}</h4>
+                <div className="flex-grow overflow-y-auto custom-scrollbar space-y-3 pr-1">
+                    {fields.map(field => (
+                        <div key={field.key} className="flex flex-col">
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="text-xs font-medium text-gray-400">{field.label}</label>
+                                <ActionButton title={t('node.action.copy')} onClick={() => handleCopy(data[field.key] || '')}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                </ActionButton>
+                            </div>
+                            <textarea 
+                                readOnly 
+                                value={data[field.key] || ''} 
+                                className={`w-full p-2 bg-gray-900/50 rounded-md resize-none custom-scrollbar focus:border-emerald-500 focus:ring-0 focus:outline-none border border-transparent ${field.key === 'description' ? 'min-h-[100px]' : (field.key === 'thumbnailPrompt' ? 'min-h-[60px]' : 'min-h-[40px]')}`}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onFocus={deselectAllNodes}
+                                rows={field.key === 'description' ? 4 : (field.key === 'tags' ? 3 : 2)}
+                            />
                         </div>
-                        <textarea 
-                            readOnly 
-                            value={data[field.key] || ''} 
-                            className="w-full flex-grow p-2 bg-gray-900/50 rounded-md resize-none custom-scrollbar focus:border-emerald-500 focus:ring-0 focus:outline-none border border-transparent" 
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onFocus={deselectAllNodes}
-                        />
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         );
     };
@@ -166,7 +175,7 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
                 onChange={(e) => handleValueUpdate({ idea: e.target.value })}
                 placeholder={isInputConnected ? t('node.content.connectedPlaceholder') : (mode === 'title' ? t('youtube_title_generator.ideaPlaceholder') : t('youtube_title_generator.channelIdeaPlaceholder'))}
                 disabled={isInputConnected || isLoading}
-                className="w-full p-2 bg-gray-700 border border-transparent rounded-md resize-y focus:border-emerald-500 focus:ring-0 focus:outline-none disabled:bg-gray-800 disabled:text-gray-500 custom-scrollbar min-h-[60px] max-h-[120px]"
+                className="w-full p-2 bg-gray-700 border border-transparent rounded-md resize-y focus:border-emerald-500 focus:ring-0 focus:outline-none disabled:bg-gray-800 disabled:text-gray-500 custom-scrollbar min-h-[60px] max-h-[120px] flex-shrink-0"
                 rows={2}
                 onMouseDown={(e) => e.stopPropagation()}
                 onFocus={deselectAllNodes}
@@ -191,23 +200,28 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
                 onUpdateUiState={handleUiStateUpdate}
                 mode={mode as 'title' | 'channel'}
                 t={t}
+                includeHashtags={includeHashtags}
+                onToggleHashtags={() => handleValueUpdate({ includeHashtags: !includeHashtags })}
+                generateThumbnail={generateThumbnail}
+                onToggleThumbnail={() => handleValueUpdate({ generateThumbnail: !generateThumbnail })}
             />
 
              {/* Language Selector Group */}
              <div className="flex-shrink-0 bg-gray-700/50 p-1 rounded-md border border-gray-600/30">
                 <div className="flex flex-wrap gap-1">
                     {LANGUAGES.map((lang) => (
-                        <button
-                            key={lang.code}
-                            onClick={() => handleLangChange(lang.code)}
-                            className={`flex-1 min-w-[30px] py-1 rounded text-[10px] font-bold uppercase transition-colors ${
-                                targetLanguages[lang.code] 
-                                    ? 'bg-emerald-600 text-white shadow-sm' 
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-600 hover:text-gray-200'
-                            }`}
-                        >
-                            {lang.label}
-                        </button>
+                        <Tooltip key={lang.code} title={t(`languages.${lang.code}`)} position="top">
+                            <button
+                                onClick={() => handleLangChange(lang.code)}
+                                className={`flex-1 min-w-[30px] py-1 rounded text-[10px] font-bold uppercase transition-colors ${
+                                    targetLanguages[lang.code] 
+                                        ? 'bg-emerald-600 text-white shadow-sm' 
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-600 hover:text-gray-200'
+                                }`}
+                            >
+                                {lang.label}
+                            </button>
+                        </Tooltip>
                     ))}
                 </div>
             </div>

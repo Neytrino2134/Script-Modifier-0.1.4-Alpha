@@ -138,6 +138,11 @@ export const CHAR_GEN_INSTRUCTIONS = {
         label: 'Visual Concept',
         text: "For every entity visual prompt, ALWAYS append: ', full body character concept on a gray background'.",
     },
+    MAIN_CHAR_LOGIC: {
+        id: 'create_main_chars',
+        label: 'Main Characters',
+        text: "MAIN CHARACTER GENERATION: You MUST generate detailed profiles for the MAIN protagonists/antagonists based on the story concept. Do not generate generic background characters here. Focus on the core cast."
+    },
     SECONDARY_CHARS: {
         id: 'create_secondary_chars',
         label: 'Secondary Chars',

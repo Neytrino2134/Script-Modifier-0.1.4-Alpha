@@ -247,6 +247,26 @@ export const useCanvasEvents = ({
                 addImagePreviewNodeFromFile(file, imageDropPosition);
                 return;
             }
+
+            if (file.type.startsWith('audio/') || file.type.startsWith('video/')) {
+                 const reader = new FileReader();
+                 reader.onload = (event) => {
+                     const base64String = (event.target?.result as string).split(',')[1];
+                     const newNodeValue = JSON.stringify({
+                         audioBase64: base64String,
+                         mimeType: file.type,
+                         fileName: file.name,
+                         transcription: '',
+                         segments: [],
+                     });
+                     onAddNode(NodeType.AUDIO_TRANSCRIBER, dropPosition, newNodeValue);
+                 };
+                 reader.onerror = () => {
+                     addToast(t('error.fileReadError'), 'info');
+                 };
+                 reader.readAsDataURL(file);
+                 return;
+            }
             
             if (file.type === 'application/json' || file.name.endsWith('.json')) {
                 const text = await file.text();

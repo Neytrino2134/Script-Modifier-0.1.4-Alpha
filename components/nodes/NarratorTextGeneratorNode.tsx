@@ -5,6 +5,7 @@ import { ActionButton } from '../ActionButton';
 import CustomSelect, { CustomSelectOption } from '../ui/CustomSelect';
 import CustomCheckbox from '../ui/CustomCheckbox';
 import { SettingsPanel } from './narrator-text-generator/SettingsPanel';
+import Tooltip from '../ui/Tooltip';
 
 const LANGUAGES = [
     { code: 'ru', label: 'RU' },
@@ -193,17 +194,18 @@ const NarratorTextGeneratorNode: React.FC<NodeContentProps> = ({
             <div className="flex-shrink-0 bg-gray-700/50 p-1 rounded-md">
                 <div className="flex flex-wrap gap-1">
                     {LANGUAGES.map((lang) => (
-                        <button
-                            key={lang.code}
-                            onClick={() => handleLangChange(lang.code)}
-                            className={`flex-1 min-w-[30px] py-1 rounded text-[10px] font-bold uppercase transition-colors ${
-                                targetLanguages[lang.code] 
-                                    ? 'bg-emerald-600 text-white shadow-sm' 
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-600 hover:text-gray-200'
-                            }`}
-                        >
-                            {lang.label}
-                        </button>
+                        <Tooltip key={lang.code} title={t(`languages.${lang.code}`)} position="top">
+                            <button
+                                onClick={() => handleLangChange(lang.code)}
+                                className={`flex-1 min-w-[30px] py-1 rounded text-[10px] font-bold uppercase transition-colors ${
+                                    targetLanguages[lang.code] 
+                                        ? 'bg-emerald-600 text-white shadow-sm' 
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-600 hover:text-gray-200'
+                                }`}
+                            >
+                                {lang.label}
+                            </button>
+                        </Tooltip>
                     ))}
                 </div>
             </div>

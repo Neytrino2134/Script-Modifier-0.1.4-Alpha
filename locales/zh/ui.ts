@@ -1,4 +1,6 @@
 
+
+
 export const ui = {
     'toolbar.edit': '编辑 (V)',
     'toolbar.cutter': '断开连接 (C)',
@@ -93,7 +95,7 @@ export const ui = {
     'search.node.character_analyzer.title': '角色分析器',
     'search.node.character_analyzer.description': '将描述拆分为角色和服装。',
     'search.node.character_generator.title': '角色生成器',
-    'search.node.character_generator.description': '从想法中创建详细的角色。(Shift+C)',
+    'search.node.character_generator.description': '从想法中创建详细的角色描述。(Shift+C)',
     'search.node.image_generator.title': '图像生成器',
     'search.node.image_generator.description': '从文本创建图像。(O)',
     'search.node.image_preview.title': '图像预览',
@@ -175,4 +177,17 @@ export const ui = {
     'help.sub.discussion': '讨论',
     'help.sub.stable': '稳定版本',
     'help.sub.alpha': 'Alpha 版本',
+
+    // Language Names
+    'languages.ru': '俄语',
+    'languages.en': '英语',
+    'languages.es': '西班牙语',
+    'languages.fr': '法语',
+    'languages.de': '德语',
+    'languages.it': '意大利语',
+    'languages.pt': '葡萄牙语',
+    'languages.zh': '中文',
+    'languages.ja': '日语',
+    'languages.ko': '韩语',
+    'languages.uz': '乌兹别克语',
 };
