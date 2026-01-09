@@ -20,6 +20,11 @@ export const MUSIC_GENERATOR_INSTRUCTIONS = {
         label: 'Lyrics Generation',
         text: "LYRICS STRUCTURE: If requested, write lyrics adhering to a standard song structure (Verse 1, Chorus, Verse 2, Chorus, Bridge, Outro). Ensure rhymes and rhythm match the requested genre."
     },
+    VERSE_COUNT_RULE: {
+        id: 'music_verse_count',
+        label: 'Verse Count',
+        text: "STRICT STRUCTURE CONSTRAINT: You MUST generate exactly {N} UNIQUE Verses in the song structure. Do not summarize or skip verses. Explicitly label them as [Verse 1], [Verse 2] ... up to [Verse {N}]."
+    },
     MUSIC_PROMPT_RULE: {
         id: 'music_prompt_rule',
         label: 'Suno/Udio Prompt',

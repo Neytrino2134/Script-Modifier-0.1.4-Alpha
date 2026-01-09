@@ -26,14 +26,43 @@ const SceneItem: React.FC<{
         ? scene.title 
         : `${t('node.content.scene')} ${index + 1}: ${scene.title || ''}`;
 
-    // Helper to format character list for badge
-    const charBadgeText = scene.characters && Array.isArray(scene.characters) 
-        ? scene.characters.map((c: string) => {
-            // Updated regex to catch Entity, Character, or localized versions
-            const match = c.match(/(?:Entity|Character|Персонаж)[-\s]?(\d+)/i);
-            return match ? `ENT-${match[1]}` : c;
-        }).join(', ')
-        : null;
+    const handleAddCharacter = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const currentChars = Array.isArray(scene.characters) ? scene.characters : [];
+        
+        // Find max index to auto-increment
+        let maxNum = 0;
+        currentChars.forEach((c: string) => {
+            const match = c.match(/(\d+)/);
+            if (match) maxNum = Math.max(maxNum, parseInt(match[1], 10));
+        });
+        
+        const newChars = [...currentChars, `Entity-${maxNum + 1}`];
+        onUpdate(index, 'characters', newChars);
+    };
+
+    const handleCharacterIndexChange = (charIndex: number, delta: number) => {
+        const currentChars = [...(Array.isArray(scene.characters) ? scene.characters : [])];
+        const charStr = currentChars[charIndex];
+        
+        // Extract number
+        const match = charStr.match(/(\d+)/);
+        let num = match ? parseInt(match[1], 10) : 0;
+        
+        // Update number
+        const newNum = Math.max(1, num + delta);
+        
+        // Preserve prefix logic slightly or enforce Entity- format
+        // For Script Generator output, Entity-N is the standard
+        currentChars[charIndex] = `Entity-${newNum}`;
+        onUpdate(index, 'characters', currentChars);
+    };
+
+    const handleDeleteCharacter = (charIndex: number) => {
+         const currentChars = [...(Array.isArray(scene.characters) ? scene.characters : [])];
+         currentChars.splice(charIndex, 1);
+         onUpdate(index, 'characters', currentChars);
+    };
 
     return (
         <div className={`bg-gray-800 rounded-lg p-3 mb-2 space-y-2 border-2 ${isSelected ? 'border-emerald-500' : 'border-transparent'} transition-colors shadow-sm`} onClick={(e) => onClick(e, index)}>
@@ -41,17 +70,64 @@ const SceneItem: React.FC<{
                 <div className="flex items-center space-x-2 flex-grow min-w-0">
                     <div className="flex flex-col min-w-0">
                         <span className="font-bold text-white truncate text-sm" title={displayTitle}>{displayTitle}</span>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                             {scene.recommendedFrames !== undefined && (
-                                <span className="text-[9px] text-emerald-400 font-mono uppercase tracking-wider bg-emerald-900/30 px-1 rounded">
+                                <span className="text-[9px] text-emerald-400 font-mono uppercase tracking-wider bg-emerald-900/30 px-1 rounded whitespace-nowrap">
                                     {t('node.content.recommendedFrames')}: {scene.recommendedFrames}
                                 </span>
                             )}
-                            {charBadgeText && (
-                                <span className="text-[9px] text-cyan-300 font-mono uppercase tracking-wider bg-cyan-900/30 px-1 rounded truncate max-w-[150px]" title={charBadgeText}>
-                                    {charBadgeText}
-                                </span>
-                            )}
+                            
+                            {/* Editable Character Badges */}
+                            <div className="flex items-center gap-1 flex-wrap">
+                                {(Array.isArray(scene.characters) ? scene.characters : []).map((char: string, charIdx: number) => {
+                                    const match = char.match(/(?:Entity|Character|Персонаж)[-\s]?(\d+)/i);
+                                    const displayVal = match ? `ENT-${match[1]}` : char;
+                                    
+                                    return (
+                                        <div 
+                                            key={`${index}-${charIdx}`}
+                                            className="relative group/char"
+                                        >
+                                            <input
+                                                type="text"
+                                                value={displayVal}
+                                                readOnly
+                                                className="text-[9px] text-cyan-300 font-mono uppercase tracking-wider bg-cyan-900/30 px-1 rounded w-12 text-center border border-transparent focus:border-cyan-500 focus:outline-none cursor-ew-resize select-none"
+                                                onClick={(e) => e.stopPropagation()}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleCharacterIndexChange(charIdx, 1);
+                                                    }
+                                                    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        handleCharacterIndexChange(charIdx, -1);
+                                                    }
+                                                }}
+                                                title="Use arrows to change index. Shift+Click to remove."
+                                                onMouseDown={(e) => {
+                                                    if (e.shiftKey) {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        handleDeleteCharacter(charIdx);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                                
+                                {/* Add Character Button */}
+                                <button
+                                    onClick={handleAddCharacter}
+                                    className="text-[9px] text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 px-1.5 rounded transition-colors font-bold h-4 flex items-center justify-center"
+                                    title="Add Character (ENT-N)"
+                                >
+                                    +
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

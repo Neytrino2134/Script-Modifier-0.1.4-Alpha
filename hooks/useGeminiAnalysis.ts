@@ -121,7 +121,13 @@ export const useGeminiAnalysis = ({
                 
                 if (parsed.scenes) {
                     if (parsed.summary) summary = parsed.summary;
-                    if (Array.isArray(parsed.scenes)) scriptScenes = parsed.scenes;
+                    if (Array.isArray(parsed.scenes)) {
+                        // FIX: Safely map scenes to ensure sceneNumber exists
+                        scriptScenes = parsed.scenes.map((s: any, i: number) => ({
+                            ...s,
+                            sceneNumber: (typeof s.sceneNumber === 'number') ? s.sceneNumber : (i + 1)
+                        }));
+                    }
                     if (Array.isArray(parsed.detailedCharacters)) {
                         const cleanChars = parsed.detailedCharacters.map(sanitize);
                         inputCharacters = [...inputCharacters, ...cleanChars];
@@ -162,7 +168,7 @@ export const useGeminiAnalysis = ({
         });
 
         if (scenesToAnalyze.length === 0) {
-            setError(`No scenes found in the selected range (${startNum}-${endNum}).`);
+            setError(`No scenes found in the selected range (${startNum}-${endNum}). Check input scene numbers.`);
             return;
         }
 

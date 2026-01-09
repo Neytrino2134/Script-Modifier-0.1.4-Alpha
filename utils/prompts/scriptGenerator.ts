@@ -141,7 +141,7 @@ export const CHAR_GEN_INSTRUCTIONS = {
     SECONDARY_CHARS: {
         id: 'create_secondary_chars',
         label: 'Secondary Chars',
-        text: "You MAY generate new secondary characters or entities if the plot requires it. COSTUME CHANGES: If a main character changes outfit, you MUST generate a NEW entity entry for them with the new clothing description and updated visual prompt."
+        text: "You MAY generate new secondary characters if the plot requires it. \n**OUTFIT CHANGES:** If a main character changes outfit, you MUST generate a NEW entity entry for them. \n**NAMING RULE FOR OUTFIT CHANGES:** You MUST append the look name in parentheses. Format: `\"Name (Look Name)\"` (e.g., `\"Batman (Tuxedo)\"`). This allows the system to distinguish it from the original."
     },
     KEY_ITEMS_LOGIC: {
         id: 'create_key_items',
@@ -151,12 +151,12 @@ export const CHAR_GEN_INSTRUCTIONS = {
     STRICT_NO_NEW: {
         id: 'char_no_new',
         label: 'No New Chars',
-        text: "Do NOT create any new characters or items. Use ONLY the provided Existing Entities. The 'detailedCharacters' output list must remain empty (unless defining visual updates for existing ones)."
+        text: "Do NOT create any new characters or items. Use ONLY the provided Existing Entities. The 'detailedCharacters' output list must remain empty (unless defining visual updates/outfit changes for existing ones)."
     },
     NO_DUPLICATES: {
         id: 'char_no_dupes',
         label: 'No Duplicates',
-        text: "CRITICAL: Do NOT re-generate entities provided in the 'Existing Characters' list. EXCEPTION: If a character changes clothes, you MUST create a new entry with the new outfit details and updated prompt."
+        text: "CRITICAL: Do NOT output an entity in `detailedCharacters` if it exactly matches the name of an entity in the Input List. \n**EXCEPTION:** If the character has a new outfit/look, you MUST create a new entry with the format `\"Name (Look Name)\"`. This distinction is required to create a new card."
     },
     DETAILED_STYLE: {
         id: 'char_detailed_style',

@@ -1,7 +1,7 @@
 
-export const LAYERED_CONSTRUCTION_NO_STYLE_TEXT = "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [**Master Set Design/Background**] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** You MUST start by establishing the physical set defined in the input (Furniture, Lighting, Textures). \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry (e.g. 'kneeling', 'reaching', 'twisted torso') and movement.\n- **Technical:** End with lens, angle, and quality tags.";
+export const LAYERED_CONSTRUCTION_NO_STYLE_TEXT = "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL GROUPING BAN:** You are FORBIDDEN from grouping subjects grammatically (e.g. 'Entity-1 and Entity-2 are running'). You MUST describe them SEQUENTIALLY.\n\n**MANDATORY SEQUENCE:**\n1. **[Master Set Design/Background]**\n2. **[Subject 1: FULL BODY POSE & ACTION]** (Even if not fully visible)\n3. *...interaction connector...*\n4. **[Subject 2: FULL BODY POSE & ACTION]**\n5. **[Specific Focus/Detail]** (If Close-Up)\n6. **[Technical/Camera]**.\n\n**LOGIC:**\n- **Environment:** Establish the physical set first. \n- **Invisible Context:** You MUST describe the full posture (kneeling, running, slumped) BEFORE describing facial details, otherwise the AI generates a T-Pose.\n- **Technical:** End with lens/angle.";
 
-export const LAYERED_CONSTRUCTION_NO_CHAR_TEXT = "**MASTER CONSTRUCTION ALGORITHM (No Entity Vis):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO ENTITY VISUALS:** Do NOT include physical descriptions (clothing, face, hair) of the entities. Refer to them ONLY by their Index (e.g. `[Entity-1]`).\n2. **FLOW:** [**Master Set Design/Background**] -> [Subject Index] + [**Full Pose & Action**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the background and physical set details. \n- **Action:** Describe **POSE, GESTURE, and MOVEMENT**. You MUST describe the physical body geometry (e.g. 'sitting cross-legged', 'running', 'arms raised') even without describing the clothes/face.\n- **Technical:** End with lens, angle, and quality tags.";
+export const LAYERED_CONSTRUCTION_NO_CHAR_TEXT = "**MASTER CONSTRUCTION ALGORITHM (No Entity Vis):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL GROUPING BAN:** You are FORBIDDEN from grouping subjects (e.g., 'Entity-1 and Entity-2 are running' is WRONG). You MUST iterate through them individually.\n\n**MANDATORY SEQUENCE:**\n1. **[Master Set Design/Background]**\n2. **[Index-1] + [FULL BODY POSE & ACTION]**\n3. *...spatial relation...*\n4. **[Index-2] + [FULL BODY POSE & ACTION]**\n5. **[Specific Focus/Detail]**\n6. **[Technical/Camera]**.\n\n**MANDATORY:** You MUST describe the physical body geometry (e.g., 'knees bent at 90 degrees', 'arms outstretched', 'jaw dropped') for EACH index separately.";
 
 export const PROMPT_MODIFIER_INSTRUCTIONS = {
     INPUTS: {
@@ -36,8 +36,8 @@ export const PROMPT_MODIFIER_INSTRUCTIONS = {
     },
     SUBJECT_FOCUS: {
         id: 'rule_subject_detail',
-        label: 'Context Hierarchy',
-        text: "**CRITICAL: FULL SUBJECT CONTEXT (MACRO-TO-MICRO).** For every subject in the frame, you MUST describe them in this specific order, REGARDLESS of the shot size (even for Extreme Close-Ups):\n1. **THE WHOLE:** Describe the Entity's Identity (Index) AND their **ACTIVE INTERACTION** (e.g. 'dragging Entity-3').\n2. **THE POSTURE:** Describe the full body stance relative to the action.\n3. **THE PART:** Only then describe the specific body part or micro-action in focus.\n\n*Never describe a floating body part without stating who it belongs to and what that person is actively doing.*"
+        label: 'Invisible Context',
+        text: "**CRITICAL: INVISIBLE BODY CONTEXT.** The Image Generator assumes a T-Pose if you don't describe the body. \n**RULE:** Even for Close-Ups (CU/ECU) of a face or object, you **MUST** describe the full body pose of the subject FIRST.\n- **WRONG:** 'Close-up of Entity-1 smiling'. (Result: Floating head or T-Pose).\n- **RIGHT:** 'Entity-1 is leaning forward over a table, shoulders hunched, weight on elbows. Close-up of Entity-1 smiling'.\n*Always anchor the detail to a full physical posture.*"
     },
     STRICT_CHAR_INDEX: {
         id: 'strict_char_index',
@@ -67,7 +67,7 @@ export const PROMPT_MODIFIER_INSTRUCTIONS = {
     LAYERED_CONSTRUCTION: {
         id: 'rule_layers',
         label: 'Layered',
-        text: "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL RULES:**\n1. **NO HEADERS:** Do NOT use prefixes like 'Environment:', 'Subject:', 'Action:'. Just write the text.\n2. **FLOW:** [Style] -> [**Master Set Design/Background**] -> [Subject Visuals] + [**Full Pose & Interaction**] -> [Technical/Camera].\n\n**LOGIC:**\n- **Environment:** Start with the specific physical set details (Furniture, Light, Texture) defined in the Scene Context. \n- **Subject:** Integrate visual details with the **POSE and ACTION**. Explicitly describe body geometry and movement.\n- **Technical:** End with lens, angle, and quality tags."
+        text: "**MASTER CONSTRUCTION ALGORITHM (Unified Flow):**\n\nConstruct the final prompt as a **SINGLE, SEAMLESS BLOCK of descriptive text**. \n\n**CRITICAL GROUPING BAN:** You are FORBIDDEN from grouping subjects (e.g. '[Entity-1] and [Entity-2]'). Describe them SEQUENTIALLY.\n\n**STRUCTURE:**\n1. **[Style]**\n2. **[Master Set Design/Background]**\n3. **[Subject 1 Visuals] + [Subject 1 FULL BODY POSE & ACTION]**\n4. **[Subject 2 Visuals] + [Subject 2 FULL BODY POSE & ACTION]**\n5. **[Specific Focus/Detail]** (If Close-Up)\n6. **[Technical/Camera]**.\n\n**LOGIC:**\n- **Environment:** Start with the specific physical set details.\n- **Subjects:** For EACH index, explicitly describe body geometry (e.g. 'kneeling', 'reaching', 'twisted torso') BEFORE describing face or details.\n- **Technical:** End with lens, angle, and quality tags."
     },
     VISUAL_SATURATION: {
         id: 'rule_saturation',
@@ -103,7 +103,7 @@ export const PROMPT_MODIFIER_INSTRUCTIONS = {
     ANATOMICAL_STRICTNESS: {
         id: 'anatomical_strictness',
         label: 'Anatomy Logic',
-        text: "**CRITICAL: ANATOMICAL RIGGING & LIMB BUDGET.** You act as a 3D Rigger. An entity has only 2 hands/paws.\n1. **CALCULATE:** If a hand is holding an object, it CANNOT be doing something else. \n2. **SEPARATE:** Forbidden to use plural 'Arms' if they do different things. \n3. **SYNTAX:** Explicitly describe: 'Left Arm [State], Right Arm [State]'. \n4. **NO LITERARY SIMPLIFICATIONS.** Be technically explicit about geometry."
+        text: "**CRITICAL: INDIVIDUAL PHYSICS.** Treat every entity as a separate 3D object.\n1. **NO SHARED VERBS:** Never say 'they looked'. Say '[Entity-1] looked left, [Entity-2] looked right'.\n2. **LIMB PLACEMENT:** Describe the exact position of arms and legs for EACH entity separately. \n3. **EMOTION:** Assign a specific facial muscle description to EACH entity (e.g. '[Entity-1] brow furrowed', '[Entity-2] smiling broadly')."
     },
     PROP_ENHANCEMENT: {
         id: 'prop_enhancement',

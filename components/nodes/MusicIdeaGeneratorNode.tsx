@@ -47,6 +47,7 @@ const MusicIdeaGeneratorNode: React.FC<NodeContentProps> = ({
 
             return {
                 generateLyrics: parsed.generateLyrics ?? true,
+                verseCount: parsed.verseCount || 2,
                 idea: parsed.idea || '',
                 targetLanguages,
                 generatedLyrics: parsed.generatedLyrics || {},
@@ -59,10 +60,11 @@ const MusicIdeaGeneratorNode: React.FC<NodeContentProps> = ({
         } catch {
             return { 
                 generateLyrics: true, 
+                verseCount: 2,
                 idea: '', 
                 targetLanguages: { ru: true, en: false }, 
                 generatedLyrics: {}, 
-                generatedMusicPrompts: {},
+                generatedMusicPrompts: {}, 
                 generatedTitles: {},
                 languageSelectionOrder: ['ru'],
                 model: 'gemini-3-flash-preview',
@@ -71,7 +73,7 @@ const MusicIdeaGeneratorNode: React.FC<NodeContentProps> = ({
         }
     }, [node.value]);
 
-    const { generateLyrics, idea, targetLanguages, generatedLyrics, generatedMusicPrompts, generatedTitles, languageSelectionOrder, model, uiState } = parsedValue;
+    const { generateLyrics, verseCount, idea, targetLanguages, generatedLyrics, generatedMusicPrompts, generatedTitles, languageSelectionOrder, model, uiState } = parsedValue;
 
     const handleValueUpdate = (updates: Partial<typeof parsedValue>) => {
         onValueChange(node.id, JSON.stringify({ ...parsedValue, ...updates }));
@@ -278,6 +280,21 @@ const MusicIdeaGeneratorNode: React.FC<NodeContentProps> = ({
                     </button>
                 </Tooltip>
 
+                {generateLyrics && (
+                    <div className="flex items-center bg-gray-900/50 rounded-lg p-0.5 border border-gray-700/50 h-full" title={t('node.content.verseCount')}>
+                         <span className="text-[9px] text-gray-500 px-1 font-bold select-none">V:</span>
+                         <input
+                            type="number"
+                            min="1"
+                            max="12"
+                            value={verseCount}
+                            onChange={(e) => handleValueUpdate({ verseCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                            className="w-8 h-full bg-transparent text-center text-xs text-white outline-none font-mono"
+                            onMouseDown={e => e.stopPropagation()}
+                         />
+                    </div>
+                )}
+
                 <button
                     onClick={isLoading ? onStopGeneration : handleGenerate}
                     disabled={isStopping || (!isLoading && !idea.trim() && !isInputConnected)}
@@ -303,6 +320,8 @@ const MusicIdeaGeneratorNode: React.FC<NodeContentProps> = ({
                 onUpdateUiState={handleUiStateUpdate}
                 generateLyrics={generateLyrics}
                 onToggleGenerateLyrics={() => handleValueUpdate({ generateLyrics: !generateLyrics })}
+                verseCount={verseCount}
+                onVerseCountChange={(count) => handleValueUpdate({ verseCount: count })}
                 model={model}
                 t={t}
             />

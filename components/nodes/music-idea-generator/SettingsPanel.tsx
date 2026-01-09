@@ -10,12 +10,14 @@ interface SettingsPanelProps {
     onUpdateUiState: (updates: Partial<MusicUiState>) => void;
     generateLyrics: boolean;
     onToggleGenerateLyrics: () => void;
+    verseCount: number;
+    onVerseCountChange: (count: number) => void;
     model: string;
     t: (key: string) => string;
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ 
-    uiState, onUpdateUiState, generateLyrics, onToggleGenerateLyrics, model, t
+    uiState, onUpdateUiState, generateLyrics, onToggleGenerateLyrics, verseCount, onVerseCountChange, model, t
 }) => {
     let stepCount = 0;
 
@@ -105,6 +107,37 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             color='emerald' 
                             index={generateLyrics ? ++stepCount : undefined}
                         />
+
+                        {/* Verse Count Input Brick */}
+                        {generateLyrics && (
+                            <div className="flex flex-row p-2 rounded border border-gray-700 text-xs transition-all relative overflow-hidden group select-none items-center gap-3 bg-emerald-900/20 flex-shrink-0">
+                                <div className="flex-shrink-0 w-6 flex flex-col items-center justify-start pt-0.5">
+                                    <div className="text-[9px] font-mono font-bold w-5 h-5 flex items-center justify-center rounded-full bg-emerald-900/50 text-emerald-200">
+                                        {++stepCount}
+                                    </div>
+                                </div>
+                                <div className="flex-grow min-w-0 flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <div className="font-bold uppercase tracking-wider text-[10px] leading-tight text-emerald-400">
+                                            {t(`instruction.${MUSIC_GENERATOR_INSTRUCTIONS.VERSE_COUNT_RULE.id}`)}
+                                        </div>
+                                        <div className="text-[10px] text-gray-400 mt-1">
+                                            {MUSIC_GENERATOR_INSTRUCTIONS.VERSE_COUNT_RULE.text.replace('{N}', verseCount.toString())}
+                                        </div>
+                                    </div>
+                                    <input 
+                                        type="number" 
+                                        min="1" 
+                                        max="20"
+                                        value={verseCount} 
+                                        onChange={(e) => onVerseCountChange(Math.max(1, parseInt(e.target.value) || 1))}
+                                        className="w-12 h-6 bg-gray-800 border border-gray-600 rounded text-center text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                     
                      {/* 3. FORMAT */}

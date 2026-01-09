@@ -8,6 +8,8 @@ export const music = {
     'instruction.desc.music_creative': 'Заставляет ИИ интерпретировать атмосферу, а не слова. Предотвращает банальные повторы ввода.',
     'instruction.music_lyrics': 'Структура Текста',
     'instruction.desc.music_lyrics': 'Генерация структуры Куплет/Припев под жанр.',
+    'instruction.music_verse_count': 'Количество куплетов',
+    'instruction.desc.music_verse_count': 'Строго контролирует количество сгенерированных куплетов.',
     'instruction.music_prompt_rule': 'AI Музыкальный Промпт',
     'instruction.desc.music_prompt_rule': 'Технические теги для Suno/Udio (BPM, Инструменты, Вокал). Макс 1000 символов.',
     'instruction.music_format': 'JSON Формат',

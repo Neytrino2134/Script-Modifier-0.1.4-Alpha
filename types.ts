@@ -193,7 +193,7 @@ export interface NodeContentProps {
   onSaveCharacterToCatalog: (nodeId: string) => void;
   setFullSizeImage: (nodeId: string, slotIndex: number, imageBase64: string) => void;
   getFullSizeImage: (nodeId: string, slotIndex: number) => string | null;
-  setImageViewer: (data: { sources: {src: string, frameNumber: number}[], initialIndex: number } | null) => void;
+  setImageViewer: (data: { sources: {src: string, frameNumber: number, prompt?: string}[], initialIndex: number } | null) => void;
   onCopyImageToClipboard: (base64: string) => void;
   onDownloadImage: (base64: string, filename: string) => void;
   onUpdateCharacterDescription?: (nodeId: string, charIndex: number) => void;

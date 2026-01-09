@@ -25,6 +25,9 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
     const [linkedCharactersCount, setLinkedCharactersCount] = useState(0);
     const [linkedCharacters, setLinkedCharacters] = useState<any[]>([]);
+    
+    // Track known IDs to identify new ones for auto-collapsing
+    const prevKnownCharIds = useRef<Set<string>>(new Set());
 
     // Timers & Stats
     const [timers, setTimers] = useState<{ current: number; total: number; last: number }>({ current: 0, total: 0, last: 0 });
@@ -262,8 +265,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         };
         const newCharacters = [...(detailedCharacters || []), newChar];
         
-        // Auto-expand the character section
-        const newUiState = { ...uiState, isCharactersSectionCollapsed: false };
+        // Auto-expand the character section and auto-collapse the NEW character
+        const newUiState = { 
+            ...uiState, 
+            isCharactersSectionCollapsed: false,
+            collapsedCharacters: [...(uiState.collapsedCharacters || []), newId] 
+        };
         
         handleValueUpdate({ detailedCharacters: newCharacters, uiState: newUiState });
     }, [detailedCharacters, linkedCharacters, handleValueUpdate, uiState]);
@@ -279,8 +286,13 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         };
         const newScenes = [...(scenes || []), newScene];
         
-        // Auto-expand the scenes section
-        const newUiState = { ...uiState, isScenesSectionCollapsed: false };
+        // Auto-expand the scenes section and auto-collapse the NEW scene
+        const newSceneIndex = newScenes.length - 1;
+        const newUiState = { 
+            ...uiState, 
+            isScenesSectionCollapsed: false,
+            collapsedScenes: [...(uiState.collapsedScenes || []), newSceneIndex]
+        };
 
         handleValueUpdate({ scenes: newScenes, uiState: newUiState });
     }, [scenes, handleValueUpdate, uiState]);
@@ -302,8 +314,18 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             title: (s.title === 'New Scene' || s.title.match(/^Scene \d+$/)) ? `Scene ${i + 1}` : s.title
         }));
         
-        // Auto-expand the scenes section (just in case)
-        const newUiState = { ...uiState, isScenesSectionCollapsed: false };
+        // Adjust collapsed indices: shift anything > index by 1, then add the new index (index + 1)
+        const insertionIndex = index + 1;
+        const updatedCollapsedScenes = (uiState.collapsedScenes || [])
+            .map(i => (i >= insertionIndex ? i + 1 : i)) // Shift existing
+            .concat(insertionIndex); // Add new
+
+        // Auto-expand the scenes section
+        const newUiState = { 
+            ...uiState, 
+            isScenesSectionCollapsed: false,
+            collapsedScenes: updatedCollapsedScenes
+        };
 
         handleValueUpdate({ scenes: reindexed, uiState: newUiState });
     }, [scenes, handleValueUpdate, uiState]);
@@ -426,11 +448,35 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             }
             return cleanChar;
         });
+        
+        // --- AUTO COLLAPSE NEW CHARACTERS ---
+        // Identify newly added character IDs and auto-collapse them
+        const allCurrentIds = [...reindexedLinkedChars, ...reindexedLocalChars].map(c => c.id);
+        const currentCollapsedSet = new Set(uiState.collapsedCharacters || []);
+        let uiChanged = false;
+        
+        allCurrentIds.forEach(id => {
+            if (!prevKnownCharIds.current.has(id)) {
+                // New ID detected, collapse it by default
+                if (!currentCollapsedSet.has(id)) {
+                    currentCollapsedSet.add(id);
+                    uiChanged = true;
+                }
+            }
+        });
+        
+        // Update known IDs for next run
+        prevKnownCharIds.current = new Set(allCurrentIds);
 
         // 3. Update state
-        if (needsUpdate) {
+        if (needsUpdate || uiChanged) {
             // Use timeout to break render cycle if invoked during render
-             setTimeout(() => handleValueUpdate({ detailedCharacters: reindexedLocalChars }), 0);
+             setTimeout(() => {
+                 const updates: any = {};
+                 if (needsUpdate) updates.detailedCharacters = reindexedLocalChars;
+                 if (uiChanged) updates.uiState = { ...uiState, collapsedCharacters: Array.from(currentCollapsedSet) };
+                 handleValueUpdate(updates);
+             }, 0);
         }
 
         setLinkedCharacters(prev => {
@@ -735,9 +781,9 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                             <div className="pl-1 border-l border-gray-700 ml-1">
                                 <ActionButton title={uiState.isSummaryCollapsed ? t('node.action.expand') : t('node.action.collapse')} onClick={(e) => { e.stopPropagation(); handleUiStateUpdate({ isSummaryCollapsed: !uiState.isSummaryCollapsed }); }} tooltipPosition="left">
                                     {uiState.isSummaryCollapsed ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                                     ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
                                     )}
                                 </ActionButton>
                             </div>

@@ -235,15 +235,22 @@ const ScriptAnalyzerNode: React.FC<NodeContentProps> = ({
              const text = getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId);
              try {
                  const parsed = JSON.parse(text);
+                 
+                 // Robustly handle scene numbers. If undefined, map to index + 1
+                 const incomingScenes = (parsed.scenes || []).map((s: any, idx: number) => ({
+                     ...s,
+                     sceneNumber: (typeof s.sceneNumber === 'number') ? s.sceneNumber : (idx + 1)
+                 }));
+
                  setUpstreamScriptData({
                      summary: parsed.summary || '',
-                     scenes: parsed.scenes || [],
+                     scenes: incomingScenes,
                      generatedStyle: parsed.generatedStyle || parsed.visualStyle || ''
                  });
 
                  // Auto-collapse incoming scenes immediately
-                 if (parsed.scenes && Array.isArray(parsed.scenes)) {
-                     setCollapsedInputScenes(new Set(parsed.scenes.map((_: any, i: number) => i)));
+                 if (incomingScenes.length > 0) {
+                     setCollapsedInputScenes(new Set(incomingScenes.map((_: any, i: number) => i)));
                  }
 
                  // Gather new upstream characters

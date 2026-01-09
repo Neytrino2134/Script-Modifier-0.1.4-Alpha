@@ -163,18 +163,18 @@ export interface AppContextType {
 
     // Gemini Handlers
     getUpstreamTextValue: (nodeId: string, handleId: string | undefined) => string;
-    handleEnhance: (nodeId: string) => Promise<void>;
-    handleAnalyzePrompt: (nodeId: string) => Promise<void>;
-    handleAnalyzeCharacter: (nodeId: string) => Promise<void>;
-    handleSendMessage: (nodeId: string) => Promise<void>;
-    handleTranslate: (nodeId: string) => Promise<void>;
-    handleGenerateScript: (nodeId: string) => Promise<void>;
-    handleModifyScriptPart: (nodeId: string, partId: string, originalText: string, modificationPrompt: string) => Promise<void>;
-    handleModifyAnalyzerFramePart: (nodeId: string, frameNumber: number, partKey: string, modificationPrompt: string) => Promise<void>;
-    handleFixErrors: (nodeId: string) => Promise<void>;
-    handleExecuteChain: (nodeId: string) => Promise<void>;
+    handleEnhance: (nodeId: string) => Promise<void> | void;
+    handleAnalyzePrompt: (nodeId: string) => Promise<void> | void;
+    handleAnalyzeCharacter: (nodeId: string) => Promise<void> | void;
+    handleSendMessage: (nodeId: string) => Promise<void> | void;
+    handleTranslate: (nodeId: string) => Promise<void> | void;
+    handleGenerateScript: (nodeId: string) => Promise<void> | void;
+    handleModifyScriptPart: (nodeId: string, partId: string, originalText: string, modificationPrompt: string) => Promise<void> | void;
+    handleModifyAnalyzerFramePart: (nodeId: string, frameNumber: number, partKey: string, modificationPrompt: string) => Promise<void> | void;
+    handleFixErrors: (nodeId: string) => Promise<void> | void;
+    handleExecuteChain: (nodeId: string) => Promise<void> | void;
     handleExecuteFullChain: (nodeId: string) => void;
-    handleProcessChainForward: (nodeId: string) => Promise<void>;
+    handleProcessChainForward: (nodeId: string) => Promise<void> | void;
     stopGeneration: () => void;
     setError: React.Dispatch<React.SetStateAction<string | null>>;
     isEnhancing: string | null;
@@ -185,7 +185,7 @@ export interface AppContextType {
     isGeneratingScript: string | null;
     isModifyingScriptPart: string | null;
     isFixingErrors: string | null;
-    handleAnalyzeScript: (nodeId: string) => Promise<void>;
+    handleAnalyzeScript: (nodeId: string) => Promise<void> | void;
     isAnalyzingScript: string | null;
     handleGenerateCharacters: (nodeId: string) => void;
     isGeneratingCharacters: string | null;
@@ -208,11 +208,11 @@ export interface AppContextType {
     isGeneratingNarratorText: string | null;
     handleTranscribeAudio: (nodeId: string) => void;
     isTranscribingAudio: string | null;
-    handleGenerateYouTubeTitles: (nodeId: string) => Promise<void>;
+    handleGenerateYouTubeTitles: (nodeId: string) => Promise<void> | void;
     isGeneratingYouTubeTitles: string | null;
-    handleGenerateYouTubeChannelInfo: (nodeId: string) => Promise<void>;
+    handleGenerateYouTubeChannelInfo: (nodeId: string) => Promise<void> | void;
     isGeneratingYouTubeChannelInfo: string | null;
-    handleGenerateMusicIdeas: (nodeId: string) => Promise<void>;
+    handleGenerateMusicIdeas: (nodeId: string) => Promise<void> | void;
     isGeneratingMusicIdeas: string | null;
     handleExtractTextFromImage: (nodeId: string) => void;
     isExtractingText: string | null;

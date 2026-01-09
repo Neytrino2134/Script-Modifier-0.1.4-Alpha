@@ -75,7 +75,7 @@ export const combineStoryIdea = async (action: string, place: string, obstacle: 
     }
 };
 
-export const generateMusicIdeas = async (idea: string, languages: any, lyrics: boolean, model: string = 'gemini-3-flash-preview') => {
+export const generateMusicIdeas = async (idea: string, languages: any, lyrics: boolean, verseCount: number = 2, model: string = 'gemini-3-flash-preview') => {
     const ai = getAiClient();
     const instructions = [];
 
@@ -91,6 +91,9 @@ export const generateMusicIdeas = async (idea: string, languages: any, lyrics: b
 
     if (lyrics) {
         instructions.push(MUSIC_GENERATOR_INSTRUCTIONS.LYRICS_RULE.text);
+        if (verseCount && verseCount > 0) {
+             instructions.push(MUSIC_GENERATOR_INSTRUCTIONS.VERSE_COUNT_RULE.text.replace('{N}', verseCount.toString()));
+        }
     } else {
         instructions.push("Do NOT generate lyrics.");
     }

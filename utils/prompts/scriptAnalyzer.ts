@@ -18,7 +18,7 @@ export const SCRIPT_ANALYZER_INSTRUCTIONS = {
     CINEMATOGRAPHY: {
         id: 'ana_cinema',
         label: 'Cinematography',
-        text: "Use professional terms for framing, lighting and PERSPECTIVE. \n1. **FRAMING:** Wide Shot, Medium Shot, Close-up, Extreme Close-up. \n2. **ANGLES:** Low Angle, High Angle, Dutch Angle, Overhead/Bird's Eye. \n3. **PERSPECTIVE:** Front View, Side Profile (Left/Right), 3/4 View, Rear View (From Behind), Over-the-Shoulder."
+        text: "Use professional terms for framing, lighting and PERSPECTIVE. \n**CRITICAL FORMATTING RULE:** Determine the Shot Type (WS, CU, etc.) and put it **ONLY** in the `shotType` JSON field. \n**FORBIDDEN:** Do NOT write 'Wide Shot', 'Close-up', or 'WS' inside the `imagePrompt` text. The `imagePrompt` must contain ONLY the visual description of the scene content."
     },
     CINEMATOGRAPHY_WIDE: {
         id: 'ana_cinema_wide',
@@ -47,8 +47,8 @@ export const SCRIPT_ANALYZER_INSTRUCTIONS = {
     },
     SUBJECT_HIERARCHY: {
         id: 'subject_hierarchy',
-        label: 'Context Hierarchy',
-        text: "**CRITICAL: INVISIBLE CONTEXT & INTERACTION.** Even for Close-Ups or details, you MUST explicitly state the entity's ongoing interaction with other entities, even if they are out of frame.\n**FORMAT:** `[Subject] + [Active Interaction Clause] + [Specific Detail]`.\n**EXAMPLE:** Instead of 'Close-up of boots sinking in snow', write: 'Close-up of boots of Entity-2 **who is actively dragging Entity-3**, sinking deep into the snow'.\n*Never describe a part without the action of the whole.*"
+        label: 'Context Anchoring',
+        text: "**CRITICAL: INVISIBLE CONTEXT & INTERACTION.** Even for Close-Ups or details, you MUST explicitly state the entity's FULL BODY ACTION, even if it is out of frame.\n**FORMAT:** `[Subject] + [FULL BODY POSTURE] + [Specific Detail]`.\n**EXAMPLE:** Instead of 'Close-up of boots sinking in snow', write: 'Entity-2 is leaning forward, dragging a heavy weight, muscles tensed. Close-up of boots sinking deep into the snow'.\n*Never describe a part without the action of the whole.*"
     },
     MOTION_DYNAMICS: {
         id: 'motion_dynamics',
@@ -158,6 +158,6 @@ export const SCRIPT_ANALYZER_INSTRUCTIONS = {
     SHOT_FILTER_WIDE: {
         id: 'shot_filter_wide',
         label: 'Wide Shots Only',
-        text: "**ULTRA-STRICT CINEMATOGRAPHY FILTER:** For ALL generated frames, you are ABSOLUTELY FORBIDDEN from using Close-Up (CU), Extreme Close-Up (ECU), or Detail shots. \n\n**TRANSLATION PROTOCOL:** If the script describes a detail:\n1. REJECT the impulse to zoom in.\n2. TRANSLATE it into a Full Body pose within the Wide Shot.\n3. You MUST use ONLY Wide Shots (WS), Long Shots (LS), or Medium Shots (MS)."
+        text: "**ULTRA-STRICT CINEMATOGRAPHY FILTER:** For ALL generated frames, you are ABSOLUTELY FORBIDDEN from using Close-Up (CU), Extreme Close-Up (ECU), or Detail shots. \n\n**TRANSLATION PROTOCOL:** If the script describes a detail (e.g., 'a tear rolling down a cheek'), you MUST TRANSLATE it into a Full Body pose within a Wide Shot (e.g., 'Wide Shot: Character slumps shoulders, head low, body language conveys grief').\n\n**RULE:** Use ONLY Wide Shots (WS), Long Shots (LS), or Medium Shots (MS). Reject the impulse to zoom in."
     }
 };

@@ -1,6 +1,8 @@
 
 
 
+
+
 import { GenerateContentResponse, Type } from "@google/genai";
 import { getAiClient, withRetry, cleanJsonString, safeJsonParse } from "./client";
 import { PROMPT_MODIFIER_INSTRUCTIONS, LAYERED_CONSTRUCTION_NO_STYLE_TEXT, LAYERED_CONSTRUCTION_NO_CHAR_TEXT } from "../../utils/prompts/promptModifier";
@@ -487,7 +489,7 @@ export const modifyScriptSceneBatch = async (
     const framesInput = frames.map((f, i) => {
         const activeCharacters = (f.characters || []).join(', ');
         return `FRAME_${i}:
-        - Shot Type: ${f.shotType || 'Standard'}
+        // Shot Type removed to prevent AI from shortcutting descriptions
         - Subject Detail & Action: ${(f.imagePrompt || '').replace(/`/g, '')}
         - World Context (MANDATORY): ${(f.environmentPrompt || '').replace(/`/g, '')}
         - Active Characters: ${activeCharacters || 'None'}

@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Node, Connection, NodeType } from '../types';
 import { supportedLanguages, LanguageCode } from '../localization';
-import { enhancePrompt, translateText, modifyScriptPart, fixTextErrors, modifyScriptPrompt, modifyScriptSceneBatch } from '../services/geminiService';
+import { enhancePrompt, translateText, modifyScriptPart, fixTextErrors, modifyScriptPrompt, modifyScriptSceneBatch, improveScriptConcept } from '../services/geminiService';
 import { PROMPT_MODIFIER_INSTRUCTIONS } from '../utils/promptInstructions';
 
 // Helper to extract [Character-N] tags from generated text
@@ -46,6 +46,7 @@ export const useGeminiModification = ({
     const [isModifyingScriptPart, setIsModifyingScriptPart] = useState<string | null>(null);
     const [isFixingErrors, setIsFixingErrors] = useState<string | null>(null);
     const [isModifyingScriptPrompts, setIsModifyingScriptPrompts] = useState<string | null>(null);
+    const [isImprovingScriptConcept, setIsImprovingScriptConcept] = useState<string | null>(null);
 
     const handleEnhance = useCallback(async (processorNodeId: string) => {
         const inputConnections = connections.filter(c => c.toNodeId === processorNodeId);
@@ -751,6 +752,29 @@ export const useGeminiModification = ({
         }
     }, [connections, getUpstreamTextValue, setNodes, nodes, setError, setIsModifyingScriptPrompts, executionStopRequested, isModifyingScriptPrompts]);
 
+    const handleImproveScriptConcept = useCallback(async (nodeId: string, currentConcept: string) => {
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node) return;
+
+        let parsed;
+        try { parsed = JSON.parse(node.value || '{}'); } catch { parsed = {}; }
+        const targetLanguage = parsed.targetLanguage || 'en';
+
+        setIsImprovingScriptConcept(nodeId);
+        setError(null);
+        try {
+            const improved = await improveScriptConcept(currentConcept, targetLanguage);
+            setNodes(prev => prev.map(n => n.id === nodeId ? { 
+                ...n, 
+                value: JSON.stringify({ ...parsed, prompt: improved }) 
+            } : n));
+        } catch (e: any) {
+            setError(e.message || "Concept improvement failed.");
+        } finally {
+            setIsImprovingScriptConcept(null);
+        }
+    }, [nodes, setNodes, setError, setIsImprovingScriptConcept]);
+
     return {
         states: {
             isEnhancing,
@@ -758,6 +782,7 @@ export const useGeminiModification = ({
             isModifyingScriptPart,
             isFixingErrors,
             isModifyingScriptPrompts,
+            isImprovingScriptConcept,
         },
         handleEnhance,
         handleTranslate,
@@ -765,12 +790,14 @@ export const useGeminiModification = ({
         handleModifyAnalyzerFramePart,
         handleFixErrors,
         handleModifyScriptPrompts,
+        handleImproveScriptConcept,
         stop: () => {
             setIsEnhancing(null);
             setIsTranslating(null);
             setIsModifyingScriptPart(null);
             setIsFixingErrors(null);
             setIsModifyingScriptPrompts(null);
+            setIsImprovingScriptConcept(null);
         }
     };
-}
+};
