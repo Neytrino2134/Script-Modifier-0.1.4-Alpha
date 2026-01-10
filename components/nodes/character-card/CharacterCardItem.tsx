@@ -202,7 +202,7 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                         <ActionButton title={t('node.action.paste')} onClick={(e) => { e.stopPropagation(); onPasteImageToSlot(); }} className="bg-black/60 p-1.5 rounded text-emerald-400 hover:text-white" tooltipPosition="left">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2" />
                                             </svg>
                                         </ActionButton>
                                         <ActionButton title={t('node.action.copy')} onClick={(e) => { 
@@ -223,7 +223,7 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                                         className="mt-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-xs font-bold rounded border border-gray-600 transition-colors flex items-center gap-1.5"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
                                         {t('node.action.paste')}
                                     </button>
@@ -424,7 +424,7 @@ export const CharacterCardItem: React.FC<CharacterCardItemProps> = ({
                             <CopyIcon className="h-4 w-4" />
                         </ActionButton>
                         <ActionButton title={t('node.action.paste')} onClick={(e) => { e.stopPropagation(); onPasteToCard(); }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                         </ActionButton>
                         <ActionButton title="Detach" onClick={(e) => { e.stopPropagation(); onDetach(); }}>
                             <DetachIcon className="h-4 w-4" />

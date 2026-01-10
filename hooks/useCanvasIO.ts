@@ -66,7 +66,8 @@ export const useCanvasIO = ({
             const sanitizedTabName = activeTabName.replace(/ /g, '_').replace(/[^a-zA-Z0-9_.-]/g, '');
 
             a.href = url;
-            a.download = `Script-Modifier-${sanitizedTabName}-${dateTimeString}.json`;
+            // Changed extension from .json to .SMC (Script Modifier Canvas)
+            a.download = `Script-Modifier-${sanitizedTabName}-${dateTimeString}.SMC`;
             a.click();
             URL.revokeObjectURL(url);
             a.remove();

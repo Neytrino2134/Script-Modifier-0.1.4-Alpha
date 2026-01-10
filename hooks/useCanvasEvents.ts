@@ -268,7 +268,8 @@ export const useCanvasEvents = ({
                  return;
             }
             
-            if (file.type === 'application/json' || file.name.endsWith('.json')) {
+            // Allow .json, .SMC, .SMP and .CHAR files
+            if (file.type === 'application/json' || file.name.endsWith('.json') || file.name.endsWith('.SMC') || file.name.endsWith('.SMP') || file.name.endsWith('.CHAR')) {
                 const text = await file.text();
                 
                 let data;

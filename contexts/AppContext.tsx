@@ -1,3 +1,4 @@
+
 import React, { createContext, useCallback, useMemo, useState, ReactNode, useContext, useRef, useEffect } from 'react';
 import type { Node, Connection, Point, Group, LibraryItem, LineStyle, Tool, CatalogItem, TabState, ConnectingInfo } from '../types';
 import { NodeType, LibraryItemType, CatalogItemType } from '../types';
@@ -387,11 +388,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const initialSavedState: TabState = {
       id: `tab-${Date.now()}`,
-      name: 'Tab 1',
+      name: 'Canvas 1',
       ...INITIAL_CANVAS_STATE
     };
     
-    const [tabs, setTabs] = useState<TabState[]>([createNewTab('Tab 1', initialSavedState)]);
+    const [tabs, setTabs] = useState<TabState[]>([createNewTab('Canvas 1', initialSavedState)]);
     const [activeTabIndex, setActiveTabIndex] = useState(0);
     
     const loadedTabIdRef = useRef<string | null>(initialSavedState.id);
@@ -402,7 +403,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     const addTab = () => {
-        const newTab = createNewTab(`Tab ${tabs.length + 1}`);
+        const newTab = createNewTab(`Canvas ${tabs.length + 1}`);
         setTabs(prev => [...prev, newTab]);
         setActiveTabIndex(tabs.length);
     };
@@ -425,12 +426,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setTabs(prev => prev.map((tab, i) => i === index ? { ...tab, name: newName } : tab));
     };
 
-    const { nodes, setNodes, nodeIdCounter, handleValueChange, handleAddNode: addNodeFromHook, handleDeleteNode, handleCopyNodeValue, handlePasteNodeValue, handleToggleNodeCollapse: baseHandleToggleNodeCollapse, handleDuplicateNode: baseHandleDuplicateNode, handleDuplicateNodeEmpty, handleToggleNodeOutputVisibility } = useNodes([], 0);
+    // Use INITIAL_CANVAS_STATE for initialization to avoid empty canvas flash
+    const { nodes, setNodes, nodeIdCounter, handleValueChange, handleAddNode: addNodeFromHook, handleDeleteNode, handleCopyNodeValue, handlePasteNodeValue, handleToggleNodeCollapse: baseHandleToggleNodeCollapse, handleDuplicateNode: baseHandleDuplicateNode, handleDuplicateNodeEmpty, handleToggleNodeOutputVisibility } = useNodes(INITIAL_CANVAS_STATE.nodes, INITIAL_CANVAS_STATE.nodeIdCounter);
     const handleDuplicateNode = baseHandleDuplicateNode;
     
-    const { connections, setConnections, addConnection, removeConnectionsByNodeId, removeConnectionById } = useConnections([]);
-    const { viewTransform, setViewTransform, isPanning, pointerPosition, clientPointerPosition, handleWheel, startPanning, pan, updatePointerPosition, stopPanning, setZoom, handleCanvasTouchStart, handleCanvasTouchMove, handleCanvasTouchEnd } = useCanvas({ scale: 1, translate: { x: 0, y: 0 } });
-    const { groups, setGroups, addGroup, removeGroup } = useGroups([]);
+    const { connections, setConnections, addConnection, removeConnectionsByNodeId, removeConnectionById } = useConnections(INITIAL_CANVAS_STATE.connections);
+    const { viewTransform, setViewTransform, isPanning, pointerPosition, clientPointerPosition, handleWheel, startPanning, pan, updatePointerPosition, stopPanning, setZoom, handleCanvasTouchStart, handleCanvasTouchMove, handleCanvasTouchEnd } = useCanvas(INITIAL_CANVAS_STATE.viewTransform);
+    const { groups, setGroups, addGroup, removeGroup } = useGroups(INITIAL_CANVAS_STATE.groups);
     
     const handleToggleNodeCollapse = useCallback((nodeId: string) => {
         setNodes(currentNodes => {
@@ -700,7 +702,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Script_Modifier_Project_${dateString}.json`;
+            // Changed extension from .json to .SMP (Script Modifier Project)
+            a.download = `Script_Modifier_Project_${dateString}.SMP`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -764,7 +767,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const regex = /^Script-Modifier-(.+)-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/;
+            // Update regex to support .SMC and .json for canvas files
+            const regex = /^Script-Modifier-(.+)-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.(SMC|json)$/i;
             const match = file.name.match(regex);
             if (match && match[1]) {
                 const tabName = match[1].replace(/_/g, ' ');

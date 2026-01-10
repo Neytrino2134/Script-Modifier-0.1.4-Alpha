@@ -17,8 +17,10 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
   
   // Animation States
   const [isVisible, setIsVisible] = useState(false);
-  // Single exit state for smoother, simultaneous animations
   const [isExiting, setIsExiting] = useState(false);
+  
+  // Internal mounting state to allow exit animation to finish before unmounting
+  const [shouldRender, setShouldRender] = useState(isOpen);
 
   // Custom Dropdown State
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,6 +38,7 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
 
   useEffect(() => {
     if (isOpen) {
+      setShouldRender(true);
       const storedKey = localStorage.getItem('gemini-api-key');
       setApiKey(storedKey ? MASKED_KEY : '');
       setIsExiting(false);
@@ -43,12 +46,14 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
         setIsVisible(true);
       });
       setTimeout(() => inputRef.current?.focus(), 100);
-    } else {
+    } else if (!isExiting) {
+        // Only unmount immediately if we are NOT in the middle of an exit sequence
         setIsVisible(false);
+        setShouldRender(false);
         setIsDropdownOpen(false);
         setIsReloadConfirmOpen(false);
     }
-  }, [isOpen]);
+  }, [isOpen, isExiting]);
 
   // Click outside listener for dropdown
   useEffect(() => {
@@ -73,19 +78,20 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
   }, [language, pendingDevSave]);
 
   const triggerSaveSequence = (key: string, isFree: boolean) => {
-      // Trigger animations
+      // 1. Start animation immediately
       setIsExiting(true);
 
-      // Wait for animations to complete before unmounting/saving
-      // The content launch animation takes 0.8s. The background fade starts at 0.5s and takes 0.7s.
-      // Total visual time approx 1.2s.
+      // 2. Trigger the logic immediately (Load data, Reset canvas, Translate)
+      // This happens while the animation plays, ensuring data is ready/reset underneath
+      onSave(key, isFree);
+      
+      // 3. Unmount after animation finishes
+      // The content launch animation takes roughly 0.8s
       setTimeout(() => {
          setIsVisible(false);
-         // Small buffer to ensure visual cleanup
-         setTimeout(() => {
-             onSave(key, isFree);
-         }, 50); 
-      }, 1000); 
+         setShouldRender(false);
+         setIsExiting(false);
+      }, 1200); 
   };
 
   const handleSave = () => {
@@ -178,7 +184,7 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
       }
   };
 
-  if (!isOpen) {
+  if (!shouldRender) {
     return null;
   }
 
@@ -193,6 +199,10 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
         35% { transform: scale(1.03) translateY(5px); opacity: 1; }
         /* Phase 2: Launch (Spring out) - Shoots UP and zooms away */
         100% { transform: scale(0.8) translateY(-120vh); opacity: 0; }
+    }
+    @keyframes landSequence {
+        0% { transform: scale(1.05) translateY(20px); opacity: 0; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
     }
     @keyframes textShimmer {
         0% { background-position: 100% 50%; }
@@ -301,7 +311,9 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ isOpen, onSave, isFirstRu
         className={`z-10 w-full flex flex-col items-center ${isReloadConfirmOpen ? 'blur-sm pointer-events-none' : ''}`}
         style={{
             // Use ease-in for the launch to simulate acceleration
-            animation: isExiting ? 'launchSequence 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards' : 'none'
+            animation: isExiting 
+                ? 'launchSequence 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards' 
+                : 'landSequence 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards'
         }}
       >
         

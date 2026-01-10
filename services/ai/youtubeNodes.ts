@@ -95,36 +95,11 @@ export const generateYouTubeTitles = async (
 
     const prompt = instructions.join('\n\n');
 
-    // Dynamic schema based on options
-    const properties: any = {
-        title: { type: Type.STRING },
-        description: { type: Type.STRING },
-        tags: { type: Type.STRING },
-    };
-
-    if (options?.generateThumbnail) {
-        properties.thumbnailPrompt = { type: Type.STRING };
-    }
-
     const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: { 
-            responseMimeType: 'application/json',
-            responseSchema: {
-                type: Type.OBJECT,
-                // The API will return a map where keys are language codes
-                // Since the keys are dynamic (ru, en, etc.), we usually just ask for JSON and parse it
-                // But if we want to enforce schema for internal objects, we'd need a map type which isn't fully supported in schema gen yet for dynamic keys
-                // So we rely on the prompt "Return a JSON object where keys are language codes" and parse the raw JSON.
-                // However, providing a schema for the *values* helps.
-                // Since we can't easily define dynamic keys in standard schema config here without knowing languages beforehand,
-                // we will stick to text parsing or a generic object schema if supported.
-                // For now, let's omit responseSchema to allow dynamic keys (languages) at the root level, 
-                // OR we can try to define known languages if provided.
-                
-                // Let's stick to prompt-based JSON enforcement as the keys are dynamic.
-            }
+            responseMimeType: 'application/json'
         }
     }));
     return JSON.parse(cleanJsonString(response.text || '{}'));

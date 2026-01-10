@@ -4,6 +4,7 @@ import type { NodeContentProps } from '../../types';
 import { ActionButton } from '../ActionButton'; 
 import { SettingsPanel } from './youtube-title-generator/SettingsPanel';
 import Tooltip from '../ui/Tooltip';
+import CustomCheckbox from '../ui/CustomCheckbox';
 
 const LANGUAGES = [
     { code: 'ru', label: 'RU' },
@@ -142,11 +143,11 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
               ];
 
         return (
-            <div key={lang} className="flex flex-col flex-1 min-h-0 space-y-2">
+            <div key={lang} className="flex flex-col flex-1 min-h-0 space-y-2 min-w-0">
                 <h4 className="font-semibold text-gray-300 text-sm border-b border-gray-700/50 pb-1">{langName}</h4>
                 <div className="flex-grow overflow-y-auto custom-scrollbar space-y-3 pr-1">
                     {fields.map(field => (
-                        <div key={field.key} className="flex flex-col">
+                        <div key={field.key} className="flex flex-col w-full">
                             <div className="flex justify-between items-center mb-1">
                                 <label className="text-xs font-medium text-gray-400">{field.label}</label>
                                 <ActionButton title={t('node.action.copy')} onClick={() => handleCopy(data[field.key] || '')}>
@@ -186,12 +187,43 @@ const YouTubeTitleGeneratorNode: React.FC<NodeContentProps> = ({
                     <button onClick={() => handleValueUpdate({ mode: 'title' })} className={`px-2 py-1 rounded text-xs font-semibold h-full ${mode === 'title' ? 'bg-emerald-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}>{t('youtube_title_generator.mode.title')}</button>
                     <button onClick={() => handleValueUpdate({ mode: 'channel' })} className={`px-2 py-1 rounded text-xs font-semibold h-full ${mode === 'channel' ? 'bg-emerald-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}>{t('youtube_title_generator.mode.channel')}</button>
                 </div>
+                
+                {/* Thumbnail Toggle (Duplicate of Stack Logic) */}
+                {mode === 'title' && (
+                    <div className="flex items-center bg-gray-700 rounded-md px-2 space-x-2 h-10 border border-gray-600 flex-shrink-0" title={t('node.content.thumbnailPrompt')}>
+                        <CustomCheckbox
+                            id={`gen-thumb-${node.id}`}
+                            checked={generateThumbnail}
+                            onChange={(checked) => handleValueUpdate({ generateThumbnail: checked })}
+                            disabled={isLoading}
+                            className="h-4 w-4"
+                        />
+                        <label htmlFor={`gen-thumb-${node.id}`} className="text-xs text-gray-300 select-none cursor-pointer font-medium">Cover</label>
+                    </div>
+                )}
+
                 <button
                     onClick={isLoading ? onStopGeneration : handleGenerate}
                     disabled={isStopping || (!isLoading && !idea.trim() && !isInputConnected)}
-                    className={`flex-grow flex-shrink-0 h-10 px-4 py-2 font-bold text-white rounded-md transition-colors duration-200 ${isStopping ? 'bg-yellow-600' : (isLoading ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-500')}`}
+                    className={`flex-grow flex-shrink-0 h-10 px-4 py-2 font-bold text-white rounded-md transition-colors duration-200 flex items-center justify-center gap-2 ${
+                        isStopping 
+                        ? 'bg-yellow-600 hover:bg-yellow-500' 
+                        : (isLoading 
+                            ? 'bg-cyan-600 hover:bg-cyan-500' 
+                            : 'bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-500')
+                    }`}
                 >
-                    {isStopping ? t('node.action.stopping') : (isLoading ? t('node.content.generating') : t('node.content.generateText'))}
+                    {isLoading ? (
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    ) : !isStopping && (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    )}
+                    <span>{isStopping ? t('node.action.stopping') : (isLoading ? t('node.content.generating') : t('node.content.generateText'))}</span>
                 </button>
             </div>
             

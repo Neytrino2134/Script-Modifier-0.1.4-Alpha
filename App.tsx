@@ -108,15 +108,15 @@ const Editor: React.FC = () => {
     const hasUseFreeKeyInStorage = localStorage.getItem('gemini-use-free-key');
     const isFree = hasUseFreeKeyInStorage === 'true';
 
-    if (!hasApiKeyInStorage && !isFree) {
-      // First launch, no settings saved yet.
+    // Only show welcome if it hasn't been shown AND there's no key
+    // OR if we specifically need an API key and it's missing (but not first run)
+    if (!hasWelcomeBeenShown && !hasApiKeyInStorage && !isFree) {
       setIsWelcomeDialogOpen(true);
-      setHasWelcomeBeenShown(false);
-    } else if (!apiSettings.hasApiKey) {
-      // Settings exist but are empty/invalid.
+    } else if (!apiSettings.hasApiKey && hasWelcomeBeenShown) {
+      // Settings exist but are empty/invalid, show specific dialog
       setIsApiKeyDialogOpen(true);
     }
-  }, [apiSettings.hasApiKey]);
+  }, [hasWelcomeBeenShown]); // Dependency changed to prevent loop on apiSettings update
 
   // Handle Full Screen Changes
   useEffect(() => {
@@ -146,6 +146,7 @@ const Editor: React.FC = () => {
     const cleanedKey = apiKey.trim();
     localStorage.setItem('gemini-use-free-key', useFreeKey ? 'true' : 'false');
     
+    // Only update key if user typed something (to allow resuming with existing key)
     if (useFreeKey) {
         localStorage.removeItem('gemini-api-key');
     } else if (cleanedKey) {
@@ -156,20 +157,29 @@ const Editor: React.FC = () => {
     const storedKey = localStorage.getItem('gemini-api-key');
     const storedFree = localStorage.getItem('gemini-use-free-key') === 'true';
     
+    const newHasApiKey = storedFree || (!!storedKey && storedKey.length > 0);
+
     setApiSettings({
-        hasApiKey: storedFree || (!!storedKey && storedKey.length > 0),
+        hasApiKey: newHasApiKey,
         useFreeKey: storedFree,
     });
 
-    // Determine if this is a "Fresh Start" or just an update/resume
-    if (!hasWelcomeBeenShown) {
-        // First time running? Reset canvas to default state (fresh start)
-        handleResetToDefault(true); // Pass true for silent reset
-    } 
-
+    // If it was the first run (Welcome Screen), reset to default if requested implicitly
+    // However, if the user just clicked "Resume" (empty key string passed), we don't reset.
+    // We only reset if they entered a key on the Welcome Screen (First Run flow usually implies reset)
+    // BUT we want to avoid double reset.
+    
+    // Logic: If Welcome was OPEN, close it.
+    if (isWelcomeDialogOpen) {
+         // Determine if this is a "Fresh Start". If hasWelcomeBeenShown is FALSE, it's fresh.
+         if (!hasWelcomeBeenShown) {
+             handleResetToDefault(true); // Silent reset to clean slate
+         }
+         setIsWelcomeDialogOpen(false);
+         setHasWelcomeBeenShown(true);
+    }
+    
     setIsApiKeyDialogOpen(false);
-    setIsWelcomeDialogOpen(false);
-    setHasWelcomeBeenShown(true);
 
     // Trigger translation of the canvas using the currently selected language
     // Use setTimeout to ensure language context update has propagated
@@ -177,7 +187,9 @@ const Editor: React.FC = () => {
         translateGraph();
     }, 50);
 
-    addToast(t('toast.apiKeySaved'), 'success');
+    if (cleanedKey || useFreeKey) {
+         addToast(t('toast.apiKeySaved'), 'success');
+    }
   };
   
   const handleClearApiKey = () => {
@@ -399,6 +411,8 @@ const Editor: React.FC = () => {
      if (isEmpty) {
         // Just go to welcome screen (effectively clearing view context)
         setIsWelcomeDialogOpen(true);
+        // Ensure restart state logic
+        setHasWelcomeBeenShown(false); 
      } else {
         setConfirmInfo({
             title: t('dialog.exit.title'),
@@ -465,7 +479,8 @@ const Editor: React.FC = () => {
             />
         )}
         
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json,application/json" className="hidden" />
+        {/* Updated accept attribute to include .SMC, .SMP and .CHAR */}
+        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json,application/json,.SMC,.SMP,.CHAR" className="hidden" />
         <input type="file" ref={catalogFileInputRef} onChange={handleCatalogFileChange} accept=".json,application/json" className="hidden" />
         <input type="file" ref={libraryFileInputRef} onChange={handleLibraryFileChange} accept=".json,application/json" className="hidden" />
         

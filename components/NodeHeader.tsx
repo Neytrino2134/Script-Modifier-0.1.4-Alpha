@@ -362,7 +362,8 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                                         
                                         const charName = count === 1 ? (cards[0].name || 'Entity') : 'Entity_Collection';
                                         const cleanName = charName.replace(/[^a-z0-9а-яё\s-_]/gi, '').trim();
-                                        filename = `${cleanName.replace(/\s+/g, '_')}_${timestamp}.json`;
+                                        // CHANGED: Use .CHAR extension
+                                        filename = `${cleanName.replace(/\s+/g, '_')}_${timestamp}.CHAR`;
                                         
                                         // Process images for all cards
                                         const exportCards = cards.map((card: any) => {
