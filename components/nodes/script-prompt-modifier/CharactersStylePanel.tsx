@@ -22,11 +22,12 @@ export const CharactersStylePanel: React.FC<CharactersStylePanelProps> = ({
     uiState, onUpdateUiState, onUpdateValue, upstreamAnalyzerData, isStyleConnected, isDataConnected, upstreamStyleValue, styleOverride, deselectAllNodes, t, characters, onRefresh
 }) => {
     // Analyzer style is derived from upstream data
-    const analyzerStyle = upstreamAnalyzerData?.visualStyle || upstreamAnalyzerData?.generatedStyle || '';
+    // Prefer generatedStyle for the placeholder too
+    const analyzerStyle = upstreamAnalyzerData?.generatedStyle || (upstreamAnalyzerData?.visualStyle !== 'none' ? upstreamAnalyzerData?.visualStyle : '') || '';
     
     // Placeholder Logic:
     // 1. If Connected: Show "Connected..."
-    // 2. If Not Connected & Analyzer has style: Show Analyzer style
+    // 2. If Not Connected & Analyzer has valid style: Show Analyzer style
     // 3. Else: Show default placeholder
     const activePlaceholder = isStyleConnected 
         ? t('node.content.connectedPlaceholder') 

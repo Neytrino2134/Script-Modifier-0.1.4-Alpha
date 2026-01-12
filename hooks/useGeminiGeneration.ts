@@ -193,10 +193,17 @@ export const useGeminiGeneration = ({
 
             if (executionStopRequested.current) throw new Error("Generation stopped.");
 
-            // Update the script object, but DO NOT modify the characters list (Scene Only Mode)
+            // FIX: Map the AI's generated style description to 'generatedStyle'.
+            // The AI might return it in 'generatedStyle' (per new prompt) or 'visualStyle' (legacy/default field).
+            // We force it into 'generatedStyle' in our state so the UI text area shows it.
+            // We RESTORE 'visualStyle' from parsedValue so the dropdown selection isn't overwritten.
+            const aiGeneratedDescription = script.generatedStyle || script.visualStyle || '';
+
             const finalScriptData = {
                 ...script,
-                detailedCharacters: detailedCharacters // Preserve existing
+                generatedStyle: aiGeneratedDescription,
+                visualStyle: parsedValue.visualStyle, // Restore dropdown value
+                detailedCharacters: detailedCharacters // Preserve existing characters
             };
 
             setNodes(prev => prev.map(n => {

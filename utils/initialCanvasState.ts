@@ -5,8 +5,8 @@ export const INITIAL_CANVAS_STATE = {
   "nodes": [
     {
       "type": NodeType.SCRIPT_GENERATOR,
-      "title": "Script Generator",
-      "value": "{\"prompt\":\"\",\"targetLanguage\":\"en\",\"characterType\":\"simple\",\"useExistingCharacters\":false,\"narratorEnabled\":true,\"narratorMode\":\"normal\",\"summary\":\"\",\"detailedCharacters\":[],\"scenes\":[],\"isAdvancedMode\":false,\"numberOfScenes\":null,\"isDetailedPlot\":false,\"genre\":\"general\",\"genre2\":\"general\",\"noCharacters\":false,\"model\":\"gemini-3-pro-preview\",\"includeSubscribeScene\":false,\"visualStyle\":\"none\",\"customVisualStyle\":\"\",\"generatedStyle\":\"\",\"createSecondaryChars\":true,\"createKeyItems\":true,\"safeGeneration\":false,\"thinkingEnabled\":false,\"scenelessMode\":false,\"simpleActions\":false,\"commercialSafe\":false,\"smartConceptEnabled\":false,\"uiState\":{\"isSummaryCollapsed\":true,\"collapsedCharacters\":[],\"collapsedScenes\":[],\"isStyleCollapsed\":true,\"isSettingsCollapsed\":true,\"isCharactersSectionCollapsed\":true,\"isScenesSectionCollapsed\":true}}",
+      "title": "Генератор сценариев",
+      "value": "{\"prompt\":\"\",\"targetLanguage\":\"en\",\"characterType\":\"simple\",\"useExistingCharacters\":false,\"narratorEnabled\":false,\"narratorMode\":\"normal\",\"summary\":\"\",\"detailedCharacters\":[],\"scenes\":[],\"isAdvancedMode\":false,\"numberOfScenes\":null,\"isDetailedPlot\":false,\"genre\":\"general\",\"genre2\":\"general\",\"noCharacters\":false,\"model\":\"gemini-3-pro-preview\",\"includeSubscribeScene\":false,\"visualStyle\":\"none\",\"customVisualStyle\":\"\",\"generatedStyle\":\"\",\"generateMainChars\":true,\"createSecondaryChars\":true,\"createKeyItems\":true,\"safeGeneration\":false,\"thinkingEnabled\":false,\"scenelessMode\":false,\"simpleActions\":false,\"commercialSafe\":false,\"smartConceptEnabled\":false,\"atmosphericEntryEnabled\":false,\"generationProgress\":null,\"uiState\":{\"isSettingsCollapsed\":true,\"isSummaryCollapsed\":true,\"isStyleCollapsed\":true,\"isCharactersSectionCollapsed\":true,\"isScenesSectionCollapsed\":true,\"collapsedCharacters\":[],\"collapsedScenes\":[]}}",
       "width": 680,
       "height": 800,
       "id": "node-13-1763665880409",
@@ -17,8 +17,8 @@ export const INITIAL_CANVAS_STATE = {
     },
     {
       "type": NodeType.SCRIPT_ANALYZER,
-      "title": "Script Analyzer",
-      "value": "{\"characters\":[],\"scenes\":[],\"targetLanguage\":\"en\",\"model\":\"gemini-3-pro-preview\",\"startSceneNumber\":null,\"endSceneNumber\":null,\"framesPerScene\":null,\"minFrames\":null,\"maxFrames\":null,\"hierarchyEnabled\":true,\"mandatoryBgEnabled\":true,\"statePersistenceEnabled\":true,\"livingWorldEnabled\":true,\"extendedAnalysis\":false,\"microActionBreakdown\":false,\"batchProcessing\":true,\"professionalStoryboard\":true,\"cinematographyEnabled\":true,\"safeGeneration\":false,\"thinkingEnabled\":false,\"shotFilter\":\"all\",\"anthroEnabled\":false,\"subscribeEnhancement\":false,\"anatomicalStrictness\":true,\"propConsistency\":true,\"visualStyle\":\"\",\"autoIndexCharacters\":true,\"uiState\":{\"isSettingsCollapsed\":true,\"isCharStyleCollapsed\":true},\"settingsPaneHeight\":200,\"characterPaneHeight\":160,\"generationProgress\":null}",
+      "title": "Анализатор сценария",
+      "value": "{\"characters\":[],\"scenes\":[],\"targetLanguage\":\"en\",\"model\":\"gemini-3-pro-preview\",\"startSceneNumber\":null,\"endSceneNumber\":null,\"framesPerScene\":null,\"minFrames\":null,\"maxFrames\":null,\"hierarchyEnabled\":true,\"mandatoryBgEnabled\":true,\"statePersistenceEnabled\":true,\"livingWorldEnabled\":false,\"extendedAnalysis\":false,\"microActionBreakdown\":false,\"batchProcessing\":true,\"professionalStoryboard\":true,\"cinematographyEnabled\":true,\"safeGeneration\":false,\"thinkingEnabled\":false,\"shotFilter\":\"all\",\"anthroEnabled\":false,\"subscribeEnhancement\":false,\"anatomicalStrictness\":true,\"propConsistency\":true,\"visualStyle\":\"\",\"autoIndexCharacters\":true,\"uiState\":{\"isSettingsCollapsed\":true,\"isCharStyleCollapsed\":true},\"settingsPaneHeight\":200,\"characterPaneHeight\":160,\"generationProgress\":null}",
       "width": 680,
       "height": 800,
       "id": "node-15-1763665895770",
@@ -29,8 +29,8 @@ export const INITIAL_CANVAS_STATE = {
     },
     {
       "type": NodeType.SCRIPT_PROMPT_MODIFIER,
-      "title": "Prompt Finalizer",
-      "value": "{\"finalPrompts\":[],\"videoPrompts\":[],\"usedCharacters\":[],\"targetLanguage\":\"en\",\"startFrameNumber\":null,\"endFrameNumber\":null,\"startSceneNumber\":null,\"endSceneNumber\":null,\"generationProgress\":null,\"styleOverride\":\"none\",\"characterPaneHeight\":162,\"model\":\"gemini-3-pro-preview\",\"disabledInstructionIds\":[\"break_paragraphs\",\"rule_saturation\"],\"includeGeneralCharDesc\":true,\"includeFullCharDesc\":false,\"safeGeneration\":false,\"thinkingEnabled\":false,\"propEnhancementEnabled\":true,\"uiState\":{\"isSettingsCollapsed\":true,\"isCharStyleCollapsed\":true},\"settingsPaneHeight\":200}",
+      "title": "Финалайзер промптов",
+      "value": "{\"finalPrompts\":[],\"videoPrompts\":[],\"sceneContexts\":{},\"usedCharacters\":[],\"targetLanguage\":\"en\",\"startFrameNumber\":null,\"endFrameNumber\":null,\"startSceneNumber\":null,\"endSceneNumber\":null,\"generationProgress\":null,\"styleOverride\":\"\",\"characterPaneHeight\":162,\"model\":\"gemini-3-pro-preview\",\"disabledInstructionIds\":[\"break_paragraphs\",\"rule_saturation\",\"pm_anthro\"],\"charDescMode\":\"none\",\"safeGeneration\":false,\"thinkingEnabled\":false,\"propEnhancementEnabled\":true,\"uiState\":{\"isSettingsCollapsed\":true,\"isCharStyleCollapsed\":false},\"settingsPaneHeight\":200}",
       "width": 680,
       "height": 800,
       "id": "node-16-1763665908511",
@@ -41,7 +41,7 @@ export const INITIAL_CANVAS_STATE = {
     },
     {
       "type": NodeType.CHARACTER_GENERATOR,
-      "title": "Character Generator",
+      "title": "Генератор персонажей",
       "value": "{\"prompt\":\"\",\"numberOfCharacters\":1,\"targetLanguage\":\"en\",\"characterType\":\"simple\",\"style\":\"simple\",\"customStyle\":\"\",\"characters\":[]}",
       "width": 680,
       "height": 800,
@@ -53,7 +53,7 @@ export const INITIAL_CANVAS_STATE = {
     },
     {
       "type": NodeType.YOUTUBE_TITLE_GENERATOR,
-      "title": "YouTube Title Generator",
+      "title": "Генератор заголовков YouTube",
       "value": "{\"mode\":\"title\",\"idea\":\"\",\"targetLanguages\":{\"ru\":true,\"en\":false},\"generatedTitleOutputs\":{},\"generatedChannelOutputs\":{}}",
       "width": 680,
       "height": 800,
@@ -65,7 +65,7 @@ export const INITIAL_CANVAS_STATE = {
     },
     {
       "type": NodeType.NARRATOR_TEXT_GENERATOR,
-      "title": "Narrator Text Generator",
+      "title": "Генератор текста диктора",
       "value": "{\"prompt\":\"\",\"role\":\"narrator\",\"generatedTexts\":{\"ru\":\"\",\"en\":\"\"},\"targetLanguages\":{\"ru\":true,\"en\":true},\"generateSSML\":false}",
       "width": 680,
       "height": 800,
@@ -77,7 +77,7 @@ export const INITIAL_CANVAS_STATE = {
     },
     {
       "type": NodeType.SPEECH_SYNTHESIZER,
-      "title": "Speech Synthesizer",
+      "title": "Синтезатор речи",
       "value": "{\"inputText\":\"\",\"voice\":\"Zephyr\",\"audioFiles\":[],\"startSceneNumber\":null,\"endSceneNumber\":null,\"intonation\":\"standard\",\"mode\":\"simple\",\"isMultiSpeaker\":false,\"speaker1Name\":\"Man\",\"speaker1Voice\":\"Zephyr\",\"speaker2Name\":\"Woman\",\"speaker2Voice\":\"Kore\"}",
       "width": 680,
       "height": 800,
@@ -89,7 +89,7 @@ export const INITIAL_CANVAS_STATE = {
     },
     {
       "type": NodeType.MUSIC_IDEA_GENERATOR,
-      "title": "Music Idea Generator",
+      "title": "Генератор музыкальных идей",
       "value": "{\"generateLyrics\":true,\"idea\":\"\",\"targetLanguages\":{\"ru\":true,\"en\":false},\"generatedLyrics\":{},\"generatedMusicPrompts\":{},\"generatedTitles\":{}}",
       "width": 680,
       "height": 800,
@@ -137,8 +137,8 @@ export const INITIAL_CANVAS_STATE = {
   "viewTransform": {
     "scale": 1,
     "translate": {
-      "x": -76.28342475994805,
-      "y": -87.09443655635778
+      "x": -10.476763626649245,
+      "y": -116.12297952975814
     }
   },
   "nodeIdCounter": 32

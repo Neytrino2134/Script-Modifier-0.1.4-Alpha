@@ -197,7 +197,7 @@ export interface AppContextType {
     isGeneratingCharacterImage: string | null;
     handleModifyScriptPrompts: (nodeId: string) => void;
     isModifyingScriptPrompts: string | null;
-    handleApplyAliases: (nodeId: string) => void;
+    handleApplyAliases: (nodeId: string) => Promise<void>;
     handleReadData: (nodeId: string) => void;
     isReadingData: string | null;
     handleGenerateSpeech: (nodeId: string) => void;

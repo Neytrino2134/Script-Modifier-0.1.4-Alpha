@@ -132,10 +132,10 @@ export const useNodes = (initialNodes: Node[], initialCounter: number) => {
         setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, value } : n)));
     }, []);
     
-    const handleCopyNodeValue = useCallback((nodeId: string) => {
+    const handleCopyNodeValue = useCallback(async (nodeId: string) => {
         const node = nodes.find(n => n.id === nodeId);
         if (node) {
-             navigator.clipboard.writeText(node.value);
+             await navigator.clipboard.writeText(node.value);
         }
     }, [nodes]);
 

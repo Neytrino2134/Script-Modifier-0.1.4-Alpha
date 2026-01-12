@@ -48,7 +48,7 @@ export const nodes = {
     'node.help.audio_transcriber': 'Uploads an audio or video file and converts its audio to text using Gemini API.',
     'node.help.youtube_title_generator': 'Generates catchy titles, descriptions, and tags for a YouTube video.',
     'node.help.music_idea_generator': 'Generates song lyrics or a musical prompt based on an idea.',
-    'node.help.youtube_analytics': 'Analyzes channel statistics and provides growth advice.',
+    'node.help.youtube_analytics': 'Analyzes channel statistics and provides growth strategy advice.',
     'node.help.image_editor': 'Edit images with AI (Inpainting, Outpainting).',
     'node.action.help': 'Help',
     'node.action.expand': 'Expand',
@@ -348,4 +348,15 @@ export const nodes = {
     'node.content.secChars': 'SECONDARY',
     'node.content.keyItems': 'ITEMS',
     'node.content.thumbnailPrompt': 'Thumbnail Prompt',
+
+    // Script Analyzer Stack Headers
+    'node.content.stack.system': '1. System & Context',
+    'node.content.stack.role': '2. Role & Core Logic',
+    'node.content.stack.cinematography': '3. Cinematography',
+    'node.content.stack.world': '4. World & Continuity',
+
+    // Missing Script Generator Headers
+    'node.content.sg_stack.narrative': 'NARRATIVE ENGINE',
+    'node.content.sg_stack.world': 'VISUAL WORLD',
+    'node.content.sg_stack.constraints': 'OUTPUT FORMAT & CONSTRAINTS',
 };

@@ -30,12 +30,14 @@ export const generateScriptEntities = async (
     // Inputs Data
     instructions.push(`${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} "${prompt}"`);
 
+    const hasExistingChars = existingCharacters && existingCharacters.length > 0;
+
     // Existing Cast context
-    if (existingCharacters && existingCharacters.length > 0) {
-        const charList = existingCharacters.map(c => 
+    if (hasExistingChars) {
+        const charList = existingCharacters!.map(c => 
             `- **Name:** ${c.name}\n  **Index:** ${c.index}\n  **Description:** ${c.fullDescription}`
         ).join('\n\n');
-        instructions.push(`EXISTING CAST (Do NOT duplicate these unless updating look): \n${charList}`);
+        instructions.push(`EXISTING CAST (LOCKED): \n${charList}`);
     } else {
         instructions.push("No existing cast provided.");
     }
@@ -43,9 +45,15 @@ export const generateScriptEntities = async (
     // Rules
     instructions.push(`**OUTPUT LANGUAGE:** Character names can remain in their original language/English, but descriptions must be in ${languageName}.`);
 
-    // Check for Main Character Generation flag in advancedOptions
+    // Smart Main Character Generation Logic
     if (advancedOptions.generateMainChars) {
-        instructions.push(CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.text);
+        if (hasExistingChars) {
+            // Intelligent override: If characters exist, don't blindly generate "Main Characters" again.
+            instructions.push("**SMART GENERATION LOGIC:** The Main Character(s) are likely already provided in the 'EXISTING CAST' list above. \n1. **DO NOT** re-generate or duplicate existing characters (e.g., if Entity-1 is the hero, do not create a new hero). \n2. **ONLY** generate a new profile for an existing character if the plot explicitly demands a **visual transformation** (e.g., 'Batman (Armored Suit)'). \n3. Focus primarily on generating **MISSING** entities required by the prompt (Antagonists, Sidekicks) that are not yet in the list.");
+        } else {
+            // No characters exist, standard generation
+            instructions.push(CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.text);
+        }
     }
 
     if (createSecondaryChars) {
@@ -161,25 +169,33 @@ export const generateScript = async (
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.STRICT_NAME_PERSISTENCE.text);
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SCENE_CHARACTERS_LIST.text);
     
-    // --- CHARACTER LOCK ---
+    // --- CHARACTER LOCK (STRICT SEPARATION) ---
     if (existingCharacters && existingCharacters.length > 0) {
         const charList = existingCharacters.map(c => 
             `- **Name:** ${c.name}\n  **Index:** ${c.index}\n  **Description:** ${c.fullDescription}`
         ).join('\n\n');
         
-        instructions.push(`**CAST LIST (LOCKED):**\n${charList}`);
-        instructions.push(`**CRITICAL RULE: NO NEW CHARACTERS.** You must write the script using ONLY the entities listed above. If the story requires a generic person, describe them as "a waiter" or "a guard" without capitalization or index. Do not add them to the character list.`);
+        instructions.push(`**MANDATORY CAST LIST (DO NOT INVENT NEW ENTITY TAGS):**\n${charList}`);
+        instructions.push(CHAR_GEN_INSTRUCTIONS.STRICT_NO_NEW.text);
+        
+        // Redundant safety check to prevent hallucination of "Entity-3" for objects
+        instructions.push("ABSOLUTE PROHIBITION: Do NOT invent new `Entity-N` tags for objects or props in the scene text. Refer to objects by their names (e.g. 'table', 'sword'), NOT as Entities.");
     } else if (advancedOptions.noCharacters) {
-        // No characters handled by model
+        instructions.push("No specific characters. Focus on events and atmosphere.");
+    } else {
+        // If no characters provided, and noCharacters is false, we might need a fallback or allow auto-generation
+        // BUT per user request, we want to split logic. So we instruct to use generic placeholders or minimal generation if absolutely needed,
+        // but prefer the entity stack to handle creation.
+        instructions.push("No cast provided. Refer to characters generically (e.g. 'A tall man') or use 'Entity-1' if you must introduce a protagonist, but DO NOT generate a 'detailedCharacters' profile output.");
     }
 
     // Style Generation Logic
     if (visualStyle === 'custom' && customVisualStyle) {
          instructions.push(`TARGET VISUAL STYLE NAME: ${customVisualStyle}`);
-         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.STYLE_EXPANSION.text);
+         instructions.push(`In the JSON output field 'generatedStyle', you must NOT simply repeat this name. YOU MUST EXPAND IT into a full, detailed technical prompt.`);
     } else if (visualStyle && visualStyle !== 'none') {
          instructions.push(`TARGET VISUAL STYLE NAME: ${visualStyle}`);
-         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.STYLE_EXPANSION.text);
+         instructions.push(`In the JSON output field 'generatedStyle', you must NOT simply repeat this name. YOU MUST EXPAND IT into a full, detailed technical prompt.`);
     }
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.VISUAL_DNA.text);
 
@@ -205,7 +221,9 @@ export const generateScript = async (
 
     instructions.push(`REMINDER: Output Language MUST be ${languageName}.`);
     instructions.push(`REMINDER: Use entity format: "Entity-Index" (e.g. "Entity-1").`);
-    instructions.push("Return JSON with keys: 'summary', 'visualStyle', 'scenes' (array of objects with 'title', 'description', 'recommendedFrames', 'narratorText', 'characters' (array of strings)). Note: 'detailedCharacters' should be omitted or empty in this response as we are using the locked list.");
+    
+    // STRICT JSON FORMAT - EXPLICITLY FORBID detailedCharacters to separate logic
+    instructions.push("Return JSON with keys: 'summary', 'generatedStyle', 'scenes' (array of objects with 'title', 'description', 'recommendedFrames', 'narratorText', 'characters' (array of strings)). \n\n**IMPORTANT:** DO NOT include a 'detailedCharacters' field in this response. Character generation is handled by a separate process.");
 
     const fullPrompt = instructions.join('\n\n');
     

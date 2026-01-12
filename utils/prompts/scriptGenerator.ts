@@ -113,12 +113,12 @@ export const SCRIPT_GENERATOR_INSTRUCTIONS = {
     STRICT_NAME_PERSISTENCE: {
         id: 'strict_name_persistence',
         label: 'Strict Naming',
-        text: "**CRITICAL ENTITY NAMING RULE:** When referring to a character, key item, or object from the provided list, you MUST use ONLY the Index format: `Entity-N`. \n**FORBIDDEN:** Do NOT include the character/object name or parenthesis (e.g., `Nick Wilde (Outfit) - Entity-2` is WRONG).\n**REQUIRED:** Use `Entity-2` only.\nThis applies to `description` and `narratorText`."
+        text: "**CRITICAL ENTITY NAMING RULE:** Use `Entity-N` tags **ONLY** for the characters/items explicitly listed in the provided 'CAST LIST'. \n**FORBIDDEN:** Do NOT invent new tags (like `Entity-2`, `Entity-3`) for objects, props, or background elements that are NOT in the Cast List. Refer to them by their generic names (e.g., 'a sword', 'a table').\n**CORRECT:** 'Entity-1 picks up a sword.' \n**INCORRECT:** 'Entity-1 picks up Entity-2.'"
     },
     SCENE_CHARACTERS_LIST: {
         id: 'scene_characters_list',
         label: 'Participant List',
-        text: "**CRITICAL JSON REQUIREMENT:** For every scene object, you MUST include a `characters` field. This array must contain the strings of the indices of ALL entities (characters/items) present in that specific scene (e.g., `[\"Entity-1\", \"Entity-3\"]`)."
+        text: "**CRITICAL JSON REQUIREMENT:** The `characters` array in each scene must contain **ONLY** the `Entity-N` tags from the CAST LIST that participate in that scene. Do not include tags for props or objects."
     },
     CHARACTER_JSON_INDEX: {
         id: 'char_json_index',
@@ -156,7 +156,7 @@ export const CHAR_GEN_INSTRUCTIONS = {
     STRICT_NO_NEW: {
         id: 'char_no_new',
         label: 'No New Chars',
-        text: "Do NOT create any new characters or items. Use ONLY the provided Existing Entities. The 'detailedCharacters' output list must remain empty (unless defining visual updates/outfit changes for existing ones)."
+        text: "**ABSOLUTE PROHIBITION ON NEW ENTITIES:** \n1. **CLOSED SYSTEM:** You are working with a CLOSED CAST. You CANNOT add, invent, or tag any new entities, characters, or items.\n2. **PROPS ARE JUST TEXT:** Items like 'fish', 'meat', 'slipper' MUST remain as plain text descriptions. Do NOT assign them an `Entity-N` tag.\n3. **SINGLE SOURCE:** If the input list only has `Entity-1`, your output MUST ONLY contain `Entity-1`. Any appearance of `Entity-2` is a hallucination and a critical failure."
     },
     NO_DUPLICATES: {
         id: 'char_no_dupes',

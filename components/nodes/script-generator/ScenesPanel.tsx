@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { ActionButton } from '../../ActionButton';
+import Tooltip from '../../ui/Tooltip';
 
 const SceneItem: React.FC<{
     scene: any;
@@ -88,45 +89,53 @@ const SceneItem: React.FC<{
                                             key={`${index}-${charIdx}`}
                                             className="relative group/char"
                                         >
-                                            <input
-                                                type="text"
-                                                value={displayVal}
-                                                readOnly
-                                                className="text-[9px] text-cyan-300 font-mono uppercase tracking-wider bg-cyan-900/30 px-1 rounded w-12 text-center border border-transparent focus:border-cyan-500 focus:outline-none cursor-ew-resize select-none"
-                                                onClick={(e) => e.stopPropagation()}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        handleCharacterIndexChange(charIdx, 1);
-                                                    }
-                                                    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        handleCharacterIndexChange(charIdx, -1);
-                                                    }
-                                                }}
-                                                title="Use arrows to change index. Shift+Click to remove."
-                                                onMouseDown={(e) => {
-                                                    if (e.shiftKey) {
+                                            <Tooltip title="Scroll/Arrows to change. Shift+Click to delete." position="top">
+                                                <input
+                                                    type="text"
+                                                    value={displayVal}
+                                                    readOnly
+                                                    className="text-[9px] text-cyan-300 font-mono uppercase tracking-wider bg-cyan-900/30 px-1 rounded w-12 text-center border border-transparent focus:border-cyan-500 focus:outline-none cursor-text select-none"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    onWheel={(e) => {
                                                         e.stopPropagation();
                                                         e.preventDefault();
-                                                        handleDeleteCharacter(charIdx);
-                                                    }
-                                                }}
-                                            />
+                                                        const delta = e.deltaY < 0 ? 1 : -1;
+                                                        handleCharacterIndexChange(charIdx, delta);
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            handleCharacterIndexChange(charIdx, 1);
+                                                        }
+                                                        if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            handleCharacterIndexChange(charIdx, -1);
+                                                        }
+                                                    }}
+                                                    onMouseDown={(e) => {
+                                                        if (e.shiftKey) {
+                                                            e.stopPropagation();
+                                                            e.preventDefault();
+                                                            handleDeleteCharacter(charIdx);
+                                                        }
+                                                    }}
+                                                />
+                                            </Tooltip>
                                         </div>
                                     );
                                 })}
                                 
                                 {/* Add Character Button */}
-                                <button
-                                    onClick={handleAddCharacter}
-                                    className="text-[9px] text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 px-1.5 rounded transition-colors font-bold h-4 flex items-center justify-center"
-                                    title="Add Character (ENT-N)"
-                                >
-                                    +
-                                </button>
+                                <Tooltip title="Add Character (ENT-N)" position="top">
+                                    <button
+                                        onClick={handleAddCharacter}
+                                        className="text-[9px] text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 px-1.5 rounded transition-colors font-bold h-4 flex items-center justify-center"
+                                    >
+                                        +
+                                    </button>
+                                </Tooltip>
                             </div>
                         </div>
                     </div>

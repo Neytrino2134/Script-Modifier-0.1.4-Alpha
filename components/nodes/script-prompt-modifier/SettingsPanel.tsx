@@ -34,6 +34,7 @@ interface SettingsPanelProps {
     isSaturationEnabled?: boolean;
     onToggleSaturation?: (checked: boolean) => void;
     onTogglePropEnhancement?: () => void;
+    nodeId: string; // Added nodeId
 }
 
 // Defined outside to prevent re-mounting and flickering during renders
@@ -56,7 +57,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
     disabledInstructionIds, t, targetLanguage, scale, maxHeight, charDescMode, 
     safeGeneration = false, thinkingEnabled = false, model, targetScrollId, onSetTargetScrollId,
     propEnhancementEnabled = true, isProcessWholeScene, onToggleProcessWholeScene,
-    isSaturationEnabled, onToggleSaturation, onTogglePropEnhancement
+    isSaturationEnabled, onToggleSaturation, onTogglePropEnhancement, nodeId
 }) => {
     const [isResizerHovered, setIsResizerHovered] = useState(false);
     const [stackFilter, setStackFilter] = useState('');
@@ -138,7 +139,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
         e.stopPropagation();
         onUpdateValue({
              disabledInstructionIds: ['break_paragraphs', 'pm_anthro', 'pm_subscribe', 'rule_saturation'], 
-             charDescMode: 'general',
+             charDescMode: 'none', // Reset to none as per new default
              safeGeneration: false,
              thinkingEnabled: false,
              propEnhancementEnabled: true
@@ -256,12 +257,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                     {/* Safe Generation */}
                     <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
                         <CustomCheckbox
-                            id="quick-safe"
+                            id={`quick-safe-${nodeId}`}
                             checked={safeGeneration} 
                             onChange={(checked) => onUpdateValue({ safeGeneration: checked })} 
                             className="h-3.5 w-3.5"
                         />
-                        <label htmlFor="quick-safe" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-emerald-400 transition-colors whitespace-nowrap">
+                        <label htmlFor={`quick-safe-${nodeId}`} className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-emerald-400 transition-colors whitespace-nowrap">
                             {t('node.content.safeGeneration')}
                         </label>
                         <SearchTrigger id="safe-gen-brick" onClick={handleSearchClick} t={t} />
@@ -270,12 +271,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                     {/* Thinking Mode */}
                     <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
                          <CustomCheckbox
-                            id="quick-thinking"
+                            id={`quick-thinking-${nodeId}`}
                             checked={thinkingEnabled} 
                             onChange={(checked) => onUpdateValue({ thinkingEnabled: checked })} 
                             className="h-3.5 w-3.5"
                         />
-                        <label htmlFor="quick-thinking" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-cyan-400 transition-colors whitespace-nowrap">
+                        <label htmlFor={`quick-thinking-${nodeId}`} className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-cyan-400 transition-colors whitespace-nowrap">
                             {t('node.content.thinkingEnabled')}
                         </label>
                         <SearchTrigger id="thinking-brick" onClick={handleSearchClick} t={t} />
@@ -284,12 +285,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                     {/* Anthro */}
                     <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
                         <CustomCheckbox
-                            id="quick-anthro"
+                            id={`quick-anthro-${nodeId}`}
                             checked={isInstructionEnabled(PROMPT_MODIFIER_INSTRUCTIONS.ANTHRO_REINFORCEMENT.id)} 
                             onChange={() => toggleInstruction(PROMPT_MODIFIER_INSTRUCTIONS.ANTHRO_REINFORCEMENT.id)} 
                             className="h-3.5 w-3.5"
                         />
-                        <label htmlFor="quick-anthro" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-cyan-400 transition-colors whitespace-nowrap">
+                        <label htmlFor={`quick-anthro-${nodeId}`} className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-cyan-400 transition-colors whitespace-nowrap">
                             {t('node.content.anthroEnabled')}
                         </label>
                         <SearchTrigger id={PROMPT_MODIFIER_INSTRUCTIONS.ANTHRO_REINFORCEMENT.id} onClick={handleSearchClick} t={t} />
@@ -298,12 +299,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                     {/* Formatting */}
                     <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
                          <CustomCheckbox
-                            id="quick-format"
+                            id={`quick-format-${nodeId}`}
                             checked={isInstructionEnabled(PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.id)} 
                             onChange={() => toggleInstruction(PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.id)} 
                             className="h-3.5 w-3.5"
                         />
-                        <label htmlFor="quick-format" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-white transition-colors whitespace-nowrap">
+                        <label htmlFor={`quick-format-${nodeId}`} className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-white transition-colors whitespace-nowrap">
                             {t('instruction.formatting')}
                         </label>
                         <SearchTrigger id={PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.id} onClick={handleSearchClick} t={t} />
@@ -312,12 +313,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                     {/* General Char Desc */}
                     <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
                         <CustomCheckbox
-                            id="quick-general-char"
+                            id={`quick-general-char-${nodeId}`}
                             checked={charDescMode === 'general'} 
                             onChange={() => onUpdateValue({ charDescMode: charDescMode === 'general' ? 'none' : 'general' })} 
                             className="h-3.5 w-3.5"
                         />
-                        <label htmlFor="quick-general-char" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-emerald-400 transition-colors whitespace-nowrap">
+                        <label htmlFor={`quick-general-char-${nodeId}`} className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-emerald-400 transition-colors whitespace-nowrap">
                             {t('node.content.includeGeneralCharDesc')}
                         </label>
                         <SearchTrigger id={PROMPT_MODIFIER_INSTRUCTIONS.GENERAL_CHAR_DESC.id} onClick={handleSearchClick} t={t} />
@@ -326,12 +327,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                     {/* Video Prompt */}
                     <div className="flex items-center gap-2 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700 group">
                         <CustomCheckbox
-                            id="quick-video-prompt"
+                            id={`quick-video-prompt-${nodeId}`}
                             checked={isVideoPromptEnabled}
                             onChange={() => toggleInstruction(PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id)} 
                             className="h-3.5 w-3.5"
                         />
-                        <label htmlFor="quick-video-prompt" className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-cyan-400 transition-colors whitespace-nowrap">
+                        <label htmlFor={`quick-video-prompt-${nodeId}`} className="text-xs text-gray-300 select-none cursor-pointer group-hover:text-cyan-400 transition-colors whitespace-nowrap">
                             {t('instruction.video')}
                         </label>
                         <SearchTrigger id={PROMPT_MODIFIER_INSTRUCTIONS.GENERATE_VIDEO_PROMPT.id} onClick={handleSearchClick} t={t} />

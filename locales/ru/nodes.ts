@@ -121,7 +121,7 @@ export const nodes = {
     'node.content.generateFromFrame': 'Генерировать с кадра:',
     'node.content.generateUpToFrame': 'по кадр',
     'node.content.analyzeFromFrame': 'Финализировать с кадра:',
-    'node.content.processFromFrame': 'Обработать с кадра:',
+    'node.content.processFromFrame': 'Обработать с кадра:', 
     'node.content.processFromScene': 'Обработать с сцены:',
     'node.content.analyzePrompt': 'Анализ Промпта',
     'node.content.analyzeScript': 'Анализ Сценария',
@@ -340,7 +340,7 @@ export const nodes = {
     'node.content.spm_stack.physics': '2. Физика и Логика',
     'node.content.spm_stack.hierarchy': '3. Иерархия Субъекта',
     'node.content.spm_stack.construction': '4. Конструкция и Формат',
-    
+
     // Script Generator Stack Headers
     'node.content.scriptGenerationStack': 'СТЕК ГЕНЕРАЦИИ СЦЕНАРИЯ',
     'node.content.entityGenerationStack': 'СТЕК ГЕНЕРАЦИИ ПЕРСОНАЖЕЙ',
@@ -349,4 +349,15 @@ export const nodes = {
     'node.content.secChars': 'ВТОРОСТЕПЕННЫЕ',
     'node.content.keyItems': 'ПРЕДМЕТЫ',
     'node.content.thumbnailPrompt': 'Промпт Обложки',
+
+    // Script Analyzer Stack Headers
+    'node.content.stack.system': '1. СИСТЕМА И КОНТЕКСТ',
+    'node.content.stack.role': '2. РОЛЬ И ЛОГИКА',
+    'node.content.stack.cinematography': '3. КИНЕМАТОГРАФИЯ',
+    'node.content.stack.world': '4. МИР И ПОСТОЯНСТВО',
+
+    // Missing Script Generator Headers
+    'node.content.sg_stack.narrative': 'НАРРАТИВНЫЙ ДВИЖОК',
+    'node.content.sg_stack.world': 'ВИЗУАЛЬНЫЙ МИР',
+    'node.content.sg_stack.constraints': 'ФОРМАТ И ОГРАНИЧЕНИЯ',
 };

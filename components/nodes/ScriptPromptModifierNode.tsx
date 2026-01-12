@@ -253,9 +253,12 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
 
     useEffect(() => {
         // Prioritize the generator's style if available
-        const analyzerStyle = upstreamAnalyzerData?.generatedStyle || upstreamAnalyzerData?.visualStyle || '';
-        if (analyzerStyle && !styleOverride && !isStyleConnected) {
-            handleValueUpdate({ styleOverride: analyzerStyle });
+        // Only autofill if it is a real description (generatedStyle)
+        // We ignore 'none' or simple preset names that might come from visualStyle
+        const generated = upstreamAnalyzerData?.generatedStyle;
+        
+        if (generated && generated !== 'none' && generated.trim() !== '' && !styleOverride && !isStyleConnected) {
+            handleValueUpdate({ styleOverride: generated });
         }
     }, [upstreamAnalyzerData, styleOverride, isStyleConnected, handleValueUpdate]);
 
@@ -487,52 +490,13 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
     };
 
     const handleStartRangeChange = (val: number) => { 
-        const newStart = Math.max(1, val);
-        
-        if (isProcessWholeScene) {
-            const updates: any = { startSceneNumber: newStart };
-            // Smart Push: If start > end, move end to start
-            if (endSceneNumber !== null && newStart > endSceneNumber) {
-                updates.endSceneNumber = newStart;
-            }
-            handleValueUpdate(updates);
-        } else {
-            const updates: any = { startFrameNumber: newStart };
-            // Smart Push: If start > end, move end to start
-            if (endFrameNumber !== null && newStart > endFrameNumber) {
-                updates.endFrameNumber = newStart;
-            }
-            handleValueUpdate(updates);
-        }
+        if (isProcessWholeScene) handleValueUpdate({ startSceneNumber: val });
+        else handleValueUpdate({ startFrameNumber: val });
     };
     
     const handleEndRangeChange = (val: number) => { 
-        // Handle input clearing (allow null temporarily via UI interaction if needed, though type implies number here usually)
-        if (!val && val !== 0) {
-             if (isProcessWholeScene) handleValueUpdate({ endSceneNumber: null });
-             else handleValueUpdate({ endFrameNumber: null });
-             return;
-        }
-
-        const newEnd = Math.max(1, val);
-
-        if (isProcessWholeScene) {
-            const updates: any = { endSceneNumber: newEnd };
-            const currentStart = startSceneNumber || 1;
-            // Smart Pull: If end < start, move start down to end
-            if (newEnd < currentStart) {
-                updates.startSceneNumber = newEnd;
-            }
-            handleValueUpdate(updates);
-        } else {
-            const updates: any = { endFrameNumber: newEnd };
-            const currentStart = startFrameNumber || 1;
-            // Smart Pull: If end < start, move start down to end
-            if (newEnd < currentStart) {
-                updates.startFrameNumber = newEnd;
-            }
-            handleValueUpdate(updates);
-        }
+        if (isProcessWholeScene) handleValueUpdate({ endSceneNumber: val });
+        else handleValueUpdate({ endFrameNumber: val });
     };
     
     const handleClearRange = () => handleValueUpdate({ startSceneNumber: null, endSceneNumber: null, startFrameNumber: null, endFrameNumber: null });
@@ -853,6 +817,7 @@ const ScriptPromptModifierNode: React.FC<NodeContentProps> = ({
                 </div>
 
                 <SettingsPanel 
+                    nodeId={node.id}
                     uiState={uiState}
                     localSettingsHeight={localSettingsHeight}
                     setLocalSettingsHeight={setLocalSettingsHeight}

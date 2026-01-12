@@ -457,12 +457,13 @@ export const useEntityActions = ({
         handleCloseCatalog();
     }, [catalogItems, currentCatalogItems, viewTransform, handleAddGroupFromTemplate, handleCloseCatalog]);
     
-    const handleApplyAliases = useCallback((nodeId: string) => {
+    // Updated to be async to handle Promise<void>
+    const handleApplyAliases = useCallback(async (nodeId: string) => {
         const node = nodes.find(n => n.id === nodeId);
         if (node?.type === NodeType.SCRIPT_ANALYZER) {
-            geminiContext.handleApplyAliasesForScriptAnalyzer(nodeId);
+            await geminiContext.handleApplyAliasesForScriptAnalyzer(nodeId);
         } else if (node?.type === NodeType.CHARACTER_GENERATOR) {
-            geminiContext.handleApplyAliasesForCharacterGenerator(nodeId);
+            await geminiContext.handleApplyAliasesForCharacterGenerator(nodeId);
         }
     }, [nodes, geminiContext]);
     
