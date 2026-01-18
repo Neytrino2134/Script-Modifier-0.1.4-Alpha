@@ -2,6 +2,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': 'Редактировать (V)',
     'toolbar.cutter': 'Разрезать (C)',
@@ -28,7 +30,7 @@ export const ui = {
     'toolbar.addImagePreview': 'Просмотр изображений (I)',
     'toolbar.addCharacterCard': 'Карточка персонажа (Ctrl+Shift+C)',
     'toolbar.addPromptProcessor': 'Обработчик промпта (P)',
-    'toolbar.addGeminiChat': 'Чат Gemini (M)',
+    'toolbar.addGeminiChat': 'Чат Gemini (G)',
     'toolbar.addTranslator': 'Переводчик (L)',
     'toolbar.addIdeaGenerator': 'Генератор идей (Shift+A)',
     'toolbar.addScriptGenerator': 'Генератор сценариев (Shift+S)',
@@ -106,7 +108,7 @@ export const ui = {
     'search.node.character_card.title': 'Карточка персонажа',
     'search.node.character_card.description': 'Хранит изображение, имя и промпт персонажа. (Ctrl+Shift+C)',
     'search.node.gemini_chat.title': 'Чат Gemini',
-    'search.node.gemini_chat.description': 'Прямое общение с Gemini AI. (M)',
+    'search.node.gemini_chat.description': 'Прямое общение с Gemini AI. (G)',
     'search.node.translator.title': 'Переводчик',
     'search.node.translator.description': 'Переводит текст на выбранный язык. (L)',
     'search.node.script_generator.title': 'Генератор сценариев',

@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChannelData, VideoEntry } from './types';
 import CustomCheckbox from '../../ui/CustomCheckbox';
-import { resizeThumbnail, processYouTubeScreenshot } from './utils';
+import { resizeThumbnail, processYouTubeScreenshot } from '../../../utils/imageUtils';
 import { extractYouTubeMetadata } from '../../../services/geminiService';
 import { PasteIcon } from '../../icons/AppIcons';
 
@@ -82,8 +82,12 @@ export const VideoList: React.FC<VideoListProps> = ({
                 isShort: false
             };
             
-            const updatedVideos = [newVideo, ...activeChannel.videos];
-            onUpdateChannel(activeChannel.id, { videos: updatedVideos });
+            // 1. Create a local copy of the list including the new video
+            // This ensures we have the correct list structure for subsequent updates within this closure
+            let currentVideos = [newVideo, ...activeChannel.videos];
+            
+            // 2. Commit the first update (Adding the row)
+            onUpdateChannel(activeChannel.id, { videos: currentVideos });
             
             // Award points
             const reward = 50;
@@ -93,28 +97,34 @@ export const VideoList: React.FC<VideoListProps> = ({
             
             addToast(t('toast.videoPasted'), 'success');
 
-            try {
-                const meta = await extractYouTubeMetadata(metadataImage);
-                
-                const currentVideos = activeChannel.videos; // Warning: Stale closure if activeChannel changed rapidly
-                const vidIndex = currentVideos.findIndex(v => v.id === newVideoId);
-                if (vidIndex === -1) {
-                     return; 
+            // 3. Process metadata if image is available
+            if (metadataImage) {
+                try {
+                    const meta = await extractYouTubeMetadata(metadataImage);
+                    
+                    // 4. Update the LOCAL list with metadata
+                    // We modify 'currentVideos' which we know contains our new video
+                    const vidIndex = currentVideos.findIndex(v => v.id === newVideoId);
+                    
+                    if (vidIndex !== -1) {
+                         const updatedList = [...currentVideos];
+                         updatedList[vidIndex] = {
+                             ...updatedList[vidIndex],
+                             title: meta.title || "Untitled",
+                             description: meta.description || "",
+                             views: meta.views || 0,
+                             uploadDate: meta.uploadDate || updatedList[vidIndex].uploadDate
+                         };
+                         
+                         // 5. Commit the second update (Metadata)
+                         onUpdateChannel(activeChannel.id, { videos: updatedList });
+                         addToast("Title and description extracted!", "success");
+                    }
+    
+                } catch (err) {
+                    console.error("Failed to extract metadata", err);
+                    addToast("Failed to extract text from image", "info");
                 }
-                
-                const vids = [...currentVideos];
-                vids[vidIndex] = {
-                    ...vids[vidIndex],
-                    title: meta.title || "Untitled",
-                    description: meta.description || "",
-                    views: meta.views || 0
-                };
-                onUpdateChannel(activeChannel.id, { videos: vids });
-                addToast("Title and description extracted!", "success");
-
-            } catch (err) {
-                console.error("Failed to extract metadata", err);
-                addToast("Failed to extract text from image", "info");
             }
 
         }).catch(err => {
@@ -246,7 +256,7 @@ export const VideoList: React.FC<VideoListProps> = ({
                                     value={video.title} 
                                     onChange={(e) => updateVideo(video.id, { title: e.target.value })}
                                     placeholder={t('youtube_analytics.videoTitle')}
-                                    className="bg-transparent border border-transparent rounded p-0.5 -ml-1 text-sm text-white font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-gray-800 w-full transition-all outline-none"
+                                    className="bg-transparent border border-transparent focus:border-emerald-500 focus:ring-0 rounded p-0.5 -ml-1 text-sm text-white font-medium focus:bg-gray-800 w-full transition-all outline-none"
                                     onFocus={deselectAllNodes}
                                 />
                                 <div className="mt-1">
@@ -264,7 +274,7 @@ export const VideoList: React.FC<VideoListProps> = ({
                                 value={video.description || ''}
                                 onChange={(e) => updateVideo(video.id, { description: e.target.value })}
                                 placeholder={t('youtube_analytics.videoDescriptionPlaceholder')}
-                                className="bg-transparent border border-transparent rounded p-0.5 -ml-1 text-xs text-gray-400 w-full resize-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-gray-800 focus:text-gray-300 transition-all outline-none"
+                                className="bg-transparent border border-transparent focus:border-emerald-500 focus:ring-0 rounded p-0.5 -ml-1 text-xs text-gray-400 w-full resize-none focus:bg-gray-800 focus:text-gray-300 transition-all outline-none"
                                 rows={1}
                                 onFocus={deselectAllNodes}
                             />
@@ -276,7 +286,7 @@ export const VideoList: React.FC<VideoListProps> = ({
                                         placeholder={t('youtube_analytics.views')}
                                         value={video.views || ''} 
                                         onChange={(e) => updateVideo(video.id, { views: parseInt(e.target.value) || 0 })}
-                                        className="w-16 bg-gray-800 text-xs p-0.5 rounded text-right text-gray-300 border border-gray-700 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                                        className="w-16 bg-gray-800 text-xs p-0.5 rounded text-right text-gray-300 border border-gray-700 focus:ring-0 focus:border-emerald-500 outline-none transition-all"
                                         onFocus={deselectAllNodes}
                                     />
                                     <button onClick={() => deleteVideo(video.id)} className="text-gray-500 hover:text-red-400">

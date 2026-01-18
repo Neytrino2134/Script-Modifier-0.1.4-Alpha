@@ -3,6 +3,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': 'Tahrirlash (V)',
     'toolbar.cutter': 'Ulanishni Kesish (C)',
@@ -29,7 +31,7 @@ export const ui = {
     'toolbar.addImagePreview': 'Rasmni Ko‘rish (I)',
     'toolbar.addCharacterCard': 'Personaj Kartasi (Ctrl+Shift+C)',
     'toolbar.addPromptProcessor': 'Prompt Protsessori (P)',
-    'toolbar.addGeminiChat': 'Gemini Chat (M)',
+    'toolbar.addGeminiChat': 'Gemini Chat (G)',
     'toolbar.addTranslator': 'Tarjimon (L)',
     'toolbar.addIdeaGenerator': 'G‘oya Generatori (Shift+A)',
     'toolbar.addScriptGenerator': 'Ssenariy Generatori (Shift+S)',
@@ -106,7 +108,7 @@ export const ui = {
     'search.node.character_card.title': 'Personaj Kartasi',
     'search.node.character_card.description': 'Personaj rasmi, nomi va promptini saqlaydi. (Ctrl+Shift+C)',
     'search.node.gemini_chat.title': 'Gemini Chat',
-    'search.node.gemini_chat.description': 'Gemini AI bilan to‘g‘ridan-to‘g‘ri suhbat. (M)',
+    'search.node.gemini_chat.description': 'Gemini AI bilan to‘g‘ridan-to‘g‘ri suhbat. (G)',
     'search.node.translator.title': 'Tarjimon',
     'search.node.translator.description': 'Matnni tanlangan tilga tarjima qiladi. (L)',
     'search.node.script_generator.title': 'Ssenariy Generatori',
@@ -120,7 +122,7 @@ export const ui = {
     'search.node.note.title': 'Eslatma',
     'search.node.note.description': 'Eslatmalar uchun oddiy matn maydoni. (N)',
     'search.node.reroute_dot.title': 'Yo‘nalish nuqtasi',
-    'search.node.reroute_dot.description': 'Ulanishlarni qayta yo‘naltirish va ajratish nuqtasi.',
+    'search.node.reroute_dot.description': 'Ulanishlarni qayta yo‘naltirish va tarmoqlash uchun nuqta.',
     'search.node.data_reader.title': 'Ma’lumot O‘quvchi',
     'search.node.data_reader.description': 'Ulanishdan kelayotgan xom ma’lumotlarni ko‘rsatadi.',
     'search.node.speech_synthesizer.title': 'Nutq Sintezatori',

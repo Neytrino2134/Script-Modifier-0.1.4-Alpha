@@ -161,6 +161,7 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
         onSaveCharacterCard,
         onLoadCharacterCard,
         onSaveCharacterToCatalog,
+        handleDownloadChat // Passed here
     } = context;
 
     // Apply Virtualization
@@ -466,6 +467,7 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
                         onSaveCharacterCard={onSaveCharacterCard}
                         onLoadCharacterCard={onLoadCharacterCard}
                         onSaveCharacterToCatalog={onSaveCharacterToCatalog}
+                        onDownloadChat={handleDownloadChat}
                     />
                 ))}
             </div>

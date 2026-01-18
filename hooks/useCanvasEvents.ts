@@ -11,7 +11,7 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
             resolve(base64String.split(',')[1]);
         };
         reader.onerror = reject;
-        reader.readAsDataURL(blob);
+        reader.readAsArrayBuffer(blob);
     });
 };
 
@@ -189,6 +189,14 @@ export const useCanvasEvents = ({
 
                     // For character cards, title might be under nodeTitle or name if title isn't set
                     if (!itemTitle) itemTitle = data.nodeTitle || data.name;
+                } else if (data.messages && Array.isArray(data.messages)) {
+                    // Chat Data Support (e.g. from file drop that was previously saved)
+                    targetNodeType = NodeType.GEMINI_CHAT;
+                    initialValueObj = data;
+                } else if (data.type === 'gemini-chat-data') {
+                    // New explicit chat type
+                    targetNodeType = NodeType.GEMINI_CHAT;
+                    initialValueObj = data;
                 } else {
                     // Fallback for legacy data (arrays) based on dragged item type
                     switch (type) {
@@ -303,40 +311,53 @@ export const useCanvasEvents = ({
                 }
 
                 // Handle new file types
-                if (data && data.type) {
+                if (data) {
                     let targetNodeType: NodeType | null = null;
                     let initialValueObj: any = data;
                     const itemTitle = data.title;
 
-                    switch (data.type) {
-                        case 'script-generator-data':
-                            targetNodeType = NodeType.SCRIPT_GENERATOR;
-                            initialValueObj = { scenes: data.scenes };
-                            break;
-                        case 'script-analyzer-data':
-                            targetNodeType = NodeType.SCRIPT_ANALYZER;
-                            initialValueObj = { scenes: data.scenes };
-                            break;
-                        case 'script-prompt-modifier-data':
-                            targetNodeType = NodeType.SCRIPT_PROMPT_MODIFIER;
-                            initialValueObj = { 
-                                finalPrompts: data.finalPrompts,
-                                sceneContexts: data.sceneContexts || {} // Extract contexts
-                            };
-                            break;
-                        case 'youtube-title-data':
-                            targetNodeType = NodeType.YOUTUBE_TITLE_GENERATOR;
-                            break;
-                        case 'youtube-analytics-data':
-                            targetNodeType = NodeType.YOUTUBE_ANALYTICS;
-                            break;
-                        case 'music-idea-data':
-                            targetNodeType = NodeType.MUSIC_IDEA_GENERATOR;
-                            break;
-                        case 'character-generator-data':
-                            targetNodeType = NodeType.CHARACTER_GENERATOR;
-                            initialValueObj = { characters: data.characters };
-                            break;
+                    // Direct type check first
+                    if (data.type) {
+                        switch (data.type) {
+                            case 'script-generator-data':
+                                targetNodeType = NodeType.SCRIPT_GENERATOR;
+                                initialValueObj = { scenes: data.scenes };
+                                break;
+                            case 'script-analyzer-data':
+                                targetNodeType = NodeType.SCRIPT_ANALYZER;
+                                initialValueObj = { scenes: data.scenes };
+                                break;
+                            case 'script-prompt-modifier-data':
+                                targetNodeType = NodeType.SCRIPT_PROMPT_MODIFIER;
+                                initialValueObj = { 
+                                    finalPrompts: data.finalPrompts,
+                                    sceneContexts: data.sceneContexts || {} // Extract contexts
+                                };
+                                break;
+                            case 'youtube-title-data':
+                                targetNodeType = NodeType.YOUTUBE_TITLE_GENERATOR;
+                                break;
+                            case 'youtube-analytics-data':
+                                targetNodeType = NodeType.YOUTUBE_ANALYTICS;
+                                break;
+                            case 'music-idea-data':
+                                targetNodeType = NodeType.MUSIC_IDEA_GENERATOR;
+                                break;
+                            case 'character-generator-data':
+                                targetNodeType = NodeType.CHARACTER_GENERATOR;
+                                initialValueObj = { characters: data.characters };
+                                break;
+                            case 'gemini-chat-data':
+                                targetNodeType = NodeType.GEMINI_CHAT;
+                                break;
+                        }
+                    }
+                    
+                    // Fallback heuristics for untyped or generic JSON files dropped
+                    if (!targetNodeType) {
+                        if (data.messages && Array.isArray(data.messages)) {
+                            targetNodeType = NodeType.GEMINI_CHAT;
+                        }
                     }
 
                     if (targetNodeType) {
@@ -367,18 +388,25 @@ export const useCanvasEvents = ({
             if (clipboardText) {
                 try {
                     const parsed = JSON.parse(clipboardText);
+                    const currentPointerPos = clientPointerPositionRef.current;
+                    const pastePosition = currentPointerPos ? {
+                        x: (currentPointerPos.x - viewTransform.translate.x) / viewTransform.scale,
+                        y: (currentPointerPos.y - viewTransform.translate.y) / viewTransform.scale,
+                    } : { x: 0, y: 0 }; // Fallback
+
                     if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type === 'character-card') {
-                        const currentPointerPos = clientPointerPositionRef.current;
-                        if (currentPointerPos) {
-                            const pastePosition = {
-                                x: (currentPointerPos.x - viewTransform.translate.x) / viewTransform.scale,
-                                y: (currentPointerPos.y - viewTransform.translate.y) / viewTransform.scale,
-                            };
-                            addCharacterCardFromFile(parsed, pastePosition);
-                            addToast(t('toast.pasted'), 'success', currentPointerPos);
-                            return;
-                        }
+                        addCharacterCardFromFile(parsed, pastePosition);
+                        addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
+                        return;
                     }
+                    
+                    // Handle Chat Paste
+                    if (parsed.messages && Array.isArray(parsed.messages)) {
+                         onAddNode(NodeType.GEMINI_CHAT, pastePosition, clipboardText);
+                         addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
+                         return;
+                    }
+
                 } catch (e) {
                     // Not valid JSON or not array of cards, proceed to default handler
                 }
@@ -389,7 +417,7 @@ export const useCanvasEvents = ({
     
         window.addEventListener('paste', handlePaste);
         return () => window.removeEventListener('paste', handlePaste);
-    }, [handlePasteFromClipboard, addCharacterCardFromFile, viewTransform, clientPointerPositionRef, t, addToast]);
+    }, [handlePasteFromClipboard, addCharacterCardFromFile, viewTransform, clientPointerPositionRef, t, addToast, onAddNode]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -491,7 +519,15 @@ export const useCanvasEvents = ({
                 setSelectedNodeIds([]); 
                 return; 
             }
-            if (e.code === 'KeyG' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) { e.preventDefault(); handleGroupSelection(); return; }
+            if (e.code === 'KeyG' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) { 
+                e.preventDefault(); 
+                if (selectedNodeIds.length > 1) {
+                    handleGroupSelection(); 
+                } else {
+                    addNodeAndCloseMenus(NodeType.GEMINI_CHAT);
+                }
+                return; 
+            }
             if (e.code === 'KeyH' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) { e.preventDefault(); selectedNodeIds.forEach(handleToggleNodeCollapse); return; }
             
             const code = e.code;
@@ -528,7 +564,6 @@ export const useCanvasEvents = ({
                     case 'KeyT': nodeTypeToAdd = NodeType.TEXT_INPUT; break;
                     case 'KeyA': nodeTypeToAdd = NodeType.PROMPT_ANALYZER; break;
                     case 'KeyP': nodeTypeToAdd = NodeType.PROMPT_PROCESSOR; break;
-                    case 'KeyM': nodeTypeToAdd = NodeType.GEMINI_CHAT; break;
                     case 'KeyL': nodeTypeToAdd = NodeType.TRANSLATOR; break;
                     case 'KeyN': nodeTypeToAdd = NodeType.NOTE; break;
                     case 'KeyO': nodeTypeToAdd = NodeType.IMAGE_GENERATOR; break;

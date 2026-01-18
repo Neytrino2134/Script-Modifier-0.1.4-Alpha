@@ -158,9 +158,14 @@ export const YouTubePlanner: React.FC<PlannerProps> = ({
             habits: newGoalHabits
         };
         onUpdateGoals([...globalGoals, newGoal]);
-        setIsCreatingGoal(false);
+        
+        // Don't close immediately to allow adding habits if user used Enter on Title
+        // But since we removed buttons, we reset for next entry or close if complete
         setNewGoalTitle('');
         setNewGoalHabits([]);
+        setIsCreatingGoal(false);
+        setJustEarned(20); // Small reward for goal setting
+        setTimeout(() => setJustEarned(0), 1000);
     };
     
     const deleteGoal = (id: string) => {
@@ -174,16 +179,13 @@ export const YouTubePlanner: React.FC<PlannerProps> = ({
     };
 
     const toggleActiveChannel = (channelId: string) => {
-        const newIds = activeChannelIds.includes(channelId)
-            ? activeChannelIds.filter(id => id !== channelId)
-            : [...activeChannelIds, channelId];
-        onUpdateActiveChannels(newIds);
+        // Enforce Single Channel Selection
+        onUpdateActiveChannels([channelId]);
     };
 
     // Task & Habit Completion Logic
-    const triggerReward = (e: React.MouseEvent, points: number) => {
-        const rect = (e.target as HTMLElement).getBoundingClientRect();
-        setConfetti({ active: true, x: rect.left + rect.width/2, y: rect.top + rect.height/2 });
+    const triggerReward = (x: number, y: number, points: number) => {
+        setConfetti({ active: true, x, y });
         onUpdatePoints(disciplinePoints + points);
         setJustEarned(points);
         setTimeout(() => setJustEarned(0), 1000);
@@ -197,15 +199,21 @@ export const YouTubePlanner: React.FC<PlannerProps> = ({
         const newDayCompletions = { ...dayCompletions, [key]: !isDone };
         onUpdateHabitCompletions({ ...habitCompletions, [selectedDateStr]: newDayCompletions });
         
-        if (!isDone) triggerReward(e, 10); // 10 points for habit
+        if (!isDone) {
+            const rect = (e.target as HTMLElement).getBoundingClientRect();
+            triggerReward(rect.left + rect.width/2, rect.top + rect.height/2, 10);
+        }
     };
 
-    const toggleTaskCompletion = (e: React.MouseEvent | boolean, taskId: string, currentVal: boolean) => {
+    const toggleTaskCompletion = (taskId: string, newStatus: boolean) => {
         const dayTasks = schedule[selectedDateStr] || [];
-        const newDayTasks = dayTasks.map(t => t.id === taskId ? { ...t, isCompleted: !currentVal } : t);
+        const newDayTasks = dayTasks.map(t => t.id === taskId ? { ...t, isCompleted: newStatus } : t);
         onUpdateSchedule({ ...schedule, [selectedDateStr]: newDayTasks });
         
-        if (!currentVal && typeof e === 'object' && 'target' in e) triggerReward(e, 50); // 50 points for task
+        if (newStatus) {
+            // Center screen confetti for tasks
+            triggerReward(window.innerWidth / 2, window.innerHeight / 2, 50);
+        }
     };
 
     const addTask = () => {
@@ -271,29 +279,53 @@ export const YouTubePlanner: React.FC<PlannerProps> = ({
                 <div className="flex-grow flex flex-col p-2 min-h-0">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t('planner.globalGoals')}</h4>
-                        <button onClick={() => setIsCreatingGoal(true)} className="text-emerald-400 hover:text-white font-bold text-lg leading-none">+</button>
+                        <button onClick={() => setIsCreatingGoal(!isCreatingGoal)} className="text-emerald-400 hover:text-white font-bold text-lg leading-none transition-transform hover:scale-110">+</button>
                     </div>
 
                     <div className="flex-grow overflow-y-auto custom-scrollbar space-y-2">
                         {isCreatingGoal && (
-                            <div className="bg-gray-700 p-2 rounded border border-gray-600 mb-2">
-                                <input className="w-full bg-gray-900 p-1 text-xs text-white rounded mb-1" placeholder={t('planner.newGoalTitle')} value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} />
+                            <div className="bg-gray-700/50 p-2 rounded border border-gray-600 mb-2 shadow-lg animate-fade-in-up">
                                 <div className="flex gap-1 mb-1">
+                                    <input 
+                                        className="w-full bg-gray-900 p-1 text-xs text-white rounded border border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-400" 
+                                        placeholder={t('planner.newGoalTitle')} 
+                                        value={newGoalTitle} 
+                                        onChange={e => setNewGoalTitle(e.target.value)} 
+                                        onKeyDown={e => e.key === 'Enter' && saveGoal()}
+                                        autoFocus
+                                    />
+                                    <button onClick={saveGoal} className="text-emerald-400 hover:text-white p-1" title="Save Goal">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                                    </button>
+                                </div>
+                                
+                                <div className="flex gap-1 mb-2 justify-between">
                                     {COLORS.map(c => (
-                                        <div key={c} onClick={() => setNewGoalColor(c)} className={`w-4 h-4 rounded-full cursor-pointer bg-${c}-500 ${newGoalColor === c ? 'ring-2 ring-white' : ''}`} />
+                                        <div key={c} onClick={() => setNewGoalColor(c)} className={`w-3 h-3 rounded-full cursor-pointer bg-${c}-500 ${newGoalColor === c ? 'ring-2 ring-white scale-110' : 'opacity-60 hover:opacity-100'}`} />
                                     ))}
                                 </div>
-                                <input type="number" className="w-full bg-gray-900 p-1 text-xs text-white rounded mb-1" placeholder={t('planner.days')} value={newGoalDuration} onChange={e => setNewGoalDuration(parseInt(e.target.value))} />
-                                <div className="flex gap-1 mb-1">
-                                    <input className="flex-grow bg-gray-900 p-1 text-xs text-white rounded" placeholder={t('planner.addHabit')} value={newHabitInput} onChange={e => setNewHabitInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addHabit()} />
-                                    <button onClick={addHabit} className="text-white">+</button>
+                                <div className="flex items-center gap-1 mb-1">
+                                    <span className="text-[10px] text-gray-400">Days:</span>
+                                    <input 
+                                        type="number" 
+                                        className="flex-grow bg-gray-900 p-1 text-xs text-white rounded border border-emerald-500 focus:outline-none" 
+                                        value={newGoalDuration} 
+                                        onChange={e => setNewGoalDuration(parseInt(e.target.value))} 
+                                        onKeyDown={e => e.key === 'Enter' && saveGoal()}
+                                    />
                                 </div>
-                                <div className="space-y-1 mb-2">
-                                    {newGoalHabits.map((h, i) => <div key={i} className="text-[10px] text-gray-300 bg-gray-800 px-1 rounded">- {h}</div>)}
+                                <div className="flex gap-1 mb-1 mt-2 border-t border-gray-600 pt-2">
+                                    <input 
+                                        className="flex-grow bg-gray-900 p-1 text-xs text-white rounded border border-emerald-500 focus:outline-none" 
+                                        placeholder={t('planner.addHabit')} 
+                                        value={newHabitInput} 
+                                        onChange={e => setNewHabitInput(e.target.value)} 
+                                        onKeyDown={e => e.key === 'Enter' && addHabit()} 
+                                    />
+                                    <button onClick={addHabit} className="text-gray-400 hover:text-white px-1">+</button>
                                 </div>
-                                <div className="flex justify-end gap-2">
-                                    <button onClick={() => setIsCreatingGoal(false)} className="text-xs text-gray-400">{t('planner.cancel')}</button>
-                                    <button onClick={saveGoal} className="text-xs text-emerald-400 font-bold">{t('planner.save')}</button>
+                                <div className="space-y-0.5">
+                                    {newGoalHabits.map((h, i) => <div key={i} className="text-[9px] text-gray-300 bg-gray-800/50 px-1 rounded flex items-center gap-1"><div className={`w-1 h-1 rounded-full bg-${newGoalColor}-500`}></div>{h}</div>)}
                                 </div>
                             </div>
                         )}
@@ -446,18 +478,18 @@ export const YouTubePlanner: React.FC<PlannerProps> = ({
                                          <div className="pt-1">
                                              <CustomCheckbox 
                                                  checked={!!task.isCompleted} 
-                                                 onChange={(checked) => toggleTaskCompletion(checked, task.id, !!task.isCompleted)} 
+                                                 onChange={(checked) => toggleTaskCompletion(task.id, checked)} 
                                                  className="h-4 w-4"
                                              />
                                          </div>
                                          <div className="flex-grow min-w-0 space-y-2">
                                              <textarea value={task.title} onChange={(e) => updateTask(task.id, { title: e.target.value })} placeholder={t('planner.taskPlaceholder')} className={`w-full bg-transparent border-none p-0 text-xs focus:ring-0 resize-none leading-snug ${task.isCompleted ? 'text-gray-500 line-through' : 'text-white'}`} rows={2} />
                                              <div className="flex justify-between items-center gap-1">
-                                                 <select value={task.channelId || ''} onChange={(e) => updateTask(task.id, { channelId: e.target.value })} className="bg-gray-900/50 text-[9px] text-gray-400 border border-gray-600 rounded px-1 py-0.5 max-w-[90px] outline-none truncate" disabled={task.isCompleted}>
+                                                 <select value={task.channelId || ''} onChange={(e) => updateTask(task.id, { channelId: e.target.value })} className="bg-gray-900/50 text-[9px] text-gray-400 border border-gray-600 rounded px-1 py-0.5 max-w-[90px] outline-none truncate" disabled={!!task.isCompleted}>
                                                     <option value="">{t('genre.general')}</option>
                                                     {channels.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                                  </select>
-                                                 <select value={task.status} onChange={(e) => updateTask(task.id, { status: e.target.value as any })} className={`text-[9px] font-bold uppercase rounded px-2 py-0.5 border border-transparent outline-none text-white ${task.isCompleted ? 'bg-gray-600' : STATUS_COLORS[task.status]}`} disabled={task.isCompleted}>
+                                                 <select value={task.status} onChange={(e) => updateTask(task.id, { status: e.target.value as any })} className={`text-[9px] font-bold uppercase rounded px-2 py-0.5 border border-transparent outline-none text-white ${task.isCompleted ? 'bg-gray-600' : STATUS_COLORS[task.status]}`} disabled={!!task.isCompleted}>
                                                     <option value="idea">Idea</option>
                                                     <option value="scripting">Script</option>
                                                     <option value="filming">Film</option>

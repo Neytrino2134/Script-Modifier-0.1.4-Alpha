@@ -3,6 +3,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': '编辑 (V)',
     'toolbar.cutter': '断开连接 (C)',
@@ -29,7 +31,7 @@ export const ui = {
     'toolbar.addImagePreview': '图像预览 (I)',
     'toolbar.addCharacterCard': '角色卡片 (Ctrl+Shift+C)',
     'toolbar.addPromptProcessor': '提示词处理器 (P)',
-    'toolbar.addGeminiChat': 'Gemini 聊天 (M)',
+    'toolbar.addGeminiChat': 'Gemini 聊天 (G)',
     'toolbar.addTranslator': '翻译器 (L)',
     'toolbar.addIdeaGenerator': '创意生成器 (Shift+A)',
     'toolbar.addScriptGenerator': '剧本生成器 (Shift+S)',
@@ -106,7 +108,7 @@ export const ui = {
     'search.node.character_card.title': '角色卡片',
     'search.node.character_card.description': '存储角色的图像、名称和提示词。(Ctrl+Shift+C)',
     'search.node.gemini_chat.title': 'Gemini 聊天',
-    'search.node.gemini_chat.description': '与 Gemini AI 直接对话。(M)',
+    'search.node.gemini_chat.description': '与 Gemini AI 直接对话。(G)',
     'search.node.translator.title': '翻译器',
     'search.node.translator.description': '将文本翻译成选定语言。(L)',
     'search.node.script_generator.title': '剧本生成器',

@@ -3,6 +3,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': 'Bearbeiten (V)',
     'toolbar.cutter': 'Verbindung trennen (C)',
@@ -29,7 +31,7 @@ export const ui = {
     'toolbar.addImagePreview': 'Bild-Vorschau (I)',
     'toolbar.addCharacterCard': 'Charakterkarte (Strg+Shift+C)',
     'toolbar.addPromptProcessor': 'Prompt-Prozessor (P)',
-    'toolbar.addGeminiChat': 'Gemini Chat (M)',
+    'toolbar.addGeminiChat': 'Gemini Chat (G)',
     'toolbar.addTranslator': 'Übersetzer (L)',
     'toolbar.addIdeaGenerator': 'Ideen-Generator (Shift+A)',
     'toolbar.addScriptGenerator': 'Drehbuch-Generator (Shift+S)',
@@ -106,7 +108,7 @@ export const ui = {
     'search.node.character_card.title': 'Charakterkarte',
     'search.node.character_card.description': 'Speichert Bild, Name und Prompt eines Charakters. (Strg+Shift+C)',
     'search.node.gemini_chat.title': 'Gemini Chat',
-    'search.node.gemini_chat.description': 'Direkte Unterhaltung mit Gemini KI. (M)',
+    'search.node.gemini_chat.description': 'Direkte Unterhaltung mit Gemini KI. (G)',
     'search.node.translator.title': 'Übersetzer',
     'search.node.translator.description': 'Übersetzt Text in eine gewählte Sprache. (L)',
     'search.node.script_generator.title': 'Drehbuch-Generator',

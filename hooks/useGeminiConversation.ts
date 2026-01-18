@@ -27,11 +27,13 @@ export const useGeminiConversation = ({
         const chatNode = nodes.find(n => n.id === nodeId);
         if (!chatNode) return;
 
-        let parsedValue: { messages: { role: string; content: string }[]; currentInput: string; mode?: string };
-        try { parsedValue = JSON.parse(chatNode.value); } 
+        let parsedValue: any;
+        try { parsedValue = JSON.parse(chatNode.value || '{}'); } 
         catch { setError("Invalid chat node data."); return; }
 
-        const { messages, currentInput, mode = 'general' } = parsedValue;
+        const messages = Array.isArray(parsedValue.messages) ? parsedValue.messages : [];
+        const { currentInput, mode = 'general' } = parsedValue;
+        
         if (!currentInput || currentInput.trim() === '') return;
 
         const newUserMessage = { role: 'user', content: currentInput };
@@ -47,7 +49,7 @@ export const useGeminiConversation = ({
         setIsChatting(nodeId);
 
         try {
-            const history = messages.map(msg => ({
+            const history = messages.map((msg: any) => ({
                 role: msg.role,
                 parts: [{ text: msg.content }]
             }));

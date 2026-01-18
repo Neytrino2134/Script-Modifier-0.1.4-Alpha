@@ -1,5 +1,7 @@
 
 
+
+
 export const nodes = {
     'node.title.text_input': 'Текстовый ввод',
     'node.title.prompt_processor': 'Обработчик промпта',
@@ -34,7 +36,7 @@ export const nodes = {
     'node.help.image_generator': 'Создает изображение по текстовому описанию. (O)',
     'node.help.image_preview': 'Отображает изображение из файла. (I)',
     'node.help.character_card': 'Хранит изображение, имя и промпт персонажа. (Ctrl+Shift+C)',
-    'node.help.gemini_chat': 'Прямое общение с Gemini AI. (M)',
+    'node.help.gemini_chat': 'Прямое общение с Gemini AI. (G)',
     'node.help.translator': 'Переводит текст на выбранный язык. (L)',
     'node.help.script_generator': 'Преобразует идею в сцены сценария. (Shift+S)',
     'node.help.script_analyzer': 'Разбивает сценарий на кадры и промпты. (Shift+D)',
@@ -333,8 +335,6 @@ export const nodes = {
     'node.content.commercialSafe': 'Безопасно для коммерции',
     'instruction.desc.commercial_safe': 'Строго избегает известных торговых марок.',
     'node.content.findStack': 'Найти в стеке...',
-    'node.content.notePlaceholder': 'Введите заметку...',
-    'node.content.textInputPlaceholder': 'Введите текст здесь...',
     
     // Prompt Finalizer Stack Headers
     'node.content.spm_stack.priming': '1. Прайминг и Контекст',

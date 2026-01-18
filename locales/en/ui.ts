@@ -3,6 +3,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': 'Edit (V)',
     'toolbar.cutter': 'Cut Connection (C)',
@@ -29,7 +31,7 @@ export const ui = {
     'toolbar.addImagePreview': 'Image Preview (I)',
     'toolbar.addCharacterCard': 'Character Card (Ctrl+Shift+C)',
     'toolbar.addPromptProcessor': 'Prompt Processor (P)',
-    'toolbar.addGeminiChat': 'Gemini Chat (M)',
+    'toolbar.addGeminiChat': 'Gemini Chat (G)',
     'toolbar.addTranslator': 'Translator (L)',
     'toolbar.addIdeaGenerator': 'Idea Generator (Shift+A)',
     'toolbar.addScriptGenerator': 'Script Generator (Shift+S)',
@@ -107,7 +109,7 @@ export const ui = {
     'search.node.character_card.title': 'Character Card',
     'search.node.character_card.description': 'Stores a character\'s image, name, and prompt. Allows image generation, saving, and loading. (Ctrl+Shift+C)',
     'search.node.gemini_chat.title': 'Gemini Chat',
-    'search.node.gemini_chat.description': 'Node for direct conversation with Gemini AI. Maintains chat history. (M)',
+    'search.node.gemini_chat.description': 'Node for direct conversation with Gemini AI. Maintains chat history. (G)',
     'search.node.translator.title': 'Translator',
     'search.node.translator.description': 'Translates incoming text to the selected language. (L)',
     'search.node.script_generator.title': 'Script Generator',

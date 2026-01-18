@@ -3,6 +3,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': 'Éditer (V)',
     'toolbar.cutter': 'Couper la connexion (C)',
@@ -29,7 +31,7 @@ export const ui = {
     'toolbar.addImagePreview': 'Aperçu d\'Image (I)',
     'toolbar.addCharacterCard': 'Fiche Personnage (Ctrl+Shift+C)',
     'toolbar.addPromptProcessor': 'Processeur de Prompt (P)',
-    'toolbar.addGeminiChat': 'Gemini Chat (M)',
+    'toolbar.addGeminiChat': 'Gemini Chat (G)',
     'toolbar.addTranslator': 'Traducteur (L)',
     'toolbar.addIdeaGenerator': 'Générateur d\'Idées (Shift+A)',
     'toolbar.addScriptGenerator': 'Générateur de Scénario (Shift+S)',
@@ -106,7 +108,7 @@ export const ui = {
     'search.node.character_card.title': 'Fiche Personnage',
     'search.node.character_card.description': 'Stocke l\'image, le nom et le prompt d\'un personnage. (Ctrl+Shift+C)',
     'search.node.gemini_chat.title': 'Gemini Chat',
-    'search.node.gemini_chat.description': 'Discussion directe avec Gemini AI. (M)',
+    'search.node.gemini_chat.description': 'Discussion directe avec Gemini AI. (G)',
     'search.node.translator.title': 'Traducteur',
     'search.node.translator.description': 'Traduit le texte vers une langue sélectionnée. (L)',
     'search.node.script_generator.title': 'Générateur de Scénario',
@@ -126,7 +128,7 @@ export const ui = {
     'search.node.speech_synthesizer.title': 'Synthétiseur Vocal',
     'search.node.speech_synthesizer.description': 'Convertit le texte en parole. (Shift+N)',
     'search.node.idea_generator.title': 'Générateur d\'Idées',
-    'search.node.idea_generator.description': 'Génère des catégories et les combine en une idée d\'histoire.',
+    'search.node.idea_generator.description': 'Génère des catégories et les combine en une idée.',
     'search.node.narrator_text_generator.title': 'Générateur de Texte Narrateur',
     'search.node.narrator_text_generator.description': 'Génère du texte pour un narrateur ou un annonceur. (Shift+G)',
     'search.node.audio_transcriber.title': 'Transcripteur Audio',

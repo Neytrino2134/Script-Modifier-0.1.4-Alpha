@@ -1,5 +1,4 @@
 
-
 import React, { useMemo } from 'react';
 import type { Node, Tool, ConnectingInfo, LibraryItem, Point, Connection, CatalogItemType } from '../types';
 import { NodeType } from '../types';
@@ -153,6 +152,7 @@ interface NodeViewProps {
   isModifyingCharacter?: string | null;
   getUpstreamNodeValues?: (nodeId: string) => any[];
   onAddNode?: (type: NodeType, position: Point) => string;
+  onDownloadChat: (nodeId: string) => void;
 }
 
 
@@ -168,7 +168,7 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
     onNodeDoubleClick, onDuplicateNodeEmpty, onRenameNode, inputData,
     onSaveCharacterCard, onLoadCharacterCard, onSaveCharacterToCatalog, setFullSizeImage, getFullSizeImage,
     setImageViewer, onCopyImageToClipboard, onDownloadImage, onUpdateCharacterDescription, isUpdatingDescription,
-    onModifyCharacter, isModifyingCharacter, getUpstreamNodeValues, onAddNode
+    onModifyCharacter, isModifyingCharacter, getUpstreamNodeValues, onAddNode, onDownloadChat
   } = props;
   const { t } = useLanguage();
   const isRerouteDot = node.type === NodeType.REROUTE_DOT;
@@ -382,6 +382,7 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
         onDuplicateNode={onDuplicateNode}
         onDuplicateNodeEmpty={onDuplicateNodeEmpty}
         onRenameNode={onRenameNode}
+        onDownloadChat={onDownloadChat}
       />
       {!isRerouteDot && !node.isCollapsed && <div className={`${contentPaddingClass} flex-grow min-h-0`}>{renderContent()}</div>}
       

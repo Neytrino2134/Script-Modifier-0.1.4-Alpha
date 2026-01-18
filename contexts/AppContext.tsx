@@ -145,6 +145,7 @@ export interface AppContextType {
     handleAddNodeFromConnectionMenu: (type: NodeType) => void;
     handleRenameNode: (nodeId: string, currentTitle: string) => void;
     handleToggleNodeOutputVisibility: (nodeId: string) => void;
+    handleDownloadChat: (nodeId: string) => void; // Added for chat download
 
     // Group Handlers
     handleGroupMouseDown: (e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>, groupId: string) => void;
@@ -670,7 +671,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         onConnectionReleased,
     });
     
-    const { onAddNode, handleAddNodeFromToolbar, deleteNodeAndConnections, handleSplitConnection, handleGroupSelection, handleRemoveGroup, handleSaveGroupToCatalog, handleSaveGroupToDisk, handleCopyGroup, handleDuplicateGroup, handleAddGroupFromCatalog, handleApplyAliases, handleDetachCharacter, addCharacterCardFromFile, addImagePreviewNodeFromFile, handlePasteFromClipboard, handleAddGroupFromTemplate, handleDuplicateNode: handleDuplicateNodeFromEntityActions, handleDuplicateNodeEmpty: handleDuplicateNodeEmptyFromEntityActions, saveDataToCatalog } = useEntityActions({
+    const { onAddNode, handleAddNodeFromToolbar, deleteNodeAndConnections, handleSplitConnection, handleGroupSelection, handleRemoveGroup, handleSaveGroupToCatalog, handleSaveGroupToDisk, handleCopyGroup, handleDuplicateGroup, handleAddGroupFromCatalog, handleApplyAliases, handleDetachCharacter, addCharacterCardFromFile, addImagePreviewNodeFromFile, handlePasteFromClipboard, handleAddGroupFromTemplate, handleDuplicateNode: handleDuplicateNodeFromEntityActions, handleDuplicateNodeEmpty: handleDuplicateNodeEmptyFromEntityActions, saveDataToCatalog, handleDownloadChat } = useEntityActions({
       nodes, connections, groups, addNodeFromHook, t,
       clientPointerPosition, clientPointerPositionRef, viewTransform, setCreationLine, setLastAddedNodeId, handleDeleteNode, removeConnectionsByNodeId,
       addConnection: addConnectionWithLogic, handleValueChange, nodeIdCounter, setNodes, setConnections, addGroup, selectedNodeIds, setSelectedNodeIds: setSelectedNodeIds, removeGroup, saveGroupToCatalog, catalogItems, currentCatalogItems, handleCloseCatalog,
@@ -927,6 +928,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         handleExtractTextFromImage: geminiContext.handleExtractTextFromImage,
         isExtractingText: geminiContext.isExtractingText,
         isAnalyzingYouTubeStats: geminiContext.isAnalyzingYouTubeStats,
+        handleDownloadChat // Export
     };
 
     return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

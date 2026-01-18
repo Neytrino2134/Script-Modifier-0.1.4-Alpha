@@ -3,6 +3,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': 'Editar (V)',
     'toolbar.cutter': 'Cortar Conexão (C)',
@@ -29,7 +31,7 @@ export const ui = {
     'toolbar.addImagePreview': 'Pré-visualização de Imagem (I)',
     'toolbar.addCharacterCard': 'Cartão de Personagem (Ctrl+Shift+C)',
     'toolbar.addPromptProcessor': 'Processador de Prompt (P)',
-    'toolbar.addGeminiChat': 'Chat Gemini (M)',
+    'toolbar.addGeminiChat': 'Chat Gemini (G)',
     'toolbar.addTranslator': 'Tradutor (L)',
     'toolbar.addIdeaGenerator': 'Gerador de Ideias (Shift+A)',
     'toolbar.addScriptGenerator': 'Gerador de Roteiro (Shift+S)',
@@ -106,7 +108,7 @@ export const ui = {
     'search.node.character_card.title': 'Cartão de Personagem',
     'search.node.character_card.description': 'Armazena imagem, nome e prompt de um personagem. (Ctrl+Shift+C)',
     'search.node.gemini_chat.title': 'Chat Gemini',
-    'search.node.gemini_chat.description': 'Conversa direta com Gemini AI. (M)',
+    'search.node.gemini_chat.description': 'Conversa direta com Gemini AI. (G)',
     'search.node.translator.title': 'Tradutor',
     'search.node.translator.description': 'Traduz o texto de entrada para o idioma selecionado. (L)',
     'search.node.script_generator.title': 'Gerador de Roteiro',

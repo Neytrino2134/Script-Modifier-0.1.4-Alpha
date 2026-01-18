@@ -3,6 +3,8 @@
 
 
 
+
+
 export const ui = {
     'toolbar.edit': 'Modifica (V)',
     'toolbar.cutter': 'Taglia connessione (C)',
@@ -29,7 +31,7 @@ export const ui = {
     'toolbar.addImagePreview': 'Anteprima Immagine (I)',
     'toolbar.addCharacterCard': 'Scheda Personaggio (Ctrl+Shift+C)',
     'toolbar.addPromptProcessor': 'Processore Prompt (P)',
-    'toolbar.addGeminiChat': 'Chat Gemini (M)',
+    'toolbar.addGeminiChat': 'Chat Gemini (G)',
     'toolbar.addTranslator': 'Traduttore (L)',
     'toolbar.addIdeaGenerator': 'Generatore Idee (Shift+A)',
     'toolbar.addScriptGenerator': 'Generatore Sceneggiatura (Shift+S)',
@@ -106,7 +108,7 @@ export const ui = {
     'search.node.character_card.title': 'Scheda Personaggio',
     'search.node.character_card.description': 'Memorizza immagine, nome e prompt di un personaggio. (Ctrl+Shift+C)',
     'search.node.gemini_chat.title': 'Chat Gemini',
-    'search.node.gemini_chat.description': 'Conversazione diretta con Gemini AI. (M)',
+    'search.node.gemini_chat.description': 'Conversazione diretta con Gemini AI. (G)',
     'search.node.translator.title': 'Traduttore',
     'search.node.translator.description': 'Traduce il testo nella lingua selezionata. (L)',
     'search.node.script_generator.title': 'Generatore Sceneggiatura',
@@ -137,7 +139,7 @@ export const ui = {
     'search.node.music_idea_generator.description': 'Genera testi di canzoni o prompt musicali.',
     'search.node.youtube_analytics': 'YouTube Analytics',
     'search.node.youtube_analytics.description': 'Analizza le statistiche del canale e fornisce consigli.',
-    'search.node.image_editor.title': 'Editor Immagini',
+    'search.node.image_editor': 'Editor Immagini',
     'search.node.image_editor.description': 'Modifica le immagini con l\'IA (Inpainting, Outpainting).',
     'search.group.input': 'Input',
     'search.group.process': 'Elaborazione & Analisi',

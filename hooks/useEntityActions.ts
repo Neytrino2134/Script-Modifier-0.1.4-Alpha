@@ -3,40 +3,7 @@ import React, { useCallback } from 'react';
 import { Node, NodeType, Point, Group, Connection, CatalogItem, CatalogItemType } from '../types';
 import { getOutputHandleType } from '../utils/nodeUtils';
 import { extractYouTubeMetadata } from '../services/geminiService';
-
-// Helper to split image for YouTube Analytics
-const splitYouTubeImage = (blob: Blob): Promise<{ thumbnail: string, metadataImage: string }> => {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = URL.createObjectURL(blob);
-        img.onload = () => {
-            const CUT_X = 136; // Approximate width of the thumbnail in the screenshot
-            
-            // Canvas 1: Thumbnail
-            const cvsThumb = document.createElement('canvas');
-            cvsThumb.width = CUT_X;
-            cvsThumb.height = img.height;
-            const ctxThumb = cvsThumb.getContext('2d');
-            if (!ctxThumb) { reject("Canvas error"); return; }
-            ctxThumb.drawImage(img, 0, 0, CUT_X, img.height, 0, 0, CUT_X, img.height);
-            
-            // Canvas 2: Metadata (Title, etc) - The rest of the image
-            const cvsMeta = document.createElement('canvas');
-            const metaWidth = img.width - CUT_X;
-            cvsMeta.width = metaWidth;
-            cvsMeta.height = img.height;
-            const ctxMeta = cvsMeta.getContext('2d');
-            if (!ctxMeta) { reject("Canvas error"); return; }
-            ctxMeta.drawImage(img, CUT_X, 0, metaWidth, img.height, 0, 0, metaWidth, img.height);
-
-            resolve({
-                thumbnail: cvsThumb.toDataURL('image/png').split(',')[1],
-                metadataImage: cvsMeta.toDataURL('image/png').split(',')[1]
-            });
-        };
-        img.onerror = reject;
-    });
-};
+import { processYouTubeScreenshot } from '../utils/imageUtils';
 
 export const useEntityActions = ({
     nodes, connections, groups, addNodeFromHook, t, clientPointerPosition, clientPointerPositionRef,
@@ -80,6 +47,7 @@ export const useEntityActions = ({
     saveGenericItemToCatalog: (type: CatalogItemType, name: string, data: any) => void;
 }) => {
     
+    // ... existing onAddNode, handleAddNodeFromToolbar etc ...
     const onAddNode = useCallback((type: NodeType, position: Point, value?: string, title?: string) => {
         const newNodeId = addNodeFromHook(type, position, t, value, title);
         setLastAddedNodeId(newNodeId);
@@ -150,6 +118,7 @@ export const useEntityActions = ({
         setConnections(current => [ ...current.filter(c => c.id !== connectionId), newConn1, newConn2, ]);
     }, [connections, nodes, t, setNodes, setConnections, nodeIdCounter, viewTransform]);
     
+    // ... existing group/catalog handlers ...
     const handleGroupSelection = useCallback(() => {
         if (selectedNodeIds.length > 1) {
             const nodesToGroup = nodes.filter(node => selectedNodeIds.includes(node.id));
@@ -621,6 +590,38 @@ export const useEntityActions = ({
         };
         reader.readAsDataURL(file);
     }, [nodeIdCounter, setNodes, t]);
+    
+    // Feature: Download Chat Node content as JSON
+    const handleDownloadChat = useCallback((nodeId: string) => {
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node || node.type !== NodeType.GEMINI_CHAT) return;
+        
+        try {
+            const chatData = JSON.parse(node.value || '{}');
+            const dataToSave = {
+                type: 'gemini-chat-data',
+                title: node.title,
+                ...chatData
+            };
+            const dataStr = JSON.stringify(dataToSave, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`;
+            const filename = `Gemini_Chat_${timestamp}.json`;
+            
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            addToast(t('toast.savedToCatalog') || 'Chat saved', 'success');
+        } catch (e) {
+            console.error("Failed to download chat:", e);
+            addToast(t('toast.saveFailed'), 'info');
+        }
+    }, [nodes, addToast, t]);
 
     const handlePasteFromClipboard = useCallback(async () => {
         try {
@@ -638,7 +639,95 @@ export const useEntityActions = ({
                      for (const item of clipboardItems) {
                         const imageType = item.types.find(type => type.startsWith('image/'));
                         if (imageType) {
-                            // Let the youtube analytics node logic inside useCanvasEvents (handleDrop) or handle internal paste logic if moved there.
+                            const blob = await item.getType(imageType);
+                            const file = new File([blob], "pasted.png", { type: imageType });
+
+                            // Process Image
+                            processYouTubeScreenshot(file).then(async ({ thumbnail, metadataImage }) => {
+                                const newVideoId = `vid-${Date.now()}`;
+                                const newVideo = {
+                                    id: newVideoId,
+                                    thumbnailBase64: thumbnail,
+                                    uploadDate: new Date().toISOString(),
+                                    title: "Processing...",
+                                    description: "",
+                                    views: 0,
+                                    likes: 0,
+                                    isShort: false
+                                };
+
+                                // Immediate Update (Add Video)
+                                setNodes(prev => prev.map(n => {
+                                    if (n.id === targetNode.id) {
+                                        try {
+                                            const parsed = JSON.parse(n.value || '{}');
+                                            const channels = parsed.channels || [];
+                                            const activeId = parsed.activeChannelId || (channels[0]?.id);
+                                            const channelIndex = channels.findIndex((c: any) => c.id === activeId);
+                                            
+                                            if (channelIndex !== -1) {
+                                                const newChannels = [...channels];
+                                                newChannels[channelIndex] = {
+                                                    ...newChannels[channelIndex],
+                                                    videos: [newVideo, ...newChannels[channelIndex].videos]
+                                                };
+                                                return { ...n, value: JSON.stringify({ ...parsed, channels: newChannels }) };
+                                            }
+                                        } catch (e) { console.error(e); }
+                                    }
+                                    return n;
+                                }));
+                                
+                                addToast(t('toast.videoPasted'), 'success', clientPointerPositionRef.current);
+
+                                // If metadata image is empty (too small or invalid), skip extraction
+                                if (!metadataImage) return;
+
+                                // Async Analysis
+                                try {
+                                    const meta = await extractYouTubeMetadata(metadataImage);
+                                    
+                                    // Second Update (Update Metadata)
+                                    setNodes(prev => prev.map(n => {
+                                        if (n.id === targetNode.id) {
+                                            try {
+                                                const parsed = JSON.parse(n.value || '{}');
+                                                const channels = parsed.channels || [];
+                                                const activeId = parsed.activeChannelId || (channels[0]?.id);
+                                                const channelIndex = channels.findIndex((c: any) => c.id === activeId);
+
+                                                if (channelIndex !== -1) {
+                                                    const currentVideos = channels[channelIndex].videos;
+                                                    const vidIndex = currentVideos.findIndex((v: any) => v.id === newVideoId);
+                                                    if (vidIndex !== -1) {
+                                                        const newVids = [...currentVideos];
+                                                        newVids[vidIndex] = {
+                                                            ...newVids[vidIndex],
+                                                            title: meta.title || "Untitled",
+                                                            description: meta.description || "",
+                                                            views: meta.views || 0,
+                                                            uploadDate: meta.uploadDate || newVids[vidIndex].uploadDate
+                                                        };
+                                                        const newChannels = [...channels];
+                                                        newChannels[channelIndex] = {
+                                                            ...newChannels[channelIndex],
+                                                            videos: newVids
+                                                        };
+                                                        return { ...n, value: JSON.stringify({ ...parsed, channels: newChannels }) };
+                                                    }
+                                                }
+                                            } catch (e) { console.error(e); }
+                                        }
+                                        return n;
+                                    }));
+                                    addToast("Metadata extracted!", "success");
+                                } catch (error) {
+                                    console.error("Gemini analysis failed", error);
+                                    addToast("Metadata extraction failed", "info");
+                                }
+                            });
+
+                            return; // Stop global paste
                         }
                     }
                 }
@@ -831,5 +920,6 @@ export const useEntityActions = ({
         handleDuplicateNode,
         handleDuplicateNodeEmpty: handleDuplicateNodeEmptyWrapper,
         saveDataToCatalog,
+        handleDownloadChat, // Export new function
     };
 };

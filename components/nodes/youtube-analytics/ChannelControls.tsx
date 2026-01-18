@@ -40,7 +40,7 @@ export const ChannelControls: React.FC<ChannelControlsProps> = ({
                     type="text"
                     value={authorName}
                     onChange={(e) => onUpdateValue({ authorName: e.target.value })}
-                    className="bg-gray-800 text-sm rounded p-1 border border-transparent focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none flex-grow text-emerald-300 font-medium transition-all"
+                    className="bg-gray-800 text-sm rounded p-1 border border-transparent focus:border-emerald-500 focus:ring-0 outline-none flex-grow text-emerald-300 font-medium transition-all"
                     onFocus={deselectAllNodes}
                     placeholder={t('youtube_analytics.authorName')}
                 />
@@ -103,7 +103,7 @@ export const ChannelControls: React.FC<ChannelControlsProps> = ({
                                 <textarea 
                                     value={activeChannel.description || ''}
                                     onChange={(e) => onUpdateChannel(activeChannel.id, { description: e.target.value })}
-                                    className="w-full bg-gray-800 text-xs rounded p-1 border border-transparent focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-white transition-all resize-none h-[60px] custom-scrollbar"
+                                    className="w-full bg-gray-800 text-xs rounded p-1 border border-transparent focus:border-emerald-500 focus:ring-0 outline-none text-white transition-all resize-none h-[60px] custom-scrollbar"
                                     placeholder={t('youtube_title_generator.channelDescription')}
                                     onFocus={deselectAllNodes}
                                     onWheel={(e) => e.stopPropagation()}
@@ -118,7 +118,7 @@ export const ChannelControls: React.FC<ChannelControlsProps> = ({
                                 type="text" 
                                 value={activeChannel.goal || ''}
                                 onChange={(e) => onUpdateChannel(activeChannel.id, { goal: e.target.value })}
-                                className="flex-grow bg-gray-800 text-xs rounded p-1 border border-transparent focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-white transition-all"
+                                className="flex-grow bg-gray-800 text-xs rounded p-1 border border-transparent focus:border-emerald-500 focus:ring-0 outline-none text-white transition-all"
                                 placeholder={t('youtube_analytics.goalPlaceholder')}
                                 onFocus={deselectAllNodes}
                             />
@@ -147,7 +147,7 @@ export const ChannelControls: React.FC<ChannelControlsProps> = ({
                             type="number" 
                             value={activeChannel.currentSubscribers || ''}
                             onChange={(e) => onUpdateChannel(activeChannel.id, { currentSubscribers: parseInt(e.target.value) || 0 })}
-                            className="w-full bg-gray-800 text-xs rounded p-1 border border-transparent focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-white transition-all"
+                            className="w-full bg-gray-800 text-xs rounded p-1 border border-transparent focus:border-emerald-500 focus:ring-0 outline-none text-white transition-all"
                             placeholder="0"
                             onFocus={deselectAllNodes}
                         />
