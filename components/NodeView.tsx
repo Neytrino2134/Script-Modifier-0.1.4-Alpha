@@ -143,7 +143,7 @@ interface NodeViewProps {
   onSaveCharacterToCatalog: (nodeId: string) => void;
   setFullSizeImage: (nodeId: string, slotIndex: number, imageBase64: string) => void;
   getFullSizeImage: (nodeId: string, slotIndex: number) => string | null;
-  setImageViewer: (data: { sources: {src: string, frameNumber: number}[], initialIndex: number } | null) => void;
+  setImageViewer: (data: { sources: { src: string, frameNumber: number }[], initialIndex: number } | null) => void;
   onCopyImageToClipboard: (base64: string) => void;
   onDownloadImage: (base64: string, filename: string) => void;
   onUpdateCharacterDescription?: (nodeId: string, charIndex: number) => void;
@@ -159,11 +159,11 @@ interface NodeViewProps {
 const HEADER_HEIGHT = 40;
 
 const NodeView: React.FC<NodeViewProps> = (props) => {
-  const { 
-    node, onMouseDown, onTouchStart, onResizeMouseDown, onResizeTouchStart, activeTool, 
+  const {
+    node, onMouseDown, onTouchStart, onResizeMouseDown, onResizeTouchStart, activeTool,
     onOutputHandleMouseDown, onOutputHandleTouchStart, onNodeClick, isHovered, isSelected, isGrouped,
-    onNodeMouseEnter, onNodeMouseLeave, onDeleteNode, onCutConnections, onCopyNodeValue, 
-    onPasteNodeValue, onValueChange, onReadData, connectingInfo, connectionTarget, 
+    onNodeMouseEnter, onNodeMouseLeave, onDeleteNode, onCutConnections, onCopyNodeValue,
+    onPasteNodeValue, onValueChange, onReadData, connectingInfo, connectionTarget,
     lastAddedNodeId, isExecuting, isDragOverTarget, addToast, onDuplicateNode,
     onNodeDoubleClick, onDuplicateNodeEmpty, onRenameNode, inputData,
     onSaveCharacterCard, onLoadCharacterCard, onSaveCharacterToCatalog, setFullSizeImage, getFullSizeImage,
@@ -172,149 +172,149 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
   } = props;
   const { t } = useLanguage();
   const isRerouteDot = node.type === NodeType.REROUTE_DOT;
-  
+
   const rerouteType = useMemo(() => {
     if (!isRerouteDot) return null;
     try {
-        const parsed = JSON.parse(node.value || '{}');
-        return parsed.type || null;
+      const parsed = JSON.parse(node.value || '{}');
+      return parsed.type || null;
     } catch {
-        return null;
+      return null;
     }
   }, [isRerouteDot, node.value]);
 
   const minSize = useMemo(() => {
     switch (node.type) {
-        case NodeType.TEXT_INPUT: return { minWidth: 460, minHeight: 280 };
-        case NodeType.PROMPT_PROCESSOR: return { minWidth: 460, minHeight: 280 };
-        case NodeType.PROMPT_ANALYZER: return { minWidth: 460, minHeight: 1000 };
-        case NodeType.CHARACTER_ANALYZER: return { minWidth: 460, minHeight: 500 };
-        case NodeType.CHARACTER_GENERATOR: return { minWidth: 680, minHeight: 800 };
-        case NodeType.IMAGE_GENERATOR: return { minWidth: 400, minHeight: 520 };
-        case NodeType.IMAGE_PREVIEW: return { minWidth: 300, minHeight: 400 };
-        case NodeType.CHARACTER_CARD: return { minWidth: 460, minHeight: 1000 };
-        case NodeType.GEMINI_CHAT: return { minWidth: 400, minHeight: 640 };
-        case NodeType.TRANSLATOR: return { minWidth: 380, minHeight: 640 };
-        case NodeType.SCRIPT_GENERATOR: return { minWidth: 680, minHeight: 800 };
-        case NodeType.SCRIPT_ANALYZER: return { minWidth: 680, minHeight: 800 };
-        case NodeType.SCRIPT_PROMPT_MODIFIER: return { minWidth: 680, minHeight: 800 };
-        case NodeType.ERROR_ANALYZER: return { minWidth: 380, minHeight: 280 };
-        case NodeType.DATA_READER: return { minWidth: 380, minHeight: 280 };
-        case NodeType.NOTE: return { minWidth: 440, minHeight: 640 };
-        case NodeType.SPEECH_SYNTHESIZER: return { minWidth: 680, minHeight: 800 };
-        case NodeType.NARRATOR_TEXT_GENERATOR: return { minWidth: 680, minHeight: 800 };
-        case NodeType.IDEA_GENERATOR: return { minWidth: 680, minHeight: 800 };
-        case NodeType.AUDIO_TRANSCRIBER: return { minWidth: 400, minHeight: 480 };
-        case NodeType.YOUTUBE_TITLE_GENERATOR: return { minWidth: 680, minHeight: 800 };
-        case NodeType.MUSIC_IDEA_GENERATOR: return { minWidth: 680, minHeight: 800 };
-        case NodeType.YOUTUBE_ANALYTICS: return { minWidth: 1200, minHeight: 800 };
-        case NodeType.REROUTE_DOT: return { minWidth: 60, minHeight: 40 };
-        default: return { minWidth: 200, minHeight: 150 };
+      case NodeType.TEXT_INPUT: return { minWidth: 460, minHeight: 280 };
+      case NodeType.PROMPT_PROCESSOR: return { minWidth: 460, minHeight: 280 };
+      case NodeType.PROMPT_ANALYZER: return { minWidth: 460, minHeight: 1000 };
+      case NodeType.CHARACTER_ANALYZER: return { minWidth: 460, minHeight: 500 };
+      case NodeType.CHARACTER_GENERATOR: return { minWidth: 460, minHeight: 1000 };
+      case NodeType.IMAGE_GENERATOR: return { minWidth: 400, minHeight: 520 };
+      case NodeType.IMAGE_PREVIEW: return { minWidth: 300, minHeight: 400 };
+      case NodeType.CHARACTER_CARD: return { minWidth: 460, minHeight: 1000 };
+      case NodeType.GEMINI_CHAT: return { minWidth: 400, minHeight: 640 };
+      case NodeType.TRANSLATOR: return { minWidth: 380, minHeight: 640 };
+      case NodeType.SCRIPT_GENERATOR: return { minWidth: 680, minHeight: 800 };
+      case NodeType.SCRIPT_ANALYZER: return { minWidth: 680, minHeight: 800 };
+      case NodeType.SCRIPT_PROMPT_MODIFIER: return { minWidth: 680, minHeight: 800 };
+      case NodeType.ERROR_ANALYZER: return { minWidth: 380, minHeight: 280 };
+      case NodeType.DATA_READER: return { minWidth: 380, minHeight: 280 };
+      case NodeType.NOTE: return { minWidth: 440, minHeight: 640 };
+      case NodeType.SPEECH_SYNTHESIZER: return { minWidth: 680, minHeight: 800 };
+      case NodeType.NARRATOR_TEXT_GENERATOR: return { minWidth: 680, minHeight: 800 };
+      case NodeType.IDEA_GENERATOR: return { minWidth: 680, minHeight: 800 };
+      case NodeType.AUDIO_TRANSCRIBER: return { minWidth: 400, minHeight: 480 };
+      case NodeType.YOUTUBE_TITLE_GENERATOR: return { minWidth: 680, minHeight: 800 };
+      case NodeType.MUSIC_IDEA_GENERATOR: return { minWidth: 680, minHeight: 800 };
+      case NodeType.YOUTUBE_ANALYTICS: return { minWidth: 1200, minHeight: 800 };
+      case NodeType.REROUTE_DOT: return { minWidth: 60, minHeight: 40 };
+      default: return { minWidth: 200, minHeight: 150 };
     }
   }, [node.type]);
 
   const handleDragMouseDown = (e: React.MouseEvent<HTMLDivElement>) => onMouseDown(e, node.id);
   const handleDragTouchStart = (e: React.TouchEvent<HTMLDivElement>) => onTouchStart(e, node.id);
-  
+
   const handleNodeClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (activeTool === 'cutter') { e.stopPropagation(); e.preventDefault(); onNodeClick(node.id); }
   };
 
   const handleCursor = activeTool === 'edit' ? 'crosshair' : 'inherit';
-  
+
   const renderContent = () => {
-    const contentProps = { 
-        ...props, 
-        nodes: props.nodes,
-        connections: props.connections,
-        t, 
-        handleCursor,
-        isEnhancing: props.isEnhancing === node.id,
-        isAnalyzing: props.isAnalyzing === node.id,
-        isAnalyzingCharacter: props.isAnalyzingCharacter === node.id,
-        isStopping: props.stoppingNodes.has(node.id),
-        onRemoveConnection: props.removeConnectionById,
-        getUpstreamTextValue: props.getUpstreamTextValue,
-        addToast: props.addToast,
-        isGeneratingIdeaCategories: props.isGeneratingIdeaCategories === node.id,
-        isCombiningStoryIdea: props.isCombiningStoryIdea === node.id,
-        isTranscribingAudio: props.isTranscribingAudio === node.id,
-        isGeneratingYouTubeTitles: props.isGeneratingYouTubeTitles === node.id,
-        isGeneratingYouTubeChannelInfo: props.isGeneratingYouTubeChannelInfo === node.id,
-        isGeneratingMusicIdeas: props.isGeneratingMusicIdeas === node.id,
-        isExtractingText: props.isExtractingText === node.id,
-        isAnalyzingYouTubeStats: props.isAnalyzingYouTubeStats === node.id,
-        isImprovingScriptConcept: props.isImprovingScriptConcept === node.id,
-        // Ensure isGeneratingEntities remains a string | null matching NodeContentProps
-        isGeneratingEntities: props.isGeneratingEntities === node.id ? props.isGeneratingEntities : null,
-        inputData: inputData,
-        // Pass Image props down
-        onSaveCharacterCard,
-        onLoadCharacterCard,
-        onSaveCharacterToCatalog,
-        setFullSizeImage,
-        getFullSizeImage,
-        setImageViewer,
-        onCopyImageToClipboard,
-        onDownloadImage,
-        onUpdateCharacterDescription,
-        isUpdatingDescription: props.isUpdatingDescription === node.id ? props.isUpdatingDescription : null,
-        onModifyCharacter,
-        isModifyingCharacter: props.isModifyingCharacter === node.id ? props.isModifyingCharacter : null,
-        getUpstreamNodeValues,
-        onAddNode,
-        onDeleteNode
+    const contentProps = {
+      ...props,
+      nodes: props.nodes,
+      connections: props.connections,
+      t,
+      handleCursor,
+      isEnhancing: props.isEnhancing === node.id,
+      isAnalyzing: props.isAnalyzing === node.id,
+      isAnalyzingCharacter: props.isAnalyzingCharacter === node.id,
+      isStopping: props.stoppingNodes.has(node.id),
+      onRemoveConnection: props.removeConnectionById,
+      getUpstreamTextValue: props.getUpstreamTextValue,
+      addToast: props.addToast,
+      isGeneratingIdeaCategories: props.isGeneratingIdeaCategories === node.id,
+      isCombiningStoryIdea: props.isCombiningStoryIdea === node.id,
+      isTranscribingAudio: props.isTranscribingAudio === node.id,
+      isGeneratingYouTubeTitles: props.isGeneratingYouTubeTitles === node.id,
+      isGeneratingYouTubeChannelInfo: props.isGeneratingYouTubeChannelInfo === node.id,
+      isGeneratingMusicIdeas: props.isGeneratingMusicIdeas === node.id,
+      isExtractingText: props.isExtractingText === node.id,
+      isAnalyzingYouTubeStats: props.isAnalyzingYouTubeStats === node.id,
+      isImprovingScriptConcept: props.isImprovingScriptConcept === node.id,
+      // Ensure isGeneratingEntities remains a string | null matching NodeContentProps
+      isGeneratingEntities: props.isGeneratingEntities === node.id ? props.isGeneratingEntities : null,
+      inputData: inputData,
+      // Pass Image props down
+      onSaveCharacterCard,
+      onLoadCharacterCard,
+      onSaveCharacterToCatalog,
+      setFullSizeImage,
+      getFullSizeImage,
+      setImageViewer,
+      onCopyImageToClipboard,
+      onDownloadImage,
+      onUpdateCharacterDescription,
+      isUpdatingDescription: props.isUpdatingDescription === node.id ? props.isUpdatingDescription : null,
+      onModifyCharacter,
+      isModifyingCharacter: props.isModifyingCharacter === node.id ? props.isModifyingCharacter : null,
+      getUpstreamNodeValues,
+      onAddNode,
+      onDeleteNode
     };
     switch (node.type) {
-        case NodeType.REROUTE_DOT: return <RerouteDotNode {...contentProps} />;
-        case NodeType.NOTE: return <NoteNode {...contentProps} />;
-        case NodeType.TRANSLATOR: return <TranslatorNode {...contentProps} />;
-        case NodeType.GEMINI_CHAT: return <GeminiChatNode {...contentProps} />;
-        case NodeType.SCRIPT_GENERATOR: return <ScriptGeneratorNode {...contentProps} />;
-        case NodeType.SCRIPT_ANALYZER: return <ScriptAnalyzerNode {...contentProps} />;
-        case NodeType.SCRIPT_PROMPT_MODIFIER: return <ScriptPromptModifierNode {...contentProps} />;
-        case NodeType.CHARACTER_GENERATOR: return <CharacterGeneratorNode {...contentProps} />;
-        case NodeType.CHARACTER_CARD: return <CharacterCardNode {...contentProps} />;
-        case NodeType.IMAGE_GENERATOR: return <ImageGeneratorNode {...contentProps} />;
-        case NodeType.IMAGE_PREVIEW: return <ImagePreviewNode {...contentProps} />;
-        case NodeType.ERROR_ANALYZER: return <ErrorAnalyzerNode {...contentProps} />;
-        case NodeType.DATA_READER: return <DataReaderNode {...contentProps} />;
-        case NodeType.SPEECH_SYNTHESIZER: return <SpeechSynthesizerNode {...contentProps} />;
-        case NodeType.NARRATOR_TEXT_GENERATOR: return <NarratorTextGeneratorNode {...contentProps} />;
-        case NodeType.IDEA_GENERATOR: return <IdeaGeneratorNode {...contentProps} />;
-        case NodeType.AUDIO_TRANSCRIBER: return <AudioTranscriberNode {...contentProps} />;
-        case NodeType.YOUTUBE_TITLE_GENERATOR: return <YouTubeTitleGeneratorNode {...contentProps} />;
-        case NodeType.MUSIC_IDEA_GENERATOR: return <MusicIdeaGeneratorNode {...contentProps} />;
-        case NodeType.YOUTUBE_ANALYTICS: return <YouTubeAnalyticsNode {...contentProps} />;
-        case NodeType.TEXT_INPUT: return <TextInputNode {...contentProps} />;
-        case NodeType.PROMPT_ANALYZER: return <PromptAnalyzerNode {...contentProps} />;
-        case NodeType.CHARACTER_ANALYZER: return <CharacterAnalyzerNode {...contentProps} />;
-        case NodeType.PROMPT_PROCESSOR: return <PromptProcessorNode {...contentProps} />;
-        default: return null;
+      case NodeType.REROUTE_DOT: return <RerouteDotNode {...contentProps} />;
+      case NodeType.NOTE: return <NoteNode {...contentProps} />;
+      case NodeType.TRANSLATOR: return <TranslatorNode {...contentProps} />;
+      case NodeType.GEMINI_CHAT: return <GeminiChatNode {...contentProps} />;
+      case NodeType.SCRIPT_GENERATOR: return <ScriptGeneratorNode {...contentProps} />;
+      case NodeType.SCRIPT_ANALYZER: return <ScriptAnalyzerNode {...contentProps} />;
+      case NodeType.SCRIPT_PROMPT_MODIFIER: return <ScriptPromptModifierNode {...contentProps} />;
+      case NodeType.CHARACTER_GENERATOR: return <CharacterGeneratorNode {...contentProps} />;
+      case NodeType.CHARACTER_CARD: return <CharacterCardNode {...contentProps} />;
+      case NodeType.IMAGE_GENERATOR: return <ImageGeneratorNode {...contentProps} />;
+      case NodeType.IMAGE_PREVIEW: return <ImagePreviewNode {...contentProps} />;
+      case NodeType.ERROR_ANALYZER: return <ErrorAnalyzerNode {...contentProps} />;
+      case NodeType.DATA_READER: return <DataReaderNode {...contentProps} />;
+      case NodeType.SPEECH_SYNTHESIZER: return <SpeechSynthesizerNode {...contentProps} />;
+      case NodeType.NARRATOR_TEXT_GENERATOR: return <NarratorTextGeneratorNode {...contentProps} />;
+      case NodeType.IDEA_GENERATOR: return <IdeaGeneratorNode {...contentProps} />;
+      case NodeType.AUDIO_TRANSCRIBER: return <AudioTranscriberNode {...contentProps} />;
+      case NodeType.YOUTUBE_TITLE_GENERATOR: return <YouTubeTitleGeneratorNode {...contentProps} />;
+      case NodeType.MUSIC_IDEA_GENERATOR: return <MusicIdeaGeneratorNode {...contentProps} />;
+      case NodeType.YOUTUBE_ANALYTICS: return <YouTubeAnalyticsNode {...contentProps} />;
+      case NodeType.TEXT_INPUT: return <TextInputNode {...contentProps} />;
+      case NodeType.PROMPT_ANALYZER: return <PromptAnalyzerNode {...contentProps} />;
+      case NodeType.CHARACTER_ANALYZER: return <CharacterAnalyzerNode {...contentProps} />;
+      case NodeType.PROMPT_PROCESSOR: return <PromptProcessorNode {...contentProps} />;
+      default: return null;
     }
   };
-  
+
   const isConnectionTarget = connectionTarget?.nodeId === node.id;
   let borderColorClass = 'border-gray-700';
 
-    if (isDragOverTarget) {
-      borderColorClass = 'border-emerald-400';
-    } else if (isConnectionTarget) {
-      borderColorClass = 'border-green-400';
-    } else if (isExecuting) {
-      borderColorClass = 'border-yellow-500';
-    } else if (isSelected) {
-      borderColorClass = 'border-emerald-400';
-    } else if (isRerouteDot) {
-      if (rerouteType === 'text') borderColorClass = 'border-emerald-500';
-      else if (rerouteType === 'image') borderColorClass = 'border-cyan-500';
-    }
+  if (isDragOverTarget) {
+    borderColorClass = 'border-emerald-400';
+  } else if (isConnectionTarget) {
+    borderColorClass = 'border-green-400';
+  } else if (isExecuting) {
+    borderColorClass = 'border-yellow-500';
+  } else if (isSelected) {
+    borderColorClass = 'border-emerald-400';
+  } else if (isRerouteDot) {
+    if (rerouteType === 'text') borderColorClass = 'border-emerald-500';
+    else if (rerouteType === 'image') borderColorClass = 'border-cyan-500';
+  }
 
   const nodeCursor = activeTool === 'cutter' ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="%23ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>') 12 12, auto` : 'default';
-  const bgClass = isRerouteDot 
+  const bgClass = isRerouteDot
     ? (rerouteType === 'text' ? 'bg-emerald-900/30' : rerouteType === 'image' ? 'bg-cyan-900/30' : 'bg-gray-600')
     : (node.type === NodeType.NOTE ? 'bg-gray-900/70 backdrop-blur-sm' : 'bg-gray-800');
-    
+
   const getHandleColor = (type: 'text' | 'image' | null, handleId?: string): string => {
     let finalType = type;
     if (isRerouteDot) finalType = rerouteType;
@@ -325,8 +325,8 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
 
     if (!connectingInfo || (!isHovered && !isRerouteDot)) return color;
     if (isConnectionTarget) {
-        if (node.type === NodeType.REROUTE_DOT) return 'bg-green-500';
-        if (connectingInfo!.fromType === getInputHandleType(node, handleId)) return 'bg-green-500';
+      if (node.type === NodeType.REROUTE_DOT) return 'bg-green-500';
+      if (connectingInfo!.fromType === getInputHandleType(node, handleId)) return 'bg-green-500';
     }
     if (isHovered) return 'bg-red-500 cursor-not-allowed';
     return color;
@@ -354,7 +354,7 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
         transform: `translate3d(${node.position.x}px, ${node.position.y}px, 0)`,
         width: node.width, height: node.isCollapsed ? `${HEADER_HEIGHT}px` : node.height,
         minWidth: isRerouteDot ? undefined : `${minSize.minWidth}px`, minHeight: node.isCollapsed ? `${HEADER_HEIGHT}px` : (isRerouteDot ? undefined : `${minSize.minHeight}px`),
-        zIndex: zIndex, 
+        zIndex: zIndex,
         cursor: nodeCursor,
         backfaceVisibility: 'hidden',
       }}
@@ -366,7 +366,7 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
         className={`absolute inset-0 border-2 ${borderColorClass} rounded-lg pointer-events-none`}
         style={{ zIndex: 12 }}
       />
-      <NodeHeader 
+      <NodeHeader
         node={node}
         t={t}
         addToast={addToast}
@@ -385,19 +385,19 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
         onDownloadChat={onDownloadChat}
       />
       {!isRerouteDot && !node.isCollapsed && <div className={`${contentPaddingClass} flex-grow min-h-0`}>{renderContent()}</div>}
-      
+
       <InputHandles node={node} getHandleColor={getHandleColor} handleCursor={handleCursor} t={t} isHovered={isHovered} isCollapsed={node.isCollapsed} />
-      <OutputHandles 
-        node={node} 
-        getHandleColor={getHandleColor} 
-        handleCursor={handleCursor} 
-        t={t} 
-        isHovered={isHovered} 
+      <OutputHandles
+        node={node}
+        getHandleColor={getHandleColor}
+        handleCursor={handleCursor}
+        t={t}
+        isHovered={isHovered}
         isCollapsed={node.isCollapsed}
         onOutputHandleMouseDown={onOutputHandleMouseDown}
         onOutputHandleTouchStart={onOutputHandleTouchStart}
       />
-      
+
       {!isRerouteDot && !node.isCollapsed && <NodeResizer onResizeMouseDown={(e) => onResizeMouseDown(e, node.id)} onResizeTouchStart={(e) => onResizeTouchStart(e, node.id)} />}
     </div>
   );
@@ -405,53 +405,53 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
 
 // Custom comparison to avoid re-rendering all nodes when one node moves.
 function arePropsEqual(prev: NodeViewProps, next: NodeViewProps) {
-    if (prev.node !== next.node) return false; // Position, size, or internal data changed
-    if (prev.isSelected !== next.isSelected) return false;
-    if (prev.isGrouped !== next.isGrouped) return false; // Check group status
-    if (prev.isHovered !== next.isHovered) return false;
-    if (prev.isExecuting !== next.isExecuting) return false;
-    if (prev.isEnhancing !== next.isEnhancing) return false;
-    if (prev.isAnalyzing !== next.isAnalyzing) return false;
-    if (prev.isAnalyzingCharacter !== next.isAnalyzingCharacter) return false;
-    if (prev.isExecutingChain !== next.isExecutingChain) return false;
-    if (prev.isChatting !== next.isChatting) return false;
-    if (prev.isTranslating !== next.isTranslating) return false;
-    if (prev.isFixingErrors !== next.isFixingErrors) return false;
-    if (prev.isReadingData !== next.isReadingData) return false;
-    if (prev.isGeneratingScript !== next.isGeneratingScript) return false;
-    if (prev.isGeneratingEntities !== next.isGeneratingEntities) return false;
-    if (prev.isModifyingScriptPart !== next.isModifyingScriptPart) return false;
-    if (prev.isAnalyzingScript !== next.isAnalyzingScript) return false;
-    if (prev.isGeneratingCharacters !== next.isGeneratingCharacters) return false;
-    if (prev.isGeneratingImage !== next.isGeneratingImage) return false;
-    if (prev.isGeneratingCharacterImage !== next.isGeneratingCharacterImage) return false;
-    if (prev.isModifyingScriptPrompts !== next.isModifyingScriptPrompts) return false;
-    if (prev.isGeneratingSpeech !== next.isGeneratingSpeech) return false;
-    if (prev.isGeneratingIdeaCategories !== next.isGeneratingIdeaCategories) return false;
-    if (prev.isCombiningStoryIdea !== next.isCombiningStoryIdea) return false;
-    if (prev.isGeneratingNarratorText !== next.isGeneratingNarratorText) return false;
-    if (prev.isTranscribingAudio !== next.isTranscribingAudio) return false;
-    if (prev.isGeneratingYouTubeTitles !== next.isGeneratingYouTubeTitles) return false;
-    if (prev.isGeneratingYouTubeChannelInfo !== next.isGeneratingYouTubeChannelInfo) return false;
-    if (prev.isGeneratingMusicIdeas !== next.isGeneratingMusicIdeas) return false;
-    if (prev.isExtractingText !== next.isExtractingText) return false;
-    if (prev.isAnalyzingYouTubeStats !== next.isAnalyzingYouTubeStats) return false;
-    if (prev.isImprovingScriptConcept !== next.isImprovingScriptConcept) return false;
-    if (prev.isUpdatingDescription !== next.isUpdatingDescription) return false;
-    if (prev.isModifyingCharacter !== next.isModifyingCharacter) return false;
-    
-    // Critical Change: Re-render if upstream input data changes
-    if (prev.inputData !== next.inputData) return false;
-    
-    if (prev.activeTool !== next.activeTool) return false;
-    if (prev.connections !== next.connections) return false;
-    if (prev.connectionTarget !== next.connectionTarget) return false;
-    if (prev.isDragOverTarget !== next.isDragOverTarget) return false;
-    if (prev.connectingInfo !== next.connectingInfo) return false;
-    if (prev.lastAddedNodeId !== next.lastAddedNodeId) return false;
-    if (prev.clearSelectionsSignal !== next.clearSelectionsSignal) return false;
+  if (prev.node !== next.node) return false; // Position, size, or internal data changed
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.isGrouped !== next.isGrouped) return false; // Check group status
+  if (prev.isHovered !== next.isHovered) return false;
+  if (prev.isExecuting !== next.isExecuting) return false;
+  if (prev.isEnhancing !== next.isEnhancing) return false;
+  if (prev.isAnalyzing !== next.isAnalyzing) return false;
+  if (prev.isAnalyzingCharacter !== next.isAnalyzingCharacter) return false;
+  if (prev.isExecutingChain !== next.isExecutingChain) return false;
+  if (prev.isChatting !== next.isChatting) return false;
+  if (prev.isTranslating !== next.isTranslating) return false;
+  if (prev.isFixingErrors !== next.isFixingErrors) return false;
+  if (prev.isReadingData !== next.isReadingData) return false;
+  if (prev.isGeneratingScript !== next.isGeneratingScript) return false;
+  if (prev.isGeneratingEntities !== next.isGeneratingEntities) return false;
+  if (prev.isModifyingScriptPart !== next.isModifyingScriptPart) return false;
+  if (prev.isAnalyzingScript !== next.isAnalyzingScript) return false;
+  if (prev.isGeneratingCharacters !== next.isGeneratingCharacters) return false;
+  if (prev.isGeneratingImage !== next.isGeneratingImage) return false;
+  if (prev.isGeneratingCharacterImage !== next.isGeneratingCharacterImage) return false;
+  if (prev.isModifyingScriptPrompts !== next.isModifyingScriptPrompts) return false;
+  if (prev.isGeneratingSpeech !== next.isGeneratingSpeech) return false;
+  if (prev.isGeneratingIdeaCategories !== next.isGeneratingIdeaCategories) return false;
+  if (prev.isCombiningStoryIdea !== next.isCombiningStoryIdea) return false;
+  if (prev.isGeneratingNarratorText !== next.isGeneratingNarratorText) return false;
+  if (prev.isTranscribingAudio !== next.isTranscribingAudio) return false;
+  if (prev.isGeneratingYouTubeTitles !== next.isGeneratingYouTubeTitles) return false;
+  if (prev.isGeneratingYouTubeChannelInfo !== next.isGeneratingYouTubeChannelInfo) return false;
+  if (prev.isGeneratingMusicIdeas !== next.isGeneratingMusicIdeas) return false;
+  if (prev.isExtractingText !== next.isExtractingText) return false;
+  if (prev.isAnalyzingYouTubeStats !== next.isAnalyzingYouTubeStats) return false;
+  if (prev.isImprovingScriptConcept !== next.isImprovingScriptConcept) return false;
+  if (prev.isUpdatingDescription !== next.isUpdatingDescription) return false;
+  if (prev.isModifyingCharacter !== next.isModifyingCharacter) return false;
 
-    return true;
+  // Critical Change: Re-render if upstream input data changes
+  if (prev.inputData !== next.inputData) return false;
+
+  if (prev.activeTool !== next.activeTool) return false;
+  if (prev.connections !== next.connections) return false;
+  if (prev.connectionTarget !== next.connectionTarget) return false;
+  if (prev.isDragOverTarget !== next.isDragOverTarget) return false;
+  if (prev.connectingInfo !== next.connectingInfo) return false;
+  if (prev.lastAddedNodeId !== next.lastAddedNodeId) return false;
+  if (prev.clearSelectionsSignal !== next.clearSelectionsSignal) return false;
+
+  return true;
 }
 
 export default React.memo(NodeView, arePropsEqual);

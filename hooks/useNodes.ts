@@ -7,7 +7,7 @@ export const getNodeDefaults = (type: NodeType, t: (key: string) => string) => {
         [NodeType.SCRIPT_GENERATOR]: 680,
         [NodeType.SCRIPT_ANALYZER]: 680,
         [NodeType.SCRIPT_PROMPT_MODIFIER]: 680,
-        [NodeType.CHARACTER_GENERATOR]: 680,
+        [NodeType.CHARACTER_GENERATOR]: 460,
         [NodeType.CHARACTER_ANALYZER]: 460,
         [NodeType.CHARACTER_CARD]: 460,
         [NodeType.TEXT_INPUT]: 460,
@@ -35,7 +35,7 @@ export const getNodeDefaults = (type: NodeType, t: (key: string) => string) => {
         [NodeType.SCRIPT_GENERATOR]: 800,
         [NodeType.SCRIPT_ANALYZER]: 800,
         [NodeType.SCRIPT_PROMPT_MODIFIER]: 800,
-        [NodeType.CHARACTER_GENERATOR]: 800,
+        [NodeType.CHARACTER_GENERATOR]: 1000,
         [NodeType.CHARACTER_ANALYZER]: 500,
         [NodeType.CHARACTER_CARD]: 1000,
         [NodeType.TEXT_INPUT]: 280,
@@ -60,7 +60,7 @@ export const getNodeDefaults = (type: NodeType, t: (key: string) => string) => {
     };
 
     let value = '';
-    
+
     if (type === NodeType.MUSIC_IDEA_GENERATOR) {
         value = JSON.stringify({
             generateLyrics: true,
@@ -73,23 +73,23 @@ export const getNodeDefaults = (type: NodeType, t: (key: string) => string) => {
             model: 'gemini-3-flash-preview'
         });
     } else if (type === NodeType.YOUTUBE_TITLE_GENERATOR) {
-         value = JSON.stringify({
+        value = JSON.stringify({
             mode: 'title',
             idea: '',
             targetLanguages: { ru: true, en: false },
             generatedTitleOutputs: {},
             generatedChannelOutputs: {}
-         });
+        });
     } else if (type === NodeType.YOUTUBE_ANALYTICS) {
-         value = JSON.stringify({
-             channels: [{ id: 'default', name: 'Main Channel', videos: [], stats: [] }],
-             activeChannelId: 'default'
-         });
+        value = JSON.stringify({
+            channels: [{ id: 'default', name: 'Main Channel', videos: [], stats: [] }],
+            activeChannelId: 'default'
+        });
     } else if (type === NodeType.SCRIPT_GENERATOR) {
         value = JSON.stringify({
-             prompt: '',
-             scenes: [],
-             detailedCharacters: []
+            prompt: '',
+            scenes: [],
+            detailedCharacters: []
         });
     }
 
@@ -109,7 +109,7 @@ export const useNodes = (initialNodes: Node[], initialCounter: number) => {
         nodeIdCounter.current += 1;
         const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
         const defaults = getNodeDefaults(type, t);
-        
+
         const newNode: Node = {
             id: newNodeId,
             type,
@@ -131,17 +131,17 @@ export const useNodes = (initialNodes: Node[], initialCounter: number) => {
     const handleValueChange = useCallback((nodeId: string, value: string) => {
         setNodes((prev) => prev.map((n) => (n.id === nodeId ? { ...n, value } : n)));
     }, []);
-    
+
     const handleCopyNodeValue = useCallback(async (nodeId: string) => {
         const node = nodes.find(n => n.id === nodeId);
         if (node) {
-             let textToCopy = node.value;
+            let textToCopy = node.value;
 
-             // Special handling for clean data export on copy (matching file export structure)
-             if (node.type === NodeType.SCRIPT_PROMPT_MODIFIER) {
-                 try {
-                     const rawData = JSON.parse(node.value);
-                     const cleanData = {
+            // Special handling for clean data export on copy (matching file export structure)
+            if (node.type === NodeType.SCRIPT_PROMPT_MODIFIER) {
+                try {
+                    const rawData = JSON.parse(node.value);
+                    const cleanData = {
                         type: 'script-prompt-modifier-data',
                         finalPrompts: rawData.finalPrompts || [],
                         videoPrompts: rawData.videoPrompts || [],
@@ -149,15 +149,15 @@ export const useNodes = (initialNodes: Node[], initialCounter: number) => {
                         sceneContexts: rawData.sceneContexts || {},
                         visualStyle: rawData.styleOverride || '',
                         title: node.title
-                     };
-                     textToCopy = JSON.stringify(cleanData, null, 2);
-                 } catch (e) {
-                     console.error("Failed to parse script prompt modifier data for copy", e);
-                 }
-             } else if (node.type === NodeType.SCRIPT_GENERATOR) {
-                 try {
-                     const rawData = JSON.parse(node.value);
-                     const cleanData = {
+                    };
+                    textToCopy = JSON.stringify(cleanData, null, 2);
+                } catch (e) {
+                    console.error("Failed to parse script prompt modifier data for copy", e);
+                }
+            } else if (node.type === NodeType.SCRIPT_GENERATOR) {
+                try {
+                    const rawData = JSON.parse(node.value);
+                    const cleanData = {
                         type: 'script-generator-data',
                         scenes: rawData.scenes || [],
                         detailedCharacters: rawData.detailedCharacters || [],
@@ -165,36 +165,36 @@ export const useNodes = (initialNodes: Node[], initialCounter: number) => {
                         summary: rawData.summary || '',
                         generatedStyle: rawData.generatedStyle || '',
                         title: node.title
-                     };
-                     textToCopy = JSON.stringify(cleanData, null, 2);
-                 } catch (e) {
-                     console.error("Failed to parse script generator data for copy", e);
-                 }
-             } else if (node.type === NodeType.SCRIPT_ANALYZER) {
-                 try {
-                     const rawData = JSON.parse(node.value);
-                     const cleanData = {
+                    };
+                    textToCopy = JSON.stringify(cleanData, null, 2);
+                } catch (e) {
+                    console.error("Failed to parse script generator data for copy", e);
+                }
+            } else if (node.type === NodeType.SCRIPT_ANALYZER) {
+                try {
+                    const rawData = JSON.parse(node.value);
+                    const cleanData = {
                         type: 'script-analyzer-data',
                         scenes: rawData.scenes || [],
                         characters: rawData.characters || [],
                         visualStyle: rawData.visualStyle || rawData.generatedStyle || '',
                         title: node.title
-                     };
-                     textToCopy = JSON.stringify(cleanData, null, 2);
-                 } catch (e) {
-                     console.error("Failed to parse script analyzer data for copy", e);
-                 }
-             }
+                    };
+                    textToCopy = JSON.stringify(cleanData, null, 2);
+                } catch (e) {
+                    console.error("Failed to parse script analyzer data for copy", e);
+                }
+            }
 
-             await navigator.clipboard.writeText(textToCopy);
+            await navigator.clipboard.writeText(textToCopy);
         }
     }, [nodes]);
 
     const handlePasteNodeValue = useCallback(async (nodeId: string) => {
-         try {
+        try {
             const text = await navigator.clipboard.readText();
             setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: text } : n));
-         } catch(e) { console.error(e); }
+        } catch (e) { console.error(e); }
     }, []);
 
     const handleToggleNodeCollapse = useCallback((nodeId: string) => {
