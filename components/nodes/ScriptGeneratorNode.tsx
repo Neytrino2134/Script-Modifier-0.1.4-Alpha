@@ -17,7 +17,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     const { language } = useLanguage();
     const isLoading = isGeneratingScript === node.id;
     const isEntLoading = isGeneratingEntities === node.id;
-    
+
     const isPromptConnected = connectedInputs?.has('prompt') || connectedInputs?.has(undefined);
     const isCharactersInputConnected = connectedInputs?.has('characters');
 
@@ -28,10 +28,10 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
     const [linkedCharactersCount, setLinkedCharactersCount] = useState(0);
     const [linkedCharacters, setLinkedCharacters] = useState<any[]>([]);
-    
+
     // Search Highlight State
     const [targetScrollId, setTargetScrollId] = useState<string | null>(null);
-    
+
     // Track known IDs to identify new ones for auto-collapsing
     const prevKnownCharIds = useRef<Set<string>>(new Set());
 
@@ -41,12 +41,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     const parsedValue = useMemo(() => {
         try {
             const parsed = JSON.parse(node.value || '{}');
-            
-            const defaultUiState = { 
-                isSettingsCollapsed: true, 
-                isSummaryCollapsed: true, 
-                isStyleCollapsed: true, 
-                isCharactersSectionCollapsed: true, 
+
+            const defaultUiState = {
+                isSettingsCollapsed: true,
+                isSummaryCollapsed: true,
+                isStyleCollapsed: true,
+                isCharactersSectionCollapsed: true,
                 isScenesSectionCollapsed: false,
                 collapsedCharacters: [],
                 collapsedScenes: []
@@ -62,7 +62,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 summary: parsed.summary || '',
                 detailedCharacters: Array.isArray(parsed.detailedCharacters) ? parsed.detailedCharacters : [],
                 scenes: Array.isArray(parsed.scenes) ? parsed.scenes : [],
-                
+
                 // Settings
                 isAdvancedMode: !!parsed.isAdvancedMode,
                 numberOfScenes: parsed.numberOfScenes || null,
@@ -74,8 +74,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 includeSubscribeScene: !!parsed.includeSubscribeScene,
                 visualStyle: parsed.visualStyle || 'none',
                 customVisualStyle: parsed.customVisualStyle || '',
-                generatedStyle: parsed.generatedStyle || '', 
-                
+                generatedStyle: parsed.generatedStyle || '',
+
                 generateMainChars: parsed.generateMainChars !== false, // Default True
                 createSecondaryChars: parsed.createSecondaryChars !== false,
                 createKeyItems: parsed.createKeyItems !== false,
@@ -86,23 +86,23 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 commercialSafe: !!parsed.commercialSafe,
                 smartConceptEnabled: !!parsed.smartConceptEnabled, // Default false
                 atmosphericEntryEnabled: parsed.atmosphericEntryEnabled !== false, // Default true for legacy compatibility
-                
+
                 generationProgress: parsed.generationProgress || null,
 
                 uiState: { ...defaultUiState, ...(parsed.uiState || {}) },
             };
         } catch {
-            return { 
-                prompt: '', targetLanguage: 'ru', detailedCharacters: [], scenes: [], 
-                uiState: { 
-                    isSettingsCollapsed: true, 
-                    isSummaryCollapsed: true, 
-                    isStyleCollapsed: true, 
-                    isCharactersSectionCollapsed: true, 
+            return {
+                prompt: '', targetLanguage: 'ru', detailedCharacters: [], scenes: [],
+                uiState: {
+                    isSettingsCollapsed: true,
+                    isSummaryCollapsed: true,
+                    isStyleCollapsed: true,
+                    isCharactersSectionCollapsed: true,
                     isScenesSectionCollapsed: false,
                     collapsedCharacters: [],
                     collapsedScenes: []
-                }, 
+                },
                 model: 'gemini-3-pro-preview', summary: '', generatedStyle: '',
                 generateMainChars: true,
                 commercialSafe: false, smartConceptEnabled: false, atmosphericEntryEnabled: true, generationProgress: null
@@ -110,7 +110,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         }
     }, [node.value]);
 
-    const { 
+    const {
         prompt, targetLanguage, characterType, useExistingCharacters, narratorEnabled, narratorMode,
         summary, detailedCharacters, scenes, isAdvancedMode, numberOfScenes, isDetailedPlot,
         genre, genre2, noCharacters, model, includeSubscribeScene, visualStyle, customVisualStyle, generatedStyle,
@@ -137,13 +137,13 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         let interval: number;
         if (generationProgress) {
             if (generationProgress.endTime) {
-                 setTimers({
+                setTimers({
                     current: 0,
                     total: Math.floor((generationProgress.endTime - generationProgress.totalStartTime) / 1000),
                     last: generationProgress.lastItemDuration || 0
                 });
             } else if (isLoading) {
-                 interval = window.setInterval(() => {
+                interval = window.setInterval(() => {
                     const now = Date.now();
                     setTimers({
                         current: Math.floor((now - (generationProgress.currentItemStartTime || now)) / 1000),
@@ -159,9 +159,9 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     }, [isLoading, generationProgress]);
 
     // Get Upstream Prompt for Display
-    const promptConnection = useMemo(() => 
+    const promptConnection = useMemo(() =>
         connections?.find(c => c.toNodeId === node.id && (c.toHandleId === 'prompt' || c.toHandleId === undefined)),
-    [connections, node.id]);
+        [connections, node.id]);
 
     const upstreamPrompt = useMemo(() => {
         if (!promptConnection || !getUpstreamTextValue) return '';
@@ -182,27 +182,27 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
 
         // Auto-collapse scenes on load
         if (scenes.length > 0) {
-             const allSceneIndices = scenes.map((_: any, i: number) => i);
-             const currentCollapsed = uiState.collapsedScenes || [];
-             if (currentCollapsed.length !== allSceneIndices.length) {
-                 updates.uiState = { ...uiState, collapsedScenes: allSceneIndices };
-                 changed = true;
-             }
+            const allSceneIndices = scenes.map((_: any, i: number) => i);
+            const currentCollapsed = uiState.collapsedScenes || [];
+            if (currentCollapsed.length !== allSceneIndices.length) {
+                updates.uiState = { ...uiState, collapsedScenes: allSceneIndices };
+                changed = true;
+            }
         }
 
         // Auto-collapse characters on load
         if (detailedCharacters.length > 0) {
             const allCharIds = detailedCharacters.map((c: any) => c.id);
             const currentCollapsed = uiState.collapsedCharacters || [];
-            
+
             // Check if we need to update collapse state
             const allCollapsed = allCharIds.every((id: string) => currentCollapsed.includes(id));
             if (!allCollapsed) {
-                 updates.uiState = { 
-                     ...(updates.uiState || uiState), 
-                     collapsedCharacters: allCharIds 
-                 };
-                 changed = true;
+                updates.uiState = {
+                    ...(updates.uiState || uiState),
+                    collapsedCharacters: allCharIds
+                };
+                changed = true;
             }
         }
 
@@ -215,10 +215,10 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     // Propagate changes from upstream (like Character Cards) to downstream nodes (like Script Analyzer)
     useEffect(() => {
         if (inputData && useExistingCharacters) {
-             const timer = setTimeout(() => {
-                 handleValueUpdate({ _upstreamSync: Date.now() });
-             }, 800); // Debounce to prevent rapid updates during typing
-             return () => clearTimeout(timer);
+            const timer = setTimeout(() => {
+                handleValueUpdate({ _upstreamSync: Date.now() });
+            }, 800); // Debounce to prevent rapid updates during typing
+            return () => clearTimeout(timer);
         }
     }, [inputData, useExistingCharacters]);
 
@@ -227,12 +227,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     }, [handleValueUpdate, uiState]);
 
     const handleStartGeneration = () => {
-         onGenerateScript(node.id);
+        onGenerateScript(node.id);
     };
 
     const handleImproveClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        
+
         // 1. Get the text to improve (upstream or local)
         const textToImprove = displayPrompt;
 
@@ -251,7 +251,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             onImproveScriptConcept(node.id, textToImprove);
         }
     };
-    
+
     // ... Manual Editing Functions ...
     // (omitted for brevity, assume they exist unchanged)
     const handleAddCharacter = useCallback(() => {
@@ -277,10 +277,10 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             originalName: nextName
         };
         const newCharacters = [...(detailedCharacters || []), newChar];
-        const newUiState = { 
-            ...uiState, 
+        const newUiState = {
+            ...uiState,
             isCharactersSectionCollapsed: false,
-            collapsedCharacters: [...(uiState.collapsedCharacters || []), newId] 
+            collapsedCharacters: [...(uiState.collapsedCharacters || []), newId]
         };
         handleValueUpdate({ detailedCharacters: newCharacters, uiState: newUiState });
     }, [detailedCharacters, linkedCharacters, handleValueUpdate, uiState]);
@@ -296,8 +296,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         };
         const newScenes = [...(scenes || []), newScene];
         const newSceneIndex = newScenes.length - 1;
-        const newUiState = { 
-            ...uiState, 
+        const newUiState = {
+            ...uiState,
             isScenesSectionCollapsed: false,
             collapsedScenes: [...(uiState.collapsedScenes || []), newSceneIndex]
         };
@@ -307,7 +307,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
     const handleAddSceneAfter = useCallback((index: number) => {
         const newScenes = [...(scenes || [])];
         const newScene = {
-            sceneNumber: 0, 
+            sceneNumber: 0,
             title: `New Scene`,
             description: '',
             narratorText: '',
@@ -323,8 +323,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         const updatedCollapsedScenes = (uiState.collapsedScenes || [])
             .map(i => (i >= insertionIndex ? i + 1 : i))
             .concat(insertionIndex);
-        const newUiState = { 
-            ...uiState, 
+        const newUiState = {
+            ...uiState,
             isScenesSectionCollapsed: false,
             collapsedScenes: updatedCollapsedScenes
         };
@@ -360,11 +360,11 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
         } else if (direction === 'up') {
             newChars.splice(Math.max(0, index - 1), 0, charToMove);
         } else if (direction === 'down') {
-             newChars.splice(Math.min(newChars.length, index + 1), 0, charToMove);
+            newChars.splice(Math.min(newChars.length, index + 1), 0, charToMove);
         }
         handleValueUpdate({ detailedCharacters: newChars });
     }, [detailedCharacters, handleValueUpdate]);
-    
+
     // Calculate linked characters from input connections AND Sync Local Indexing
     useEffect(() => {
         if (!connections || !getUpstreamTextValue) {
@@ -375,7 +375,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
 
         const inputConns = connections.filter(c => c.toNodeId === node.id && c.toHandleId === 'characters');
         const incomingChars: any[] = [];
-        
+
         // 1. Gather all incoming characters
         inputConns.forEach(conn => {
             const val = getUpstreamTextValue(conn.fromNodeId, conn.fromHandleId);
@@ -389,21 +389,21 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 });
 
                 if (Array.isArray(parsed)) {
-                     parsed.forEach(c => incomingChars.push(processChar(c)));
+                    parsed.forEach(c => incomingChars.push(processChar(c)));
                 } else if (parsed.characters && Array.isArray(parsed.characters)) {
-                     parsed.characters.forEach((c: any) => incomingChars.push(processChar(c)));
+                    parsed.characters.forEach((c: any) => incomingChars.push(processChar(c)));
                 } else if (parsed.name) {
-                     incomingChars.push(processChar(parsed));
+                    incomingChars.push(processChar(parsed));
                 }
-            } catch {}
+            } catch { }
         });
 
         // Use Refs to access current state without triggering effect
         const currentLocals = detailedCharactersRef.current || [];
         const currentUiState = uiStateRef.current;
-        
+
         let updates: any = {};
-        
+
         // --- AUTOMATIC CONFIGURATION UPDATE ---
         if (inputConns.length > 0) {
             if (!useExistingCharactersRef.current) updates.useExistingCharacters = true;
@@ -418,27 +418,27 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 index: `Entity-${i + 1}`
             };
         });
-        
+
         const startLocalIndex = reindexedLinkedChars.length + 1;
         let localNeedsUpdate = false;
-        
+
         const reindexedLocalChars = currentLocals.map((char: any, i: number) => {
             const targetIndex = startLocalIndex + i;
             const expectedIndexStr = `Entity-${targetIndex}`;
             const { alias, ...cleanChar } = char;
-            
+
             if (cleanChar.index !== expectedIndexStr || alias) {
                 localNeedsUpdate = true;
                 return { ...cleanChar, index: expectedIndexStr };
             }
             return cleanChar;
         });
-        
+
         // --- AUTO COLLAPSE NEW CHARACTERS ---
         const allCurrentIds = [...reindexedLinkedChars, ...reindexedLocalChars].map(c => c.id);
         const currentCollapsedSet = new Set(currentUiState.collapsedCharacters || []);
         let uiChanged = false;
-        
+
         allCurrentIds.forEach(id => {
             if (!prevKnownCharIds.current.has(id)) {
                 if (!currentCollapsedSet.has(id)) {
@@ -447,38 +447,38 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 }
             }
         });
-        
+
         prevKnownCharIds.current = new Set(allCurrentIds);
 
         // Check if anything actually changed to prevent loops
         const linkedChanged = JSON.stringify(linkedCharacters) !== JSON.stringify(reindexedLinkedChars);
         const localsChanged = JSON.stringify(currentLocals) !== JSON.stringify(reindexedLocalChars);
-        
+
         if (linkedChanged) {
-             setLinkedCharacters(reindexedLinkedChars);
-             setLinkedCharactersCount(reindexedLinkedChars.length);
+            setLinkedCharacters(reindexedLinkedChars);
+            setLinkedCharactersCount(reindexedLinkedChars.length);
         }
 
         if (localNeedsUpdate || uiChanged || Object.keys(updates).length > 0) {
-             if (localNeedsUpdate) updates.detailedCharacters = reindexedLocalChars;
-             if (uiChanged) updates.uiState = { ...currentUiState, collapsedCharacters: Array.from(currentCollapsedSet) };
-             
-             // Use setTimeout to defer state update and break render cycle
-             setTimeout(() => {
-                 handleValueUpdate(updates);
-             }, 0);
+            if (localNeedsUpdate) updates.detailedCharacters = reindexedLocalChars;
+            if (uiChanged) updates.uiState = { ...currentUiState, collapsedCharacters: Array.from(currentCollapsedSet) };
+
+            // Use setTimeout to defer state update and break render cycle
+            setTimeout(() => {
+                handleValueUpdate(updates);
+            }, 0);
         }
 
     }, [connections, getUpstreamTextValue, node.id, inputData, handleValueUpdate]); // Removed detailedCharacters and uiState from dependencies
 
     const handleEmbedCharacter = useCallback((char: any) => {
-         const newChar = { 
-             ...char, 
-             isLinked: false, 
-             id: `char-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
-         };
-         // Index will be fixed by the useEffect above
-         handleValueUpdate({ detailedCharacters: [...detailedCharacters, newChar] });
+        const newChar = {
+            ...char,
+            isLinked: false,
+            id: `char-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+        };
+        // Index will be fixed by the useEffect above
+        handleValueUpdate({ detailedCharacters: [...detailedCharacters, newChar] });
     }, [detailedCharacters, handleValueUpdate]);
 
     const combinedCharacters = useMemo(() => {
@@ -498,8 +498,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 <div className="flex justify-between items-center px-1">
                     <label className="text-xs font-medium text-gray-400">{t('node.content.scriptPromptPlaceholder')}</label>
                     <div className="flex items-center space-x-1">
-                         <ActionButton 
-                            title={t('node.action.improveConcept')} 
+                        <ActionButton
+                            title={t('node.action.improveConcept')}
                             tooltipPosition="left"
                             onClick={handleImproveClick}
                             disabled={!displayPrompt.trim() || !!isImprovingScriptConcept}
@@ -510,8 +510,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                             )}
                         </ActionButton>
-                        <ActionButton 
-                            title={t('node.action.clear')} 
+                        <ActionButton
+                            title={t('node.action.clear')}
                             tooltipPosition="left"
                             onClick={(e) => { e.stopPropagation(); handleValueUpdate({ prompt: '' }); }}
                             disabled={isPromptConnected || !prompt}
@@ -521,7 +521,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     </div>
                 </div>
 
-                 <textarea
+                <textarea
                     value={displayPrompt}
                     onChange={(e) => handleValueUpdate({ prompt: e.target.value })}
                     placeholder={isPromptConnected ? t('node.content.connectedPlaceholder') : t('node.content.scriptPromptPlaceholder')}
@@ -536,14 +536,13 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                 <div className="flex items-center space-x-2">
                     {/* Model Switcher & Lang & Generate Button */}
                     <div className="flex flex-shrink-0 gap-1 h-10 select-none bg-gray-900/50 rounded-lg p-0.5 items-center">
-                         <Tooltip title={t('tooltip.model.flash')} position="top" className="h-full flex-1">
+                        <Tooltip title={t('tooltip.model.flash')} position="top" className="h-full flex-1">
                             <button
                                 onClick={() => handleValueUpdate({ model: 'gemini-3-flash-preview' })}
-                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center ${
-                                    model === 'gemini-3-flash-preview' 
-                                    ? 'bg-emerald-600 text-white shadow-sm' 
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                                }`}
+                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center ${model === 'gemini-3-flash-preview'
+                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                                    }`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
@@ -554,42 +553,39 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                         <Tooltip title={t('tooltip.model.pro')} position="top" className="h-full flex-1">
                             <button
                                 onClick={() => handleValueUpdate({ model: 'gemini-3-pro-preview' })}
-                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center ${
-                                    model === 'gemini-3-pro-preview' 
-                                    ? 'bg-emerald-600 text-white shadow-sm' 
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                                }`}
+                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center ${model === 'gemini-3-pro-preview'
+                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                                    }`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                 </svg>
                                 PRO
                             </button>
                         </Tooltip>
                     </div>
 
-                     {/* Language Switcher */}
-                     <div className="flex flex-shrink-0 gap-1 h-10 select-none bg-gray-900/50 rounded-lg p-0.5 items-center">
+                    {/* Language Switcher */}
+                    <div className="flex flex-shrink-0 gap-1 h-10 select-none bg-gray-900/50 rounded-lg p-0.5 items-center">
                         <Tooltip title={t(`tooltip.lang.${primaryLang}`)} position="top" className="h-full flex">
-                            <button 
-                                onClick={() => handleValueUpdate({ targetLanguage: primaryLang })} 
-                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
-                                    targetLanguage === primaryLang 
-                                    ? 'bg-emerald-600 text-white shadow-sm' 
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                                }`}
+                            <button
+                                onClick={() => handleValueUpdate({ targetLanguage: primaryLang })}
+                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${targetLanguage === primaryLang
+                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                                    }`}
                             >
                                 {primaryLang.toUpperCase()}
                             </button>
                         </Tooltip>
                         <Tooltip title={t('tooltip.lang.en')} position="top" className="h-full flex">
-                            <button 
-                                onClick={() => handleValueUpdate({ targetLanguage: 'en' })} 
-                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
-                                    targetLanguage === 'en' 
-                                    ? 'bg-emerald-600 text-white shadow-sm' 
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                                }`}
+                            <button
+                                onClick={() => handleValueUpdate({ targetLanguage: 'en' })}
+                                className={`px-3 h-full rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${targetLanguage === 'en'
+                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                                    }`}
                             >
                                 EN
                             </button>
@@ -599,13 +595,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     <button
                         onClick={isLoading || isEntLoading ? onStopGeneration : handleStartGeneration}
                         disabled={isStopping || !!isEntLoading || (!isLoading && !displayPrompt.trim())}
-                        className={`flex-grow h-10 px-4 font-bold text-xs uppercase tracking-wide text-white rounded-lg transition-all duration-200 shadow-sm flex items-center justify-center ${
-                            isStopping 
-                            ? 'bg-yellow-600 hover:bg-yellow-500' 
-                            : (isLoading 
-                                ? 'bg-cyan-600 hover:bg-cyan-500' 
-                                : 'bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed')
-                        }`}
+                        className={`flex-grow h-10 px-4 font-bold text-xs uppercase tracking-wide text-white rounded-lg transition-all duration-200 shadow-sm flex items-center justify-center ${isStopping
+                                ? 'bg-yellow-600 hover:bg-yellow-500'
+                                : (isLoading
+                                    ? 'bg-cyan-600 hover:bg-cyan-500'
+                                    : 'bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed')
+                            }`}
                     >
                         {isLoading ? (
                             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -614,22 +609,22 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                             </svg>
                         ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                               <path strokeLinecap="round" strokeLinejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                             </svg>
                         )}
                         {isStopping ? t('node.action.stopping') : (isLoading ? t('node.content.generating') : t('node.content.generateScript'))}
                     </button>
                 </div>
-                
+
                 {/* Stats Bar */}
                 <div className="p-2 flex items-center justify-between text-xs border border-gray-700 bg-gray-900/50 rounded-md">
                     <div className="font-semibold text-emerald-400">
-                         {t('node.content.scenes_generated', { count: scenes.length })}
+                        {t('node.content.scenes_generated', { count: scenes.length })}
                     </div>
-                    
+
                     <div className="flex items-center gap-4 text-gray-400">
-                         {generationProgress && (
-                             <>
+                        {generationProgress && (
+                            <>
                                 {isLoading ? (
                                     <div className="text-yellow-400 animate-pulse font-mono">
                                         {t('node.content.status.generating')}
@@ -644,18 +639,18 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     </div>
                 </div>
 
-                 {/* Progress Bar */}
-                 {(isLoading && generationProgress) && (
+                {/* Progress Bar */}
+                {(isLoading && generationProgress) && (
                     <div className="w-full h-1 bg-gray-800 rounded-b-md overflow-hidden border-t border-gray-800 -mt-2">
                         {/* Just a simple indeterminate or slow progress if no total known for script gen */}
-                        <div 
+                        <div
                             className="h-full bg-emerald-500 animate-pulse w-full"
                         />
                     </div>
-                 )}
+                )}
             </div>
 
-            <SettingsPanel 
+            <SettingsPanel
                 uiState={uiState}
                 onUpdateUiState={handleUiStateUpdate}
                 onUpdateValue={handleValueUpdate}
@@ -705,15 +700,15 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
             {/* Scrollable Container for Results */}
             {/* Visual separator from parameters */}
             <div className="my-2 border-b border-gray-700/50"></div>
-            
-            <div 
+
+            <div
                 className="flex-grow overflow-y-auto min-h-0 custom-scrollbar p-1 flex flex-col gap-1 bg-gray-900/30 border border-gray-700/50 rounded-md"
                 onWheel={(e) => e.stopPropagation()}
                 style={{ scrollbarGutter: 'stable' }}
             >
                 {/* Generated Style Output */}
                 <div className="flex-shrink-0 mb-1 bg-gray-900 rounded-md border border-gray-700 hover:border-emerald-500 overflow-hidden flex flex-col transition-all duration-200">
-                    <div 
+                    <div
                         className="flex justify-between items-center p-2 bg-gray-800/50 cursor-pointer select-none hover:bg-gray-700/50 transition-colors"
                         onClick={() => handleUiStateUpdate({ isStyleCollapsed: !uiState.isStyleCollapsed })}
                     >
@@ -724,12 +719,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                             <h3 className="font-bold text-emerald-400 select-none transition-colors uppercase text-xs tracking-wider">{t('node.content.style')}</h3>
                         </div>
                         <div className="flex items-center space-x-1">
-                             <ActionButton tooltipPosition="left" title={t('node.action.copy')} onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(generatedStyle); }}>
+                            <ActionButton tooltipPosition="left" title={t('node.action.copy')} onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(generatedStyle); }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                             </ActionButton>
-                             <ActionButton tooltipPosition="left" title={t('node.action.clear')} onClick={(e) => { e.stopPropagation(); handleValueUpdate({ generatedStyle: '' }); }}>
+                            </ActionButton>
+                            <ActionButton tooltipPosition="left" title={t('node.action.clear')} onClick={(e) => { e.stopPropagation(); handleValueUpdate({ generatedStyle: '' }); }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                             </ActionButton>
+                            </ActionButton>
                             <div className="pl-1 border-l border-gray-700 ml-1">
                                 <ActionButton title={uiState.isStyleCollapsed ? t('node.action.expand') : t('node.action.collapse')} onClick={(e) => { e.stopPropagation(); handleUiStateUpdate({ isStyleCollapsed: !uiState.isStyleCollapsed }); }} tooltipPosition="left">
                                     {uiState.isStyleCollapsed ? (
@@ -743,8 +738,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     </div>
                     {!uiState.isStyleCollapsed && (
                         <div className="p-2">
-                            <textarea 
-                                value={generatedStyle} 
+                            <textarea
+                                value={generatedStyle}
                                 onChange={(e) => handleValueUpdate({ generatedStyle: e.target.value })}
                                 placeholder={t('node.content.stylePromptPlaceholder')}
                                 className="w-full text-xs p-2 bg-gray-900 border-none rounded-md resize-y min-h-[60px] focus:outline-none focus:border-emerald-500 focus:ring-0 custom-scrollbar text-gray-300"
@@ -755,7 +750,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
 
                 {/* Summary Output */}
                 <div className="flex-shrink-0 mb-1 bg-gray-900 rounded-md border border-gray-700 hover:border-emerald-500 overflow-hidden flex flex-col transition-all duration-200">
-                    <div 
+                    <div
                         className="flex justify-between items-center p-2 bg-gray-800/50 cursor-pointer select-none hover:bg-gray-700/50 transition-colors"
                         onClick={() => handleUiStateUpdate({ isSummaryCollapsed: !uiState.isSummaryCollapsed })}
                     >
@@ -766,12 +761,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                             <h3 className="font-bold text-emerald-400 select-none transition-colors uppercase text-xs tracking-wider">{t('node.content.summary')}</h3>
                         </div>
                         <div className="flex items-center space-x-1">
-                             <ActionButton tooltipPosition="left" title={t('node.action.copy')} onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(summary); }}>
+                            <ActionButton tooltipPosition="left" title={t('node.action.copy')} onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(summary); }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                             </ActionButton>
-                             <ActionButton tooltipPosition="left" title={t('node.action.clear')} onClick={(e) => { e.stopPropagation(); handleValueUpdate({ summary: '' }); }}>
+                            </ActionButton>
+                            <ActionButton tooltipPosition="left" title={t('node.action.clear')} onClick={(e) => { e.stopPropagation(); handleValueUpdate({ summary: '' }); }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                             </ActionButton>
+                            </ActionButton>
                             <div className="pl-1 border-l border-gray-700 ml-1">
                                 <ActionButton title={uiState.isSummaryCollapsed ? t('node.action.expand') : t('node.action.collapse')} onClick={(e) => { e.stopPropagation(); handleUiStateUpdate({ isSummaryCollapsed: !uiState.isSummaryCollapsed }); }} tooltipPosition="left">
                                     {uiState.isSummaryCollapsed ? (
@@ -785,8 +780,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     </div>
                     {!uiState.isSummaryCollapsed && (
                         <div className="p-2">
-                            <textarea 
-                                value={summary} 
+                            <textarea
+                                value={summary}
                                 onChange={(e) => handleValueUpdate({ summary: e.target.value })}
                                 placeholder="..."
                                 className="w-full text-sm p-2 bg-gray-900 border-none rounded-md resize-y min-h-[60px] focus:outline-none focus:border-emerald-500 focus:ring-0 custom-scrollbar text-gray-300"
@@ -795,10 +790,10 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     )}
                 </div>
 
-                <CharactersPanel 
+                <CharactersPanel
                     uiState={uiState}
-                    onUpdateUiState={handleUiStateUpdate} 
-                    onUpdateValue={handleValueUpdate} 
+                    onUpdateUiState={handleUiStateUpdate}
+                    onUpdateValue={handleValueUpdate}
                     allCharacters={combinedCharacters}
                     selectedCharacters={selectedCharacters}
                     collapsedCharacters={uiState.collapsedCharacters || []}
@@ -807,8 +802,8 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     t={t}
                     onAddCharacter={handleAddCharacter}
                     handleToggleAllCharacters={() => {
-                        if (uiState.collapsedCharacters?.length === combinedCharacters.length) handleValueUpdate({ uiState: { ...uiState, collapsedCharacters: [] }});
-                        else handleValueUpdate({ uiState: { ...uiState, collapsedCharacters: combinedCharacters.map((c: any) => c.id) }});
+                        if (uiState.collapsedCharacters?.length === combinedCharacters.length) handleValueUpdate({ uiState: { ...uiState, collapsedCharacters: [] } });
+                        else handleValueUpdate({ uiState: { ...uiState, collapsedCharacters: combinedCharacters.map((c: any) => c.id) } });
                     }}
                     handleCharacterClick={(e, id) => {
                         setSelectedCharacters(prev => {
@@ -837,7 +832,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     isSyncAvailable={false}
                     onMoveCharacter={handleMoveCharacter}
                     onClearCharacters={() => handleValueUpdate({ detailedCharacters: [] })}
-                    
+
                     // Entity Gen Props
                     onGenerateEntities={() => onGenerateEntities(node.id)}
                     isGeneratingEntities={!!isEntLoading}
@@ -847,9 +842,12 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     onGenerateMainChange={(val) => handleValueUpdate({ generateMainChars: val })}
                     onCreateSecondaryChange={(val) => handleValueUpdate({ createSecondaryChars: val })}
                     onCreateKeyItemsChange={(val) => handleValueUpdate({ createKeyItems: val })}
-                    
+
                     onSetTargetScrollId={setTargetScrollId}
-                    isScriptGenerating={!!isLoading} 
+                    isScriptGenerating={!!isLoading}
+
+                    smartConceptEnabled={smartConceptEnabled}
+                    onToggleSmartConcept={(val) => handleValueUpdate({ smartConceptEnabled: val })}
                 />
 
                 <ScenesPanel
@@ -865,14 +863,14 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                     handleUiStateUpdate={handleUiStateUpdate}
                     addScene={handleAddScene}
                     handleToggleAllScenes={() => {
-                        if (uiState.collapsedScenes?.length === scenes.length) handleValueUpdate({ uiState: { ...uiState, collapsedScenes: [] }});
-                        else handleValueUpdate({ uiState: { ...uiState, collapsedScenes: scenes.map((_, i) => i) }});
+                        if (uiState.collapsedScenes?.length === scenes.length) handleValueUpdate({ uiState: { ...uiState, collapsedScenes: [] } });
+                        else handleValueUpdate({ uiState: { ...uiState, collapsedScenes: scenes.map((_, i) => i) } });
                     }}
-                    handleSceneClick={() => {}}
+                    handleSceneClick={() => { }}
                     handleToggleSceneCollapse={(index) => {
                         const current = uiState.collapsedScenes || [];
                         const next = current.includes(index) ? current.filter(x => x !== index) : [...current, index];
-                        handleValueUpdate({ uiState: { ...uiState, collapsedScenes: next }});
+                        handleValueUpdate({ uiState: { ...uiState, collapsedScenes: next } });
                     }}
                     updateScene={(index, field, value) => {
                         const newScenes = [...scenes];
@@ -883,7 +881,7 @@ const ScriptGeneratorNode: React.FC<NodeContentProps> = ({
                         const newScenes = scenes.filter((_, i) => i !== index);
                         handleValueUpdate({ scenes: newScenes });
                     }}
-                    addSceneAfter={handleAddSceneAfter} 
+                    addSceneAfter={handleAddSceneAfter}
                     moveScene={handleMoveScene}
                     onModifyScriptPart={(partId, original, modPrompt) => onModifyScriptPart(node.id, partId, original, modPrompt)}
                     deselectAllNodes={deselectAllNodes}

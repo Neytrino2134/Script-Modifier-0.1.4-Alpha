@@ -26,7 +26,7 @@ export const generateScriptEntities = async (
 
     // System Core - Entity Generation Specialist
     instructions.push("You are an expert Character Designer and Prop Master for film production. Your goal is to analyze the story concept and existing cast to generate necessary additional entities (Main Characters, Secondary Characters, and Key Items).");
-    
+
     // Inputs Data
     instructions.push(`${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} "${prompt}"`);
 
@@ -34,7 +34,7 @@ export const generateScriptEntities = async (
 
     // Existing Cast context
     if (hasExistingChars) {
-        const charList = existingCharacters!.map(c => 
+        const charList = existingCharacters!.map(c =>
             `- **Name:** ${c.name}\n  **Index:** ${c.index}\n  **Description:** ${c.fullDescription}`
         ).join('\n\n');
         instructions.push(`EXISTING CAST (LOCKED): \n${charList}`);
@@ -70,39 +70,39 @@ export const generateScriptEntities = async (
 
     instructions.push(CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.text);
     instructions.push(CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.text);
-    
+
     // Style Context
     if (visualStyle === 'custom' && customVisualStyle) {
-         instructions.push(`TARGET VISUAL STYLE: ${customVisualStyle}`);
-         instructions.push(CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE.text);
+        instructions.push(`TARGET VISUAL STYLE: ${customVisualStyle}`);
+        instructions.push(CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE.text);
     } else if (visualStyle && visualStyle !== 'none') {
-         instructions.push(`TARGET VISUAL STYLE: ${visualStyle}`);
-         instructions.push(CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE.text);
+        instructions.push(`TARGET VISUAL STYLE: ${visualStyle}`);
+        instructions.push(CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE.text);
     }
 
     instructions.push("Return JSON object with key: 'detailedCharacters' (array of objects with keys: 'name', 'fullDescription', 'prompt', 'index' (optional - will be assigned automatically if missing)).");
 
     const fullPrompt = instructions.join('\n\n');
-    
+
     const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
         model: model,
         contents: fullPrompt,
-        config: { 
+        config: {
             responseMimeType: 'application/json',
-            thinkingConfig: thinkingEnabled ? { thinkingBudget: 4000 } : undefined 
+            thinkingConfig: thinkingEnabled ? { thinkingBudget: 4000 } : undefined
         }
     }));
-    
+
     return safeJsonParse(response.text || '{}');
 };
 
 export const generateScript = async (
-    prompt: string, 
-    targetLanguage: string, 
-    characterType: string, 
-    narratorEnabled: boolean, 
-    narratorMode: string, 
-    existingCharacters: any[] | undefined, 
+    prompt: string,
+    targetLanguage: string,
+    characterType: string,
+    narratorEnabled: boolean,
+    narratorMode: string,
+    existingCharacters: any[] | undefined,
     advancedOptions: any,
     model: string,
     visualStyle: string,
@@ -120,27 +120,27 @@ export const generateScript = async (
 
     // System Core
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.CORE.text);
-    
+
     // Explicit Language Instruction
     instructions.push(`**OUTPUT LANGUAGE:** You MUST write the 'summary', scene 'title', 'description', and 'narratorText' strictly in ${languageName}.`);
-    
+
     // Inputs Data
     instructions.push(`${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} "${prompt}"`);
-    
+
     // --- CREATIVE EXPANSION RULES ---
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.IMPROVE_CONCEPT.text);
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text);
-    
+
     if (scenelessMode) {
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SCENELESS_MODE.text);
     } else {
         // Core Narrative Stack
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.ANALYSIS.text);
-        
+
         if (atmosphericEntryEnabled) {
             instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.EXPOSITION.text);
         }
-        
+
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.DELAYED_REVEAL.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.VISUALS_FIRST.text);
         instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SEAMLESS_FLOW.text);
@@ -168,16 +168,16 @@ export const generateScript = async (
 
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.STRICT_NAME_PERSISTENCE.text);
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.SCENE_CHARACTERS_LIST.text);
-    
+
     // --- CHARACTER LOCK (STRICT SEPARATION) ---
     if (existingCharacters && existingCharacters.length > 0) {
-        const charList = existingCharacters.map(c => 
+        const charList = existingCharacters.map(c =>
             `- **Name:** ${c.name}\n  **Index:** ${c.index}\n  **Description:** ${c.fullDescription}`
         ).join('\n\n');
-        
+
         instructions.push(`**MANDATORY CAST LIST (DO NOT INVENT NEW ENTITY TAGS):**\n${charList}`);
         instructions.push(CHAR_GEN_INSTRUCTIONS.STRICT_NO_NEW.text);
-        
+
         // Redundant safety check to prevent hallucination of "Entity-3" for objects
         instructions.push("ABSOLUTE PROHIBITION: Do NOT invent new `Entity-N` tags for objects or props in the scene text. Refer to objects by their names (e.g. 'table', 'sword'), NOT as Entities.");
     } else if (advancedOptions.noCharacters) {
@@ -191,20 +191,20 @@ export const generateScript = async (
 
     // Style Generation Logic
     if (visualStyle === 'custom' && customVisualStyle) {
-         instructions.push(`TARGET VISUAL STYLE NAME: ${customVisualStyle}`);
-         instructions.push(`In the JSON output field 'generatedStyle', you must NOT simply repeat this name. YOU MUST EXPAND IT into a full, detailed technical prompt.`);
+        instructions.push(`TARGET VISUAL STYLE NAME: ${customVisualStyle}`);
+        instructions.push(`In the JSON output field 'generatedStyle', you must NOT simply repeat this name. YOU MUST EXPAND IT into a full, detailed technical prompt.`);
     } else if (visualStyle && visualStyle !== 'none') {
-         instructions.push(`TARGET VISUAL STYLE NAME: ${visualStyle}`);
-         instructions.push(`In the JSON output field 'generatedStyle', you must NOT simply repeat this name. YOU MUST EXPAND IT into a full, detailed technical prompt.`);
+        instructions.push(`TARGET VISUAL STYLE NAME: ${visualStyle}`);
+        instructions.push(`In the JSON output field 'generatedStyle', you must NOT simply repeat this name. YOU MUST EXPAND IT into a full, detailed technical prompt.`);
     }
     instructions.push(SCRIPT_GENERATOR_INSTRUCTIONS.VISUAL_DNA.text);
 
     if (advancedOptions.includeSubscribeScene && !scenelessMode) {
         instructions.push("Include a scene breaking the fourth wall asking to subscribe/like.");
     }
-    
+
     if (narratorEnabled) {
-         instructions.push(`Include Narrator voiceover. Style: ${narratorMode}.`);
+        instructions.push(`Include Narrator voiceover. Style: ${narratorMode}.`);
     }
 
     if (advancedOptions.numberOfScenes) {
@@ -221,21 +221,21 @@ export const generateScript = async (
 
     instructions.push(`REMINDER: Output Language MUST be ${languageName}.`);
     instructions.push(`REMINDER: Use entity format: "Entity-Index" (e.g. "Entity-1").`);
-    
+
     // STRICT JSON FORMAT - EXPLICITLY FORBID detailedCharacters to separate logic
     instructions.push("Return JSON with keys: 'summary', 'generatedStyle', 'scenes' (array of objects with 'title', 'description', 'recommendedFrames', 'narratorText', 'characters' (array of strings)). \n\n**IMPORTANT:** DO NOT include a 'detailedCharacters' field in this response. Character generation is handled by a separate process.");
 
     const fullPrompt = instructions.join('\n\n');
-    
+
     const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
         model: model,
         contents: fullPrompt,
-        config: { 
+        config: {
             responseMimeType: 'application/json',
-            thinkingConfig: thinkingEnabled ? { thinkingBudget: 16000 } : undefined 
+            thinkingConfig: thinkingEnabled ? { thinkingBudget: 16000 } : undefined
         }
     }));
-    
+
     return safeJsonParse(response.text || '{}');
 };
 
@@ -250,11 +250,11 @@ export const analyzeScript = async (
     const ai = getAiClient();
     const languageName = getLanguageName(targetLanguage);
     const instructions = [];
-    
+
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.ROLE.text);
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.INPUTS.text);
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.NO_POV.text);
-    
+
     // Inject Dynamic Frame Constraint Logic
     let frameConstraint = "";
     if (options.minFrames) {
@@ -271,27 +271,28 @@ export const analyzeScript = async (
         instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.STORYBOARD_RULES.text);
         instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.TECHNICAL_DIRECTIVES.text);
     }
-    
+
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.MANDATORY_BG.text); // Force specific Set Design instruction
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.BATCH_PROCESSING.text);
-    
+
     if (options.extendedAnalysis) {
         instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.EXTENDED_VISUALS.text);
     }
-    
+
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.ACTION_PHASE_BREAKDOWN.text);
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.USE_ALIASES.text);
     instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.CHARACTER_ARRAY_INTEGRITY.text); // NEW INSTRUCTION
-    
+    instructions.push(SCRIPT_ANALYZER_INSTRUCTIONS.ENTITY_LIMIT.text);
+
     // STRICT LANGUAGE ENFORCEMENT
     instructions.push(`**TARGET LANGUAGE:** The entire analysis (sceneContext, imagePrompt, environmentPrompt, videoPrompt) MUST be written in **${languageName}**. \n**EXCEPTION:** The Character Tags must remain in English: 'Entity-1', 'Entity-2'. Do not translate the word 'Entity' to ${languageName}.`);
-    
+
     const sceneText = scenes.map(s => {
         const charList = s.characters ? `Participating Entities: [${s.characters.join(', ')}]` : '';
         return `SCENE ${s.sceneNumber} (Rec Frames: ${s.recommendedFrames}): ${s.title}\n${charList}\n${s.description}\n${s.narratorText || ''}`;
     }).join('\n\n');
     const charText = characters.map(c => `${c.name} (Index: ${c.index || c.alias}): ${c.fullDescription}`).join('\n');
-    
+
     const prompt = `
         ${instructions.join('\n\n')}
         
@@ -312,23 +313,23 @@ export const analyzeScript = async (
         Each frame object has: 'frameNumber', 'imagePrompt' (in ${languageName}), 'environmentPrompt' (in ${languageName}), 'videoPrompt' (in ${languageName}), 'characters' (array of indices e.g. "Entity-1"), 'shotType', 'duration' (integer, seconds, e.g. 2).
     `;
 
-     const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
+    const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
         model: model,
         contents: prompt,
-        config: { 
-            responseMimeType: 'application/json' 
+        config: {
+            responseMimeType: 'application/json'
         }
     }));
-    
+
     return safeJsonParse(response.text || '[]');
 };
 
 export const modifyScriptPrompt = async (
-    basePrompt: string, 
-    environmentPrompt: string, 
-    characterPrompts: string[], 
-    targetLanguage: string, 
-    styleOverride: string, 
+    basePrompt: string,
+    environmentPrompt: string,
+    characterPrompts: string[],
+    targetLanguage: string,
+    styleOverride: string,
     sceneContext: string = '',
     characterMap: Record<string, string> = {},
     characterAliases: string[] = [],
@@ -372,15 +373,15 @@ export const modifyScriptPrompt = async (
         instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.GENERAL_CHAR_DESC.text);
         instructions.push(`**CHARACTER VISUAL INTEGRATION:** Summarize the visual prompt from the character's profile. Merge details naturally.`);
     } else if (detailOptions.charDescMode === 'full') {
-         instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.FULL_CHAR_DESC.text);
-         instructions.push(`**CHARACTER VISUAL INTEGRATION:** Use FULL visual profiles.`);
-    } 
+        instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.FULL_CHAR_DESC.text);
+        instructions.push(`**CHARACTER VISUAL INTEGRATION:** Use FULL visual profiles.`);
+    }
     // If 'none', no character visual instruction is pushed
 
     if (activeInstructionIds.includes(PROMPT_MODIFIER_INSTRUCTIONS.LAYERED_CONSTRUCTION.id)) {
         if (detailOptions.charDescMode === 'none') {
-             // Use "No Character Visuals" algorithm text
-             instructions.push(LAYERED_CONSTRUCTION_NO_CHAR_TEXT);
+            // Use "No Character Visuals" algorithm text
+            instructions.push(LAYERED_CONSTRUCTION_NO_CHAR_TEXT);
         } else if (isSaturationActive) {
             instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.LAYERED_CONSTRUCTION.text);
         } else {
@@ -399,7 +400,7 @@ export const modifyScriptPrompt = async (
     if (activeInstructionIds.includes(PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.id)) {
         instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.text);
     }
-    
+
     // STRICT LANGUAGE ENFORCEMENT
     instructions.push(`**OUTPUT LANGUAGE:** The final image and video prompts MUST be written in **${languageName}**. \n**EXCEPTION:** The Character Tags inside square brackets must remain in English: '[Entity-1]', '[Entity-2]'. Do not translate the word 'Entity'.`);
 
@@ -411,14 +412,14 @@ export const modifyScriptPrompt = async (
         instructions.push("Return ONLY the final image prompt string.");
     }
 
-    const relevantCharacterPrompts = characterAliases.length > 0 
+    const relevantCharacterPrompts = characterAliases.length > 0
         ? characterAliases.map(alias => characterMap[alias] ? `[${alias}]: ${characterMap[alias]}` : null).filter(Boolean)
         : characterPrompts;
 
     const characterInfo = relevantCharacterPrompts.length > 0
         ? `Use ONLY these character profiles relevant to this frame:\n${relevantCharacterPrompts.map(p => `- ${p}`).join('\n')}`
         : 'No specific characters in this frame.';
-        
+
     const styleContext = isSaturationActive ? `**VISUAL STYLE:** ${styleOverride || "Cinematic realism"}` : "";
 
     const prompt = `
@@ -434,11 +435,11 @@ export const modifyScriptPrompt = async (
 
     try {
         const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
-            model: 'gemini-2.5-flash', 
+            model: 'gemini-2.5-flash',
             contents: prompt,
-            config: { 
+            config: {
                 ... (generateVideoPrompt ? { responseMimeType: 'application/json' } : {}),
-                thinkingConfig: detailOptions.thinkingEnabled ? { thinkingBudget: 16000 } : undefined 
+                thinkingConfig: detailOptions.thinkingEnabled ? { thinkingBudget: 16000 } : undefined
             }
         }));
 
@@ -505,13 +506,13 @@ export const modifyScriptSceneBatch = async (
         instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.GENERAL_CHAR_DESC.text);
         instructions.push(`**CHARACTER VISUAL INTEGRATION:** Summarize the visual prompt from the character's profile. Merge details naturally.`);
     } else if (detailOptions.charDescMode === 'full') {
-         instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.FULL_CHAR_DESC.text);
-         instructions.push(`**CHARACTER VISUAL INTEGRATION:** Use FULL visual profiles.`);
+        instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.FULL_CHAR_DESC.text);
+        instructions.push(`**CHARACTER VISUAL INTEGRATION:** Use FULL visual profiles.`);
     }
 
     if (activeInstructionIds.includes(PROMPT_MODIFIER_INSTRUCTIONS.LAYERED_CONSTRUCTION.id)) {
         if (detailOptions.charDescMode === 'none') {
-             instructions.push(LAYERED_CONSTRUCTION_NO_CHAR_TEXT);
+            instructions.push(LAYERED_CONSTRUCTION_NO_CHAR_TEXT);
         } else if (isSaturationActive) {
             instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.LAYERED_CONSTRUCTION.text);
         } else {
@@ -530,7 +531,7 @@ export const modifyScriptSceneBatch = async (
     if (activeInstructionIds.includes(PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.id)) {
         instructions.push(PROMPT_MODIFIER_INSTRUCTIONS.BREAK_PARAGRAPHS.text);
     }
-    
+
     // STRICT LANGUAGE ENFORCEMENT
     instructions.push(`**OUTPUT LANGUAGE:** The final image and video prompts MUST be written in **${languageName}**. \n**EXCEPTION:** The Character Tags inside square brackets must remain in English: '[Entity-1]', '[Entity-2]'. Do not translate the word 'Entity'.`);
 
@@ -541,7 +542,7 @@ export const modifyScriptSceneBatch = async (
     } else {
         instructions.push(`Return JSON array of strings (image prompts only).`);
     }
-    
+
     // STRICT JSON INSTRUCTION TO PREVENT SYNTAX ERRORS
     instructions.push(`**STRICT JSON SYNTAX:** Ensure all keys (e.g. "imagePrompt") are double-quoted. Do NOT use trailing commas. Escape any quotes inside strings.`);
 
@@ -581,11 +582,11 @@ export const modifyScriptSceneBatch = async (
 
     try {
         const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
-            model: model, 
+            model: model,
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: 'application/json',
-                thinkingConfig: detailOptions.thinkingEnabled ? { thinkingBudget: 16000 } : undefined 
+                thinkingConfig: detailOptions.thinkingEnabled ? { thinkingBudget: 16000 } : undefined
             }
         }));
         return safeJsonParse(response.text || '[]');

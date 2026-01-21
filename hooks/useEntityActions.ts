@@ -1,7 +1,7 @@
 
 import React, { useCallback } from 'react';
 import { Node, NodeType, Point, Group, Connection, CatalogItem, CatalogItemType } from '../types';
-import { getOutputHandleType } from '../utils/nodeUtils';
+import { getOutputHandleType, NODE_WIDTH_STEP } from '../utils/nodeUtils';
 import { extractYouTubeMetadata } from '../services/geminiService';
 import { processYouTubeScreenshot } from '../utils/imageUtils';
 
@@ -46,7 +46,7 @@ export const useEntityActions = ({
     handleDuplicateNodeEmpty: (nodeId: string, t: (key: string, options?: { [key: string]: string | number; }) => string) => string;
     saveGenericItemToCatalog: (type: CatalogItemType, name: string, data: any) => void;
 }) => {
-    
+
     // ... existing onAddNode, handleAddNodeFromToolbar etc ...
     const onAddNode = useCallback((type: NodeType, position: Point, value?: string, title?: string) => {
         const newNodeId = addNodeFromHook(type, position, t, value, title);
@@ -93,31 +93,31 @@ export const useEntityActions = ({
         nodeIdCounter.current += 1;
         const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
         const connectionType = getOutputHandleType(fromNode, connToSplit.fromHandleId);
-        
+
         const canvasPosition = {
             x: (e.clientX - viewTransform.translate.x) / viewTransform.scale,
             y: (e.clientY - viewTransform.translate.y) / viewTransform.scale,
         };
 
-        const newNode = { 
-            id: newNodeId, 
-            type: NodeType.REROUTE_DOT, 
-            position: { 
+        const newNode = {
+            id: newNodeId,
+            type: NodeType.REROUTE_DOT,
+            position: {
                 x: canvasPosition.x - 30, // hardcoded 60/2
                 y: canvasPosition.y - 20, // hardcoded 40/2
-            }, 
-            value: JSON.stringify({ type: connectionType }), 
-            title: t('node.title.reroute_dot'), 
-            width: 60, 
-            height: 40 
+            },
+            value: JSON.stringify({ type: connectionType }),
+            title: t('node.title.reroute_dot'),
+            width: 60,
+            height: 40
         };
         const newConn1 = { id: `conn-${Date.now()}-1-${Math.random().toString(36).substr(2, 9)}`, fromNodeId: connToSplit.fromNodeId, toNodeId: newNodeId, fromHandleId: connToSplit.fromHandleId };
         const newConn2 = { id: `conn-${Date.now()}-2-${Math.random().toString(36).substr(2, 9)}`, fromNodeId: newNodeId, toNodeId: connToSplit.toNodeId, toHandleId: connToSplit.toHandleId };
-        
+
         setNodes(current => [...current, newNode]);
-        setConnections(current => [ ...current.filter(c => c.id !== connectionId), newConn1, newConn2, ]);
+        setConnections(current => [...current.filter(c => c.id !== connectionId), newConn1, newConn2,]);
     }, [connections, nodes, t, setNodes, setConnections, nodeIdCounter, viewTransform]);
-    
+
     // ... existing group/catalog handlers ...
     const handleGroupSelection = useCallback(() => {
         if (selectedNodeIds.length > 1) {
@@ -153,7 +153,7 @@ export const useEntityActions = ({
         const nodesToCopy = JSON.parse(JSON.stringify(memberNodes));
         const minX = Math.min(...nodesToCopy.map((n: Node) => n.position.x));
         const minY = Math.min(...nodesToCopy.map((n: Node) => n.position.y));
-        
+
         nodesToCopy.forEach((n: Node) => {
             n.position.x -= minX;
             n.position.y -= minY;
@@ -255,7 +255,7 @@ export const useEntityActions = ({
         let dataToSave: any = {};
         try {
             const parsed = JSON.parse(node.value || '{}');
-            
+
             switch (type) {
                 case CatalogItemType.CHARACTERS:
                     // Can be Generator or Card
@@ -267,13 +267,13 @@ export const useEntityActions = ({
                         const exportCards = cards.map((card: any) => {
                             const exportImageSources: Record<string, string | null> = {};
                             const ratios = ['1:1', '16:9', '9:16'];
-                            
+
                             // 1. Prioritize Existing ImageSources in data
                             const sourceObj = card.imageSources || card.thumbnails || {};
 
                             ratios.forEach(r => {
                                 let val = sourceObj[r];
-                                
+
                                 // Fallback for 1:1 if not found in map but present in base field
                                 if (r === '1:1' && !val) {
                                     val = card.image || card.imageBase64;
@@ -287,14 +287,14 @@ export const useEntityActions = ({
                             });
 
                             let mainImage = exportImageSources['1:1'] || null;
-                            
+
                             // Ensure we have at least one main image if 1:1 failed above but exists in root
                             if (!mainImage && (card.image || card.imageBase64)) {
-                                 const raw = card.image || card.imageBase64;
-                                 mainImage = raw.startsWith('data:image') ? raw : `data:image/png;base64,${raw}`;
-                                 if (!exportImageSources['1:1']) exportImageSources['1:1'] = mainImage;
+                                const raw = card.image || card.imageBase64;
+                                mainImage = raw.startsWith('data:image') ? raw : `data:image/png;base64,${raw}`;
+                                if (!exportImageSources['1:1']) exportImageSources['1:1'] = mainImage;
                             }
-                            
+
                             return {
                                 type: 'character-card',
                                 nodeTitle: node.title,
@@ -315,7 +315,7 @@ export const useEntityActions = ({
                                 isPromptCollapsed: card.isPromptCollapsed !== false // Default true if undefined
                             };
                         });
-                        
+
                         dataToSave = exportCards; // Save the ARRAY directly for catalog logic
                     }
                     break;
@@ -323,11 +323,11 @@ export const useEntityActions = ({
                     dataToSave = { type: 'script-generator-data', scenes: parsed.scenes || [] };
                     break;
                 case CatalogItemType.ANALYSIS:
-                    dataToSave = { type: 'script-analyzer-data', scenes: parsed.scenes || [], visualStyle: parsed.visualStyle || '' }; 
+                    dataToSave = { type: 'script-analyzer-data', scenes: parsed.scenes || [], visualStyle: parsed.visualStyle || '' };
                     break;
                 case CatalogItemType.FINAL_PROMPTS:
-                    dataToSave = { 
-                        type: 'script-prompt-modifier-data', 
+                    dataToSave = {
+                        type: 'script-prompt-modifier-data',
                         finalPrompts: parsed.finalPrompts || [],
                         usedCharacters: parsed.usedCharacters || [] // Added usedCharacters
                     };
@@ -345,11 +345,11 @@ export const useEntityActions = ({
                     break;
                 case CatalogItemType.MUSIC:
                     dataToSave = {
-                         type: 'music-idea-data',
-                         idea: parsed.idea,
-                         generatedLyrics: parsed.generatedLyrics,
-                         generatedMusicPrompts: parsed.generatedMusicPrompts,
-                         generatedTitles: parsed.generatedTitles
+                        type: 'music-idea-data',
+                        idea: parsed.idea,
+                        generatedLyrics: parsed.generatedLyrics,
+                        generatedMusicPrompts: parsed.generatedMusicPrompts,
+                        generatedTitles: parsed.generatedTitles
                     };
                     break;
                 default:
@@ -364,9 +364,9 @@ export const useEntityActions = ({
         if (!Array.isArray(dataToSave)) {
             dataToSave.title = node.title;
         } else if (dataToSave.length > 0) {
-             // For arrays, attach title to first element or handle differently if needed. 
-             // CharacterCardNode load logic expects nodeTitle on elements.
-             dataToSave[0].nodeTitle = node.title;
+            // For arrays, attach title to first element or handle differently if needed. 
+            // CharacterCardNode load logic expects nodeTitle on elements.
+            dataToSave[0].nodeTitle = node.title;
         }
 
         saveGenericItemToCatalog(type, name, dataToSave);
@@ -392,7 +392,7 @@ export const useEntityActions = ({
             n.position.x -= minX;
             n.position.y -= minY;
         });
-        
+
         const groupData = {
             type: 'scriptModifierGroup', // Updated type
             name: group.title,
@@ -416,7 +416,7 @@ export const useEntityActions = ({
         const dateString = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 
         const sanitizedTitle = group.title.replace(/[^a-z0-9а-яё\s-_]/gi, '').trim().replace(/\s+/g, '_');
-        
+
         a.download = `${sanitizedTitle}_Script_Modifier_Group_${dateString}.json`;
 
         a.click();
@@ -424,19 +424,19 @@ export const useEntityActions = ({
         a.remove();
         addToast(t('toast.groupSavedToDisk', { groupTitle: group.title }), 'success');
     }, [groups, nodes, connections, t, addToast]);
-    
+
     const handleAddGroupFromCatalog = useCallback((itemId) => {
         const item = catalogItems.find(i => i.id === itemId) || currentCatalogItems.find(i => i.id === itemId);
         if (!item) return;
         const canvasCenter = { x: (-viewTransform.translate.x + window.innerWidth / 2) / viewTransform.scale, y: (-viewTransform.translate.y + window.innerHeight / 2) / viewTransform.scale, };
-        
+
         if (item.type === CatalogItemType.GROUP && item.nodes && item.connections) {
-             handleAddGroupFromTemplate({ name: item.name, nodes: item.nodes, connections: item.connections }, canvasCenter);
+            handleAddGroupFromTemplate({ name: item.name, nodes: item.nodes, connections: item.connections }, canvasCenter);
         }
-        
+
         handleCloseCatalog();
     }, [catalogItems, currentCatalogItems, viewTransform, handleAddGroupFromTemplate, handleCloseCatalog]);
-    
+
     // Updated to be async to handle Promise<void>
     const handleApplyAliases = useCallback(async (nodeId: string) => {
         const node = nodes.find(n => n.id === nodeId);
@@ -446,13 +446,13 @@ export const useEntityActions = ({
             await geminiContext.handleApplyAliasesForCharacterGenerator(nodeId);
         }
     }, [nodes, geminiContext]);
-    
+
     const handleDetachCharacter = useCallback((characterData: any, generatorNode: Node) => {
         if (!characterData || !generatorNode) return;
 
         nodeIdCounter.current++;
         const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
-        
+
         // Create basic imageSources if image exists
         const imageSources: Record<string, string | null> = {};
         if (characterData.imageBase64) {
@@ -473,12 +473,18 @@ export const useEntityActions = ({
             isPromptCollapsed: true
         }]);
 
+        // Calculate position: 400px to the right of the cursor in canvas coordinates
+        const canvasPosition = {
+            x: (clientPointerPosition.x - viewTransform.translate.x) / viewTransform.scale,
+            y: (clientPointerPosition.y - viewTransform.translate.y) / viewTransform.scale,
+        };
+
         const newNode = {
             id: newNodeId,
             type: NodeType.CHARACTER_CARD,
             position: {
-                x: generatorNode.position.x + generatorNode.width + 60,
-                y: generatorNode.position.y,
+                x: canvasPosition.x + 400,
+                y: canvasPosition.y,
             },
             value: newNodeValue,
             title: characterData.name || t('node.title.character_card'),
@@ -487,13 +493,13 @@ export const useEntityActions = ({
         };
 
         setNodes(current => [...current, newNode]);
-     }, [nodeIdCounter, setNodes, t]);
+    }, [nodeIdCounter, setNodes, t, clientPointerPosition, viewTransform]);
 
     const addCharacterCardFromFile = useCallback((cardData: any, position: Point) => {
         const processCard = (data: any) => {
-             const loadedSources: Record<string, string | null> = {};
-             if (data.imageSources) {
-                 Object.keys(data.imageSources).forEach(key => {
+            const loadedSources: Record<string, string | null> = {};
+            if (data.imageSources) {
+                Object.keys(data.imageSources).forEach(key => {
                     const val = data.imageSources[key];
                     if (typeof val === 'string' && val.startsWith('data:image')) {
                         loadedSources[key] = val.split(',')[1];
@@ -501,17 +507,17 @@ export const useEntityActions = ({
                         loadedSources[key] = val;
                     }
                 });
-             }
-             
-             let mainImage = data.image;
-             if (typeof mainImage === 'string' && mainImage.startsWith('data:image')) {
-                 mainImage = mainImage.split(',')[1];
-             }
-             if (!loadedSources['1:1']) {
-                 loadedSources['1:1'] = mainImage;
-             }
+            }
 
-             return {
+            let mainImage = data.image;
+            if (typeof mainImage === 'string' && mainImage.startsWith('data:image')) {
+                mainImage = mainImage.split(',')[1];
+            }
+            if (!loadedSources['1:1']) {
+                loadedSources['1:1'] = mainImage;
+            }
+
+            return {
                 type: "character-card",
                 id: data.id || `char-card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 name: data.name || 'Loaded Entity',
@@ -528,7 +534,7 @@ export const useEntityActions = ({
                 isImageCollapsed: !!data.isImageCollapsed,
                 isPromptCollapsed: data.isPromptCollapsed !== false, // Default true
                 nodeTitle: data.nodeTitle
-             };
+            };
         };
 
         let cardsToProcess: any[] = [];
@@ -546,7 +552,7 @@ export const useEntityActions = ({
 
         nodeIdCounter.current++;
         const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
-        
+
         // Ensure the title is set on the object structure before creating node
         cardsToProcess = cardsToProcess.map(c => ({ ...c, nodeTitle: title }));
 
@@ -556,7 +562,7 @@ export const useEntityActions = ({
             position: position,
             value: JSON.stringify(cardsToProcess),
             title: title,
-            width: Math.max(460, cardsToProcess.length * 420), // 420 is NODE_WIDTH_STEP
+            width: Math.max(460, cardsToProcess.length * NODE_WIDTH_STEP),
             height: 1000,
         };
 
@@ -569,10 +575,10 @@ export const useEntityActions = ({
             const result = event.target?.result as string;
             if (result) {
                 const base64String = result.split(',')[1];
-                
+
                 nodeIdCounter.current++;
                 const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
-                
+
                 const newNodeValue = JSON.stringify({ imageBase64: base64String });
                 const nodeTitle = file.name.replace(/\.[^/.]+$/, "") || t('node.title.image_preview');
 
@@ -590,12 +596,12 @@ export const useEntityActions = ({
         };
         reader.readAsDataURL(file);
     }, [nodeIdCounter, setNodes, t]);
-    
+
     // Feature: Download Chat Node content as JSON
     const handleDownloadChat = useCallback((nodeId: string) => {
         const node = nodes.find(n => n.id === nodeId);
         if (!node || node.type !== NodeType.GEMINI_CHAT) return;
-        
+
         try {
             const chatData = JSON.parse(node.value || '{}');
             const dataToSave = {
@@ -607,11 +613,11 @@ export const useEntityActions = ({
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
-            
+
             const now = new Date();
             const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`;
             const filename = `Gemini_Chat_${timestamp}.json`;
-            
+
             a.href = url;
             a.download = filename;
             a.click();
@@ -626,7 +632,7 @@ export const useEntityActions = ({
     const handlePasteFromClipboard = useCallback(async () => {
         try {
             const clipboardItems = await navigator.clipboard.read().catch(() => []);
-            
+
             const pastePosition = {
                 x: (clientPointerPositionRef.current.x - viewTransform.translate.x) / viewTransform.scale,
                 y: (clientPointerPositionRef.current.y - viewTransform.translate.y) / viewTransform.scale,
@@ -636,7 +642,7 @@ export const useEntityActions = ({
             if (selectedNodeIds.length === 1) {
                 const targetNode = nodes.find(n => n.id === selectedNodeIds[0]);
                 if (targetNode && targetNode.type === NodeType.YOUTUBE_ANALYTICS) {
-                     for (const item of clipboardItems) {
+                    for (const item of clipboardItems) {
                         const imageType = item.types.find(type => type.startsWith('image/'));
                         if (imageType) {
                             const blob = await item.getType(imageType);
@@ -664,7 +670,7 @@ export const useEntityActions = ({
                                             const channels = parsed.channels || [];
                                             const activeId = parsed.activeChannelId || (channels[0]?.id);
                                             const channelIndex = channels.findIndex((c: any) => c.id === activeId);
-                                            
+
                                             if (channelIndex !== -1) {
                                                 const newChannels = [...channels];
                                                 newChannels[channelIndex] = {
@@ -677,7 +683,7 @@ export const useEntityActions = ({
                                     }
                                     return n;
                                 }));
-                                
+
                                 addToast(t('toast.videoPasted'), 'success', clientPointerPositionRef.current);
 
                                 // If metadata image is empty (too small or invalid), skip extraction
@@ -686,7 +692,7 @@ export const useEntityActions = ({
                                 // Async Analysis
                                 try {
                                     const meta = await extractYouTubeMetadata(metadataImage);
-                                    
+
                                     // Second Update (Update Metadata)
                                     setNodes(prev => prev.map(n => {
                                         if (n.id === targetNode.id) {
@@ -743,16 +749,16 @@ export const useEntityActions = ({
                             const text = await blob.text();
                             try {
                                 const parsed = JSON.parse(text);
-                                
+
                                 let cardData = parsed;
                                 if (Array.isArray(parsed) && parsed.length > 0) {
-                                     cardData = parsed[0]; // Take first for single update logic
+                                    cardData = parsed[0]; // Take first for single update logic
                                 }
 
                                 if (cardData.type === 'character-card' || (cardData.name && cardData.fullDescription)) {
                                     const parsedValue = JSON.parse(targetNode.value || '[]');
                                     const currentCards = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
-                                    
+
                                     // Append new card
                                     const newCard = {
                                         ...cardData,
@@ -766,31 +772,31 @@ export const useEntityActions = ({
                                     delete newCard.alias;
 
                                     if (cardData.imageSources) {
-                                         Object.keys(cardData.imageSources).forEach(k => {
-                                             if (cardData.imageSources[k] && cardData.imageSources[k].startsWith('data:image')) {
-                                                 cardData.imageSources[k] = cardData.imageSources[k].split(',')[1];
-                                             }
-                                         });
-                                         newCard.imageSources = cardData.imageSources;
+                                        Object.keys(cardData.imageSources).forEach(k => {
+                                            if (cardData.imageSources[k] && cardData.imageSources[k].startsWith('data:image')) {
+                                                cardData.imageSources[k] = cardData.imageSources[k].split(',')[1];
+                                            }
+                                        });
+                                        newCard.imageSources = cardData.imageSources;
                                     }
 
                                     const updated = [...currentCards, newCard];
                                     handleValueChange(targetNode.id, JSON.stringify(updated));
-                                    
+
                                     // Update width
-                                    setNodes(nds => nds.map(n => n.id === targetNode.id ? { ...n, width: updated.length * 420 } : n));
-                                    
+                                    setNodes(nds => nds.map(n => n.id === targetNode.id ? { ...n, width: updated.length * NODE_WIDTH_STEP } : n));
+
                                     addToast(t('toast.charLoaded'), 'success', clientPointerPositionRef.current);
                                     return;
                                 }
-                            } catch {}
+                            } catch { }
                         }
                     }
                 }
             }
 
             // Standard Paste Logic (Global)
-            
+
             // 3. Check for Image Files in Clipboard
             for (const item of clipboardItems) {
                 const imageType = item.types.find(type => type.startsWith('image/'));
@@ -802,19 +808,19 @@ export const useEntityActions = ({
                     return; // Stop after pasting image
                 }
             }
-            
+
             // 4. Text / JSON / Base64 String
             const text = await navigator.clipboard.readText().catch(() => '');
-            
+
             if (text) {
                 // Check if text is a Base64 Data URI for an image
                 if (text.startsWith('data:image/') && text.includes('base64,')) {
-                     const base64Data = text.split(',')[1];
-                     const newNodeValue = JSON.stringify({ imageBase64: base64Data });
-                     
-                     nodeIdCounter.current++;
-                     const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
-                     const newNode = {
+                    const base64Data = text.split(',')[1];
+                    const newNodeValue = JSON.stringify({ imageBase64: base64Data });
+
+                    nodeIdCounter.current++;
+                    const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
+                    const newNode = {
                         id: newNodeId,
                         type: NodeType.IMAGE_PREVIEW,
                         position: pastePosition,
@@ -822,10 +828,10 @@ export const useEntityActions = ({
                         title: t('node.title.image_preview'),
                         width: 300,
                         height: 340,
-                     };
-                     setNodes(current => [...current, newNode]);
-                     addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
-                     return;
+                    };
+                    setNodes(current => [...current, newNode]);
+                    addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
+                    return;
                 }
 
                 // Check for JSON Nodes/Groups
@@ -839,9 +845,9 @@ export const useEntityActions = ({
                     }
                     // Check for Character Card JSON on global paste -> Create NEW node (Array or Single)
                     if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].type === 'character-card' || parsed[0].name)) {
-                         addCharacterCardFromFile(parsed, pastePosition);
-                         addToast(t('toast.charLoaded'), 'success', clientPointerPositionRef.current);
-                         return;
+                        addCharacterCardFromFile(parsed, pastePosition);
+                        addToast(t('toast.charLoaded'), 'success', clientPointerPositionRef.current);
+                        return;
                     }
                     // Single card legacy check
                     if (parsed.type === 'character-card' || (parsed.name && parsed.fullDescription)) {
@@ -851,23 +857,23 @@ export const useEntityActions = ({
                     }
                     // Check for YouTube Analytics data
                     if (parsed.type === 'youtube-analytics-data') {
-                         onAddNode(NodeType.YOUTUBE_ANALYTICS, pastePosition, text, parsed.title);
-                         addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
-                         return;
+                        onAddNode(NodeType.YOUTUBE_ANALYTICS, pastePosition, text, parsed.title);
+                        addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
+                        return;
                     }
-                    
+
                     // Check for Music Idea data
                     if (parsed.type === 'music-idea-data') {
-                         onAddNode(NodeType.MUSIC_IDEA_GENERATOR, pastePosition, text, parsed.title);
-                         addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
-                         return;
+                        onAddNode(NodeType.MUSIC_IDEA_GENERATOR, pastePosition, text, parsed.title);
+                        addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
+                        return;
                     }
-                    
+
                     // Check for Image Preview JSON (imageBase64)
                     if (parsed.imageBase64 && typeof parsed.imageBase64 === 'string') {
-                         nodeIdCounter.current++;
-                         const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
-                         const newNode = {
+                        nodeIdCounter.current++;
+                        const newNodeId = `node-${nodeIdCounter.current}-${Date.now()}`;
+                        const newNode = {
                             id: newNodeId,
                             type: NodeType.IMAGE_PREVIEW,
                             position: pastePosition,
@@ -875,13 +881,13 @@ export const useEntityActions = ({
                             title: t('node.title.image_preview'),
                             width: 300,
                             height: 340,
-                         };
-                         setNodes(current => [...current, newNode]);
-                         addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
-                         return;
+                        };
+                        setNodes(current => [...current, newNode]);
+                        addToast(t('toast.pasted'), 'success', clientPointerPositionRef.current);
+                        return;
                     }
 
-                } catch {}
+                } catch { }
 
                 // Fallback for Plain Text Input
                 onAddNode(NodeType.TEXT_INPUT, pastePosition, text);
@@ -894,7 +900,7 @@ export const useEntityActions = ({
             geminiContext.setError('Could not read from clipboard. Permission might be denied.');
         }
     }, [clientPointerPositionRef, viewTransform, onAddNode, geminiContext, selectedNodeIds, nodes, handleValueChange, addToast, t, addCharacterCardFromFile, handleAddGroupFromTemplate, setNodes, addImagePreviewNodeFromFile, nodeIdCounter]);
-    
+
     const handleDuplicateNodeEmptyWrapper = useCallback((nodeId: string) => {
         return handleDuplicateNodeEmpty(nodeId, t);
     }, [handleDuplicateNodeEmpty, t]);

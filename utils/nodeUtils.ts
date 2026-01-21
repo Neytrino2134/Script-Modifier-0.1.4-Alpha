@@ -3,7 +3,7 @@ import { Node, NodeType } from '../types';
 
 export const HEADER_HEIGHT = 40;
 export const CONTENT_PADDING = 12;
-export const NODE_WIDTH_STEP = 420;
+export const NODE_WIDTH_STEP = 460;
 
 export const RATIO_INDICES: Record<string, number> = { '1:1': 1, '16:9': 2, '9:16': 3 };
 
@@ -58,7 +58,7 @@ export const getInputHandleType = (node: Node, handleId?: string): 'text' | 'ima
         case NodeType.YOUTUBE_TITLE_GENERATOR:
         case NodeType.MUSIC_IDEA_GENERATOR:
         case NodeType.YOUTUBE_ANALYTICS:
-             return 'text';
+            return 'text';
         case NodeType.IMAGE_PREVIEW:
             return 'image';
         case NodeType.REROUTE_DOT: return null; // Accepts any, handled by connection logic

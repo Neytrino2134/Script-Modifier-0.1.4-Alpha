@@ -1,16 +1,16 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import { Node, Connection, NodeType } from '../types';
-import { 
-    generateScript, 
+import {
+    generateScript,
     generateScriptEntities,
-    generateCharacters, 
-    generateImage, 
-    generateSpeech, 
-    generateNarratorText, 
-    transcribeAudio, 
-    generateYouTubeTitles, 
-    generateYouTubeChannelInfo, 
+    generateCharacters,
+    generateImage,
+    generateSpeech,
+    generateNarratorText,
+    transcribeAudio,
+    generateYouTubeTitles,
+    generateYouTubeChannelInfo,
     generateMusicIdeas,
     extractTextFromImage,
     generateIdeaCategories,
@@ -67,7 +67,7 @@ export const useGeminiGeneration = ({
 
         // Gather upstream characters if useExistingCharacters is true (manual + linked are usually merged in node state)
         // Here we just use what is in state, which is correct
-        
+
         if (!finalPrompt.trim() && (!detailedCharacters || detailedCharacters.length === 0)) {
             setError("No prompt or existing characters provided.");
             return;
@@ -95,7 +95,7 @@ export const useGeminiGeneration = ({
 
             // Post-process new entities: Assign IDs and Indices
             let newEntities = result.detailedCharacters || [];
-            
+
             // Calculate starting index
             const currentMaxIndex = detailedCharacters.reduce((max: number, c: any) => {
                 const match = (c.index || '').match(/(\d+)/);
@@ -111,22 +111,22 @@ export const useGeminiGeneration = ({
 
             // Merge with existing characters
             const updatedDetailedCharacters = [...(detailedCharacters || []), ...newEntities];
-            
+
             // Expand UI to show characters
-            const newUiState = { 
-                ...(parsedValue.uiState || {}), 
-                isCharactersSectionCollapsed: false 
+            const newUiState = {
+                ...(parsedValue.uiState || {}),
+                isCharactersSectionCollapsed: false
             };
 
             setNodes(prev => prev.map(n => {
                 if (n.id === nodeId) {
-                    return { 
-                        ...n, 
-                        value: JSON.stringify({ 
-                            ...parsedValue, 
+                    return {
+                        ...n,
+                        value: JSON.stringify({
+                            ...parsedValue,
                             detailedCharacters: updatedDetailedCharacters,
                             uiState: newUiState
-                        }) 
+                        })
                     };
                 }
                 return n;
@@ -135,7 +135,7 @@ export const useGeminiGeneration = ({
         } catch (e: any) {
             setError(e.message || "Entity generation failed.");
         } finally {
-             setIsGeneratingEntities(null);
+            setIsGeneratingEntities(null);
         }
 
     }, [nodes, connections, getUpstreamTextValue, setNodes, setError, executionStopRequested]);
@@ -150,7 +150,7 @@ export const useGeminiGeneration = ({
 
         const {
             prompt, targetLanguage, characterType, narratorEnabled, narratorMode,
-            model, visualStyle, customVisualStyle, 
+            model, visualStyle, customVisualStyle,
             thinkingEnabled, scenelessMode, simpleActions,
             commercialSafe, smartConceptEnabled, atmosphericEntryEnabled,
             useExistingCharacters, detailedCharacters
@@ -209,13 +209,13 @@ export const useGeminiGeneration = ({
             setNodes(prev => prev.map(n => {
                 if (n.id === nodeId) {
                     const current = JSON.parse(n.value || '{}');
-                    return { 
-                        ...n, 
-                        value: JSON.stringify({ 
-                            ...current, 
+                    return {
+                        ...n,
+                        value: JSON.stringify({
+                            ...current,
                             ...finalScriptData,
-                            generationProgress: { ...current.generationProgress, endTime: Date.now(), current: 1 } 
-                        }) 
+                            generationProgress: { ...current.generationProgress, endTime: Date.now(), current: 1 }
+                        })
                     };
                 }
                 return n;
@@ -232,9 +232,9 @@ export const useGeminiGeneration = ({
         if (!node) return;
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
-        
+
         const { prompt, numberOfCharacters, targetLanguage, characterType, style, customStyle } = parsedValue;
-        
+
         const inputConnection = connections.find(c => c.toNodeId === nodeId);
         const finalPrompt = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : prompt;
 
@@ -256,7 +256,7 @@ export const useGeminiGeneration = ({
                 return n;
             }));
         } catch (e: any) {
-             setError(e.message || "Character generation failed.");
+            setError(e.message || "Character generation failed.");
         } finally {
             setIsGeneratingCharacters(null);
         }
@@ -276,12 +276,15 @@ export const useGeminiGeneration = ({
         } else if (node.type === NodeType.CHARACTER_GENERATOR && characterId !== undefined) {
             const char = parsedValue.characters.find((c: any) => c.id === characterId);
             prompt = char ? char.prompt : '';
+            if (char && char.additionalPrompt && char.additionalPrompt.trim()) {
+                prompt = `${prompt}, ${char.additionalPrompt.trim()}`;
+            }
         } else if (node.type === NodeType.CHARACTER_CARD && characterId !== undefined) {
-             const charData = Array.isArray(parsedValue) ? parsedValue[characterId as number] : parsedValue;
-             prompt = charData.prompt;
-             if (charData.additionalPrompt && charData.additionalPrompt.trim()) {
-                 prompt = `${prompt}, ${charData.additionalPrompt}`;
-             }
+            const charData = Array.isArray(parsedValue) ? parsedValue[characterId as number] : parsedValue;
+            prompt = charData.prompt;
+            if (charData.additionalPrompt && charData.additionalPrompt.trim()) {
+                prompt = `${prompt}, ${charData.additionalPrompt}`;
+            }
         }
 
         if (!prompt) {
@@ -292,16 +295,16 @@ export const useGeminiGeneration = ({
         const loadingKey = characterId !== undefined ? `${nodeId}-${characterId}` : nodeId;
         if (characterId !== undefined) setIsGeneratingCharacterImage(loadingKey);
         else setIsGeneratingImage(nodeId);
-        
+
         setError(null);
 
         try {
-             // For Character Card, use selectedRatio if available, default to 1:1
-             let ratio = '1:1';
-             if (node.type === NodeType.CHARACTER_CARD && characterId !== undefined) {
-                 const charData = Array.isArray(parsedValue) ? parsedValue[characterId as number] : parsedValue;
-                 ratio = charData.selectedRatio || '1:1';
-             }
+            // For Character Card, use selectedRatio if available, default to 1:1
+            let ratio = '1:1';
+            if (node.type === NodeType.CHARACTER_CARD && characterId !== undefined) {
+                const charData = Array.isArray(parsedValue) ? parsedValue[characterId as number] : parsedValue;
+                ratio = charData.selectedRatio || '1:1';
+            }
 
             const imageBase64 = await generateImage(prompt, ratio);
 
@@ -316,11 +319,11 @@ export const useGeminiGeneration = ({
                     } else if (node.type === NodeType.CHARACTER_CARD) {
                         const newCards = [...(Array.isArray(current) ? current : [current])];
                         const idx = characterId as number;
-                        if(newCards[idx]) {
-                             const card = newCards[idx];
-                             const newSources = { ...card.imageSources, [ratio]: imageBase64 };
-                             const newThumbnails = { ...card.thumbnails, [ratio]: imageBase64 }; // Should ideally be a thumbnail, but base64 works
-                             newCards[idx] = { ...card, image: imageBase64, imageSources: newSources, thumbnails: newThumbnails };
+                        if (newCards[idx]) {
+                            const card = newCards[idx];
+                            const newSources = { ...card.imageSources, [ratio]: imageBase64 };
+                            const newThumbnails = { ...card.thumbnails, [ratio]: imageBase64 }; // Should ideally be a thumbnail, but base64 works
+                            newCards[idx] = { ...card, image: imageBase64, imageSources: newSources, thumbnails: newThumbnails };
                         }
                         return { ...n, value: JSON.stringify(newCards) };
                     }
@@ -348,8 +351,8 @@ export const useGeminiGeneration = ({
 
         // Input logic handled by useGeminiConversation's handleReadData or direct prop usually,
         // but for generation we grab current state inputText
-        let inputText = parsedValue.inputText; 
-        
+        let inputText = parsedValue.inputText;
+
         if (!inputText || (Array.isArray(inputText) && inputText.length === 0)) {
             setError("No text to synthesize.");
             return;
@@ -373,7 +376,7 @@ export const useGeminiGeneration = ({
                     if (scene.text) {
                         const audioData = await generateSpeech(scene.text, targetVoice, intonation, multiSpeakerConfig);
                         if (audioData) {
-                             newAudioFiles.push({
+                            newAudioFiles.push({
                                 id: `scene-${scene.sceneNumber}-${Date.now()}`,
                                 title: `Scene ${scene.sceneNumber}`,
                                 text: scene.text,
@@ -387,8 +390,8 @@ export const useGeminiGeneration = ({
             } else {
                 const text = typeof inputText === 'string' ? inputText : '';
                 const audioData = await generateSpeech(text, targetVoice, intonation, multiSpeakerConfig);
-                 if (audioData) {
-                     newAudioFiles.push({
+                if (audioData) {
+                    newAudioFiles.push({
                         id: `simple-${Date.now()}`,
                         title: 'Generated Audio',
                         text: text.substring(0, 50) + '...',
@@ -414,23 +417,23 @@ export const useGeminiGeneration = ({
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
         const { prompt, role, targetLanguages, generateSSML } = parsedValue;
-        
+
         if (!prompt) { setError("No prompt provided."); return; }
 
         setIsGeneratingNarratorText(nodeId);
         setError(null);
         try {
-             // Only generate for selected languages
-             const languagesToGen = Object.keys(targetLanguages).filter(k => targetLanguages[k]);
-             const result = await generateNarratorText(prompt, role, languagesToGen, generateSSML);
-             
-             setNodes(prev => prev.map(n => {
-                 if (n.id === nodeId) {
-                     const current = JSON.parse(n.value || '{}');
-                     return { ...n, value: JSON.stringify({ ...current, generatedTexts: result }) };
-                 }
-                 return n;
-             }));
+            // Only generate for selected languages
+            const languagesToGen = Object.keys(targetLanguages).filter(k => targetLanguages[k]);
+            const result = await generateNarratorText(prompt, role, languagesToGen, generateSSML);
+
+            setNodes(prev => prev.map(n => {
+                if (n.id === nodeId) {
+                    const current = JSON.parse(n.value || '{}');
+                    return { ...n, value: JSON.stringify({ ...current, generatedTexts: result }) };
+                }
+                return n;
+            }));
         } catch (e: any) {
             setError(e.message || "Narrator text generation failed.");
         } finally {
@@ -453,12 +456,12 @@ export const useGeminiGeneration = ({
             const rawSegmentsString = await transcribeAudio(audioBase64, mimeType || 'audio/mp3');
             // Parse result to set plain text as well
             let segments = [];
-            try { segments = JSON.parse(rawSegmentsString); } catch {}
+            try { segments = JSON.parse(rawSegmentsString); } catch { }
             const plainText = segments.map((s: any) => s.text).join(' ');
 
-            setNodes(prev => prev.map(n => n.id === nodeId ? { 
-                ...n, 
-                value: JSON.stringify({ ...parsedValue, transcription: plainText, segments }) 
+            setNodes(prev => prev.map(n => n.id === nodeId ? {
+                ...n,
+                value: JSON.stringify({ ...parsedValue, transcription: plainText, segments })
             } : n));
         } catch (e: any) {
             setError(e.message || "Transcription failed.");
@@ -473,7 +476,7 @@ export const useGeminiGeneration = ({
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
         const { idea, targetLanguages, includeHashtags, generateThumbnail } = parsedValue;
-        
+
         const inputConnection = connections.find(c => c.toNodeId === nodeId);
         const finalIdea = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : idea;
 
@@ -484,7 +487,7 @@ export const useGeminiGeneration = ({
         try {
             const selectedLangs = Object.keys(targetLanguages).filter(k => targetLanguages[k]);
             const result = await generateYouTubeTitles(
-                finalIdea, 
+                finalIdea,
                 selectedLangs,
                 { includeHashtags, generateThumbnail }
             );
@@ -502,7 +505,7 @@ export const useGeminiGeneration = ({
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
         const { idea, targetLanguages } = parsedValue;
-        
+
         const inputConnection = connections.find(c => c.toNodeId === nodeId);
         const finalIdea = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : idea;
 
@@ -511,9 +514,9 @@ export const useGeminiGeneration = ({
         setIsGeneratingYouTubeChannelInfo(nodeId);
         setError(null);
         try {
-             const selectedLangs = Object.keys(targetLanguages).filter(k => targetLanguages[k]);
-             const result = await generateYouTubeChannelInfo(finalIdea, selectedLangs);
-             setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: JSON.stringify({ ...parsedValue, generatedChannelOutputs: result }) } : n));
+            const selectedLangs = Object.keys(targetLanguages).filter(k => targetLanguages[k]);
+            const result = await generateYouTubeChannelInfo(finalIdea, selectedLangs);
+            setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: JSON.stringify({ ...parsedValue, generatedChannelOutputs: result }) } : n));
         } catch (e: any) {
             setError(e.message || "Channel info generation failed.");
         } finally {
@@ -524,18 +527,18 @@ export const useGeminiGeneration = ({
     const handleGenerateMusicIdeas = useCallback(async (nodeId: string) => {
         const node = nodes.find(n => n.id === nodeId);
         if (!node) return;
-    
+
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { setError("Invalid node data."); return; }
-    
+
         const { idea, targetLanguages, generateLyrics, verseCount, model } = parsedValue;
         const inputConnection = connections.find(c => c.toNodeId === nodeId);
         const finalIdea = inputConnection ? getUpstreamTextValue(inputConnection.fromNodeId, inputConnection.fromHandleId) : idea;
-    
+
         const selectedLangs = Object.values(targetLanguages).some(v => v);
         if (!selectedLangs) { setError("Please select at least one language."); return; }
         if (!finalIdea || !finalIdea.trim()) { setError("Please provide an idea."); return; }
-    
+
         setError(null);
         setIsGeneratingMusicIdeas(nodeId);
         try {
@@ -544,7 +547,7 @@ export const useGeminiGeneration = ({
             const generatedLyrics: { [lang: string]: string } = {};
             const generatedMusicPrompts: { [lang: string]: string } = {};
             const generatedTitles: { [lang: string]: string } = {};
-    
+
             for (const lang in result) {
                 if (result[lang].lyrics) {
                     generatedLyrics[lang] = result[lang].lyrics;
@@ -557,9 +560,9 @@ export const useGeminiGeneration = ({
                 }
             }
 
-            const updatedValue = { 
-                ...parsedValue, 
-                idea: finalIdea, 
+            const updatedValue = {
+                ...parsedValue,
+                idea: finalIdea,
                 generatedLyrics,
                 generatedMusicPrompts,
                 generatedTitles,
@@ -578,7 +581,7 @@ export const useGeminiGeneration = ({
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
         const { imageBase64 } = parsedValue;
-        
+
         if (!imageBase64) { setError("No image loaded."); return; }
 
         setIsExtractingText(nodeId);
@@ -587,7 +590,7 @@ export const useGeminiGeneration = ({
             const text = await extractTextFromImage(imageBase64);
             setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, value: JSON.stringify({ ...parsedValue, extractedText: text }) } : n));
         } catch (e: any) {
-             setError(e.message || "Text extraction failed.");
+            setError(e.message || "Text extraction failed.");
         } finally {
             setIsExtractingText(null);
         }
@@ -604,9 +607,9 @@ export const useGeminiGeneration = ({
         setError(null);
         try {
             const categories = await generateIdeaCategories(targetLanguage, format, theme);
-            setNodes(prev => prev.map(n => n.id === nodeId ? { 
-                ...n, 
-                value: JSON.stringify({ ...parsedValue, categories, stage: 'selection', selection: { action: null, place: null, obstacle: null } }) 
+            setNodes(prev => prev.map(n => n.id === nodeId ? {
+                ...n,
+                value: JSON.stringify({ ...parsedValue, categories, stage: 'selection', selection: { action: null, place: null, obstacle: null } })
             } : n));
         } catch (e: any) {
             setError(e.message || "Category generation failed.");
@@ -621,24 +624,24 @@ export const useGeminiGeneration = ({
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
         const { selection, targetLanguage } = parsedValue;
-        
+
         if (!selection.action || !selection.place || !selection.obstacle) {
-             setError("Please select all three categories.");
-             return;
+            setError("Please select all three categories.");
+            return;
         }
 
         setIsCombiningStoryIdea(nodeId);
         setError(null);
         try {
             const idea = await combineStoryIdea(selection.action, selection.place, selection.obstacle, targetLanguage);
-            setNodes(prev => prev.map(n => n.id === nodeId ? { 
-                ...n, 
-                value: JSON.stringify({ ...parsedValue, generatedIdea: idea }) 
+            setNodes(prev => prev.map(n => n.id === nodeId ? {
+                ...n,
+                value: JSON.stringify({ ...parsedValue, generatedIdea: idea })
             } : n));
         } catch (e: any) {
             setError(e.message || "Idea generation failed.");
         } finally {
-             setIsCombiningStoryIdea(null);
+            setIsCombiningStoryIdea(null);
         }
     }, [nodes, setNodes, setError]);
 
@@ -676,20 +679,20 @@ export const useGeminiGeneration = ({
         handleCombineStoryIdea,
         stop,
         states: {
-             isGeneratingScript,
-             isGeneratingEntities,
-             isGeneratingCharacters,
-             isGeneratingImage,
-             isGeneratingCharacterImage,
-             isGeneratingSpeech,
-             isGeneratingNarratorText,
-             isTranscribingAudio,
-             isGeneratingYouTubeTitles,
-             isGeneratingYouTubeChannelInfo,
-             isGeneratingMusicIdeas,
-             isExtractingText,
-             isGeneratingIdeaCategories,
-             isCombiningStoryIdea
+            isGeneratingScript,
+            isGeneratingEntities,
+            isGeneratingCharacters,
+            isGeneratingImage,
+            isGeneratingCharacterImage,
+            isGeneratingSpeech,
+            isGeneratingNarratorText,
+            isTranscribingAudio,
+            isGeneratingYouTubeTitles,
+            isGeneratingYouTubeChannelInfo,
+            isGeneratingMusicIdeas,
+            isExtractingText,
+            isGeneratingIdeaCategories,
+            isCombiningStoryIdea
         }
     };
 };

@@ -1,5 +1,5 @@
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { useAppContext } from '../contexts/Context';
 import NodeView from './NodeView';
 import ConnectionView from './ConnectionView';
@@ -9,9 +9,10 @@ import { useVirtualization } from '../hooks/useVirtualization';
 
 interface CanvasProps {
     children?: React.ReactNode;
+    checkTarget?: boolean;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ children }) => {
+const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
     const context = useAppContext();
     const longPressTimer = useRef<number | null>(null);
     const touchStartPos = useRef<Point | null>(null);
@@ -183,35 +184,35 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
 
     const handleContainerTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         if (e.touches.length === 1) {
-          if (longPressTimer.current) clearTimeout(longPressTimer.current);
-          const touch = e.touches[0];
-          touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-          longPressTimer.current = window.setTimeout(() => {
-            if (touchStartPos.current) {
-              openContextMenu(touchStartPos.current);
-            }
-            longPressTimer.current = null;
-          }, 500);
+            if (longPressTimer.current) clearTimeout(longPressTimer.current);
+            const touch = e.touches[0];
+            touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+            longPressTimer.current = window.setTimeout(() => {
+                if (touchStartPos.current) {
+                    openContextMenu(touchStartPos.current);
+                }
+                longPressTimer.current = null;
+            }, 500);
         }
         handleCanvasTouchStart(e);
     };
-    
+
     const handleContainerTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         if (longPressTimer.current && touchStartPos.current && e.touches.length > 0) {
-          const dx = e.touches[0].clientX - touchStartPos.current.x;
-          const dy = e.touches[0].clientY - touchStartPos.current.y;
-          if (Math.hypot(dx, dy) > 10) {
-            clearTimeout(longPressTimer.current);
-            longPressTimer.current = null;
-          }
+            const dx = e.touches[0].clientX - touchStartPos.current.x;
+            const dy = e.touches[0].clientY - touchStartPos.current.y;
+            if (Math.hypot(dx, dy) > 10) {
+                clearTimeout(longPressTimer.current);
+                longPressTimer.current = null;
+            }
         }
         handleCanvasTouchMove(e);
     };
-    
+
     const handleContainerTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
         if (longPressTimer.current) {
-          clearTimeout(longPressTimer.current);
-          longPressTimer.current = null;
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
         }
         handleCanvasTouchEnd(e);
     };
@@ -220,28 +221,61 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
     // This prevents massive string allocation/concatenation on every render frame during drag.
     // We use a signature based on length and a prefix for large data.
     const getInputDataForNode = (nodeId: string) => {
-         const incoming = connections.filter(c => c.toNodeId === nodeId);
-         if (incoming.length === 0) return '';
-         return incoming.map(c => {
-             const fromNode = nodes.find(n => n.id === c.fromNodeId);
-             if (!fromNode) return '';
-             // If value is large (likely containing images), create a lightweight signature
-             if (fromNode.value.length > 2000) {
-                 return `${c.fromHandleId}:LEN_${fromNode.value.length}_${fromNode.value.substring(0, 50)}`;
-             }
-             return `${c.fromHandleId}:${fromNode.value}`; 
-         }).sort().join('||');
+        const incoming = connections.filter(c => c.toNodeId === nodeId);
+        if (incoming.length === 0) return '';
+        return incoming.map(c => {
+            const fromNode = nodes.find(n => n.id === c.fromNodeId);
+            if (!fromNode) return '';
+            // If value is large (likely containing images), create a lightweight signature
+            if (fromNode.value.length > 2000) {
+                return `${c.fromHandleId}:LEN_${fromNode.value.length}_${fromNode.value.substring(0, 50)}`;
+            }
+            return `${c.fromHandleId}:${fromNode.value}`;
+        }).sort().join('||');
     };
 
+    const containerRef = useRef<HTMLDivElement>(null);
+    const handleWheelRef = useRef(handleWheel);
+    handleWheelRef.current = handleWheel;
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const onWheelNative = (e: WheelEvent) => {
+            const target = e.target as HTMLElement;
+
+            // Проверяем, находится ли курсор над нодой или внутри интерактивных элементов
+            // Если да, то не применяем масштабирование холста
+            if (
+                target.closest('.absolute.flex.flex-col') || // Нода (основной контейнер)
+                target.closest('textarea') ||
+                target.closest('input') ||
+                target.closest('.no-wheel') ||
+                target.closest('.custom-scrollbar') || // Элементы с прокруткой
+                target.closest('button') ||
+                target.closest('select')
+            ) {
+                return; // Позволяем стандартное поведение прокрутки
+            }
+
+            // Если курсор на пустом пространстве холста, применяем масштабирование
+            handleWheelRef.current(e as unknown as React.WheelEvent<HTMLDivElement>);
+        };
+
+        container.addEventListener('wheel', onWheelNative, { passive: false });
+        return () => container.removeEventListener('wheel', onWheelNative);
+    }, []);
+
     return (
-        <div 
-            id="app-container" 
+        <div
+            id="app-container"
+            ref={containerRef}
             tabIndex={-1}
             className={`relative w-full h-full min-h-0 bg-gray-900 select-none outline-none ${isDraggingOverCanvas ? 'outline-4 outline-dashed outline-emerald-500 outline-offset-[-4px]' : ''}`}
             onMouseDown={handleCanvasMouseDown}
             onContextMenu={handleCanvasContextMenu}
             onMouseMove={updatePointerPosition}
-            onWheel={handleWheel}
             onDoubleClick={handleCanvasDoubleClick}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -251,12 +285,12 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
             onTouchEnd={handleContainerTouchEnd}
             style={{
                 cursor: getCanvasCursor(),
-                touchAction: 'none', 
+                touchAction: 'none',
                 overflow: 'hidden'
             }}
         >
             {/* Background Grid Pattern (Static Background) */}
-            <div 
+            <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
                     backgroundImage: 'radial-gradient(rgba(52, 211, 153, 0.15) 1px, transparent 1px)',
@@ -268,19 +302,19 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
 
             {/* Transform Layer: Moves everything together */}
             {/* Added pointer-events-none so panning clicks pass through to app-container */}
-            <div 
-                id="canvas-transform-layer" 
-                className="pointer-events-none" 
-                style={{ 
+            <div
+                id="canvas-transform-layer"
+                className="pointer-events-none"
+                style={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     width: '100%',
                     height: '100%',
-                    transform: `translate3d(${viewTransform.translate.x}px, ${viewTransform.translate.y}px, 0) scale(${viewTransform.scale})`, 
+                    transform: `translate3d(${viewTransform.translate.x}px, ${viewTransform.translate.y}px, 0) scale(${viewTransform.scale})`,
                     transformOrigin: '0 0',
                     // REMOVED will-change: transform to prevent blurry text at >100% zoom
-                }} 
+                }}
             >
                 {/* Origin Crosshair - Neat little plus */}
                 <div className="absolute pointer-events-none" style={{ left: 0, top: 0, zIndex: 0 }}>
@@ -291,21 +325,21 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
 
                 {/* Selection Rect */}
                 {selectionRect && <div className="absolute border-2 border-dashed border-emerald-400 bg-emerald-400/20 pointer-events-none" style={{ left: selectionRect.x, top: selectionRect.y, width: selectionRect.width, height: selectionRect.height, zIndex: 100 }} />}
-                
+
                 {/* Group Creation Button */}
                 {groupButtonPosition && (
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); context.handleGroupSelection(); }} 
-                        className="absolute z-20 px-4 py-2 font-bold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors duration-200 -translate-x-1/2 flex items-center space-x-2 pointer-events-auto shadow-lg" 
-                        style={{ left: groupButtonPosition.x, top: groupButtonPosition.y }} 
+                    <button
+                        onClick={(e) => { e.stopPropagation(); context.handleGroupSelection(); }}
+                        className="absolute z-20 px-4 py-2 font-bold text-white bg-emerald-600 rounded-md hover:bg-emerald-700 transition-colors duration-200 -translate-x-1/2 flex items-center space-x-2 pointer-events-auto shadow-lg"
+                        style={{ left: groupButtonPosition.x, top: groupButtonPosition.y }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                         </svg>
                         <span>{t('group.button.create', { count: selectedNodeIds.length })}</span>
                     </button>
                 )}
-                
+
                 {/* Connections SVG - pointer events handled by paths */}
                 <svg className="absolute top-0 left-0 w-full h-full overflow-visible pointer-events-none" style={{ zIndex: 9 }}>
                     <defs>
@@ -322,8 +356,8 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
                         return <ConnectionView key={conn.id} connection={conn} fromNode={fromNode} start={start} end={end} isNodeHovered={effectiveTool === 'cutter' && (hoveredNodeId === conn.fromNodeId || hoveredNodeId === conn.toNodeId)} activeTool={effectiveTool} onDelete={removeConnectionById} onSplit={handleSplitConnection} lineStyle={lineStyle} />;
                     })}
                     {connectingInfo && <path d={`M ${connectingInfo.fromPoint.x} ${connectingInfo.fromPoint.y} C ${connectingInfo.fromPoint.x + 80} ${connectingInfo.fromPoint.y}, ${pointerPosition.x - 80} ${pointerPosition.y}, ${pointerPosition.x} ${pointerPosition.y}`} stroke={connectingLineColor} strokeWidth="3" fill="none" style={{ strokeDasharray: '8 4' }} />}
-                    
-                     {creationLine && (
+
+                    {creationLine && (
                         <line
                             x1={creationLine.start.x} y1={creationLine.start.y}
                             x2={creationLine.end.x} y2={creationLine.end.y}
@@ -360,8 +394,8 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
                     <NodeView
                         key={node.id}
                         node={node}
-                        nodes={nodes} 
-                        connections={connections} 
+                        nodes={nodes}
+                        connections={connections}
                         removeConnectionById={removeConnectionById}
                         onMouseDown={handleNodeMouseDown}
                         onTouchStart={handleNodeTouchStart}
@@ -458,7 +492,7 @@ const Canvas: React.FC<CanvasProps> = ({ children }) => {
                         clearSelectionsSignal={clearSelectionsSignal}
                         onImproveScriptConcept={handleImproveScriptConcept}
                         isImprovingScriptConcept={isImprovingScriptConcept}
-                        inputData={getInputDataForNode(node.id)} 
+                        inputData={getInputDataForNode(node.id)}
                         setFullSizeImage={setFullSizeImage}
                         getFullSizeImage={getFullSizeImage}
                         setImageViewer={setImageViewer}

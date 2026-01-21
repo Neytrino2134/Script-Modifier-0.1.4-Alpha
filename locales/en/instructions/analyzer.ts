@@ -51,7 +51,7 @@ export const analyzer = {
     'instruction.desc.sensory_saturation': 'FORBIDDEN to be brief. Instead of "Hands gripping", write "Dirty hands with white knuckles tightly gripping the cold glass".',
     'instruction.ana_no_pov': 'No POV',
     'instruction.desc.ana_no_pov': 'CRITICAL NEGATIVE: STRICT BAN on "POV" or "First-Person" shots. The camera MUST be external (Over-the-shoulder, Wide, etc.).',
-    
+
     // New Translations
     'instruction.desc.static_frame_logic': 'STRICT BAN on movement verbs ("walking", "swaying"). Describe a FROZEN moment. "Foam frozen in air", "Leaves angled by wind".',
     'instruction.desc.anatomical_posing': 'Describe body GEOMETRY. Instead of "resting", write: "Lying supine, arms at sides, head tilted back".',
@@ -62,7 +62,7 @@ export const analyzer = {
 
     'instruction.inputs_data': 'Inputs',
     'instruction.desc.inputs_data': 'Source Data: Script Summary, Character Profiles, Scene Texts.',
-    
+
     // Instruction Labels (Titles)
     'instruction.static_frame_logic': 'Strict Static',
     'instruction.anatomical_posing': 'Anatomical Posing',
@@ -70,4 +70,6 @@ export const analyzer = {
     'instruction.prop_consistency': 'Object Specificity',
     'instruction.subject_hierarchy': 'Context Anchoring',
     'instruction.motion_dynamics': 'Motion Dynamics',
+    'instruction.entity_limit': 'Entity Limit',
+    'instruction.desc.entity_limit': 'STRICTLY FORBIDDEN to use more than 3 entities per frame. Break crowded scenes into smaller group shots.',
 };

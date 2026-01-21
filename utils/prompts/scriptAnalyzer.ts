@@ -159,5 +159,10 @@ export const SCRIPT_ANALYZER_INSTRUCTIONS = {
         id: 'shot_filter_wide',
         label: 'Wide Shots Only',
         text: "**ULTRA-STRICT CINEMATOGRAPHY FILTER:** For ALL generated frames, you are ABSOLUTELY FORBIDDEN from using Close-Up (CU), Extreme Close-Up (ECU), or Detail shots. \n\n**TRANSLATION PROTOCOL:** If the script describes a detail (e.g., 'a tear rolling down a cheek'), you MUST TRANSLATE it into a Full Body pose within a Wide Shot (e.g., 'Wide Shot: Character slumps shoulders, head low, body language conveys grief').\n\n**RULE:** Use ONLY Wide Shots (WS), Long Shots (LS), or Medium Shots (MS). Reject the impulse to zoom in."
+    },
+    ENTITY_LIMIT: {
+        id: 'entity_limit',
+        label: 'Max 3 Entities',
+        text: "**CRITICAL ENTITY LIMIT:** You are STRICTLY FORBIDDEN from including more than 3 entities in a single frame description. If a scene involves more than 3 characters, you MUST break it down into separate shots focusing on small groups (Shared Splits, Close-ups, Reaction Shots). NEVER crowd the frame with >3 entities."
     }
 };

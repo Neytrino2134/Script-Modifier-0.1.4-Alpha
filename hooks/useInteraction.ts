@@ -4,26 +4,26 @@ import { Node, Point, Connection, Group, NodeType, Tool, ConnectingInfo } from '
 import { getOutputHandleType, getInputHandleType } from '../utils/nodeUtils';
 
 interface ResizingInfo {
-  nodeId: string;
-  startPosition: Point;
-  startSize: { width: number; height: number };
+    nodeId: string;
+    startPosition: Point;
+    startSize: { width: number; height: number };
 }
 
 interface DraggingInfo {
-  type: 'node' | 'group';
-  id: string;
-  offsets: Map<string, Point>; // Map of nodeId -> offset
+    type: 'node' | 'group';
+    id: string;
+    offsets: Map<string, Point>; // Map of nodeId -> offset
 }
 
 interface PanInfo {
-  startPoint: Point;
-  startTranslate: Point;
+    startPoint: Point;
+    startTranslate: Point;
 }
 
 interface DollyZoomInfo {
-  startX: number;
-  startScale: number;
-  pivot: Point;
+    startX: number;
+    startScale: number;
+    pivot: Point;
 }
 
 interface UseInteractionProps {
@@ -94,7 +94,7 @@ const recalculateGroups = (groups: Group[], nodes: Node[]): Group[] => {
     });
 };
 
-export const useInteraction = ({ 
+export const useInteraction = ({
     nodes, setNodes, groups, setGroups, addConnection, connections,
     setConnections,
     viewTransform, updatePointerPosition, pan, isPanning, startPanning, stopPanning, isSnapToGrid,
@@ -172,16 +172,16 @@ export const useInteraction = ({
 
     const effectiveTool: Tool =
         isZDown ? 'zoom' :
-        activeTool === 'edit'
-            ? isCtrlDown && isAltDown
-                ? 'reroute'
-                : isCtrlDown
-                ? 'cutter'
-                : isShiftDown
-                ? 'selection'
-                : 'edit'
-            : activeTool;
-    
+            activeTool === 'edit'
+                ? isCtrlDown && isAltDown
+                    ? 'reroute'
+                    : isCtrlDown
+                        ? 'cutter'
+                        : isShiftDown
+                            ? 'selection'
+                            : 'edit'
+                : activeTool;
+
     useEffect(() => {
         if (connectingInfo && hoveredNodeId) {
             const targetNode = nodes.find(n => n.id === hoveredNodeId);
@@ -193,7 +193,7 @@ export const useInteraction = ({
                         return;
                     }
                 }
-                 if (targetNode.type === NodeType.REROUTE_DOT) {
+                if (targetNode.type === NodeType.REROUTE_DOT) {
                     const hasExistingInput = connections.some(c => c.toNodeId === hoveredNodeId);
                     if (!hasExistingInput) {
                         setConnectionTarget({ nodeId: targetNode.id });
@@ -240,7 +240,7 @@ export const useInteraction = ({
             }
         }
         setSelectedNodeIds(newSelectedIds);
-        
+
         const nodesToDrag = newSelectedIds.includes(nodeId) ? newSelectedIds : [nodeId];
         const offsets = new Map<string, Point>();
         const transformedClientX = (clientX - viewTransform.translate.x) / viewTransform.scale;
@@ -273,16 +273,16 @@ export const useInteraction = ({
     const handleNodeTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>, nodeId: string) => {
         e.stopPropagation();
         if (e.touches.length === 1) {
-             const touch = e.touches[0];
-             startNodeDrag(nodeId, touch.clientX, touch.clientY, false);
+            const touch = e.touches[0];
+            startNodeDrag(nodeId, touch.clientX, touch.clientY, false);
         }
     }, [startNodeDrag]);
-    
+
     const handleGroupMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, groupId: string) => {
         if (effectiveTool !== 'edit' && effectiveTool !== 'selection' && effectiveTool !== 'reroute') return;
         e.preventDefault();
         e.stopPropagation();
-        
+
         const group = groups.find(g => g.id === groupId);
         if (!group) return;
 
@@ -311,9 +311,9 @@ export const useInteraction = ({
         if (e.touches.length !== 1) return;
         e.stopPropagation();
         const touch = e.touches[0];
-        
+
         if (effectiveTool !== 'edit' && effectiveTool !== 'selection' && effectiveTool !== 'reroute') return;
-        
+
         const group = groups.find(g => g.id === groupId);
         if (!group) return;
 
@@ -337,14 +337,14 @@ export const useInteraction = ({
 
         setDraggingInfo({ type: 'group', id: groupId, offsets });
     }, [nodes, groups, viewTransform, effectiveTool]);
-    
+
     const handleNodeResizeMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, nodeId: string) => {
         if (effectiveTool !== 'edit' && effectiveTool !== 'selection' && effectiveTool !== 'reroute') return;
         e.preventDefault();
         e.stopPropagation();
 
         if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur();
+            document.activeElement.blur();
         }
 
         const node = nodes.find(n => n.id === nodeId);
@@ -373,10 +373,10 @@ export const useInteraction = ({
             });
         }
     }, [nodes, effectiveTool]);
-    
+
     const startConnection = useCallback((nodeId: string, handleId: string | undefined, clientRect: DOMRect) => {
         if (effectiveTool !== 'edit' && effectiveTool !== 'reroute') return;
-        
+
         const fromNode = nodes.find(n => n.id === nodeId);
         if (!fromNode) return;
 
@@ -419,16 +419,16 @@ export const useInteraction = ({
         if (document.activeElement instanceof HTMLElement) {
             (document.activeElement as HTMLElement).blur();
         }
-        
+
         if (e.target !== e.currentTarget) return;
 
         (e.currentTarget as HTMLElement).focus();
-        
+
         if (effectiveTool === 'zoom') {
             e.preventDefault();
             e.stopPropagation();
-            setDollyZoomingInfo({ 
-                startX: e.clientX, 
+            setDollyZoomingInfo({
+                startX: e.clientX,
                 startScale: viewTransform.scale,
                 pivot: { x: e.clientX, y: e.clientY }
             });
@@ -447,7 +447,7 @@ export const useInteraction = ({
                 setSelectedNodeIds([]);
                 triggerClearSelections();
             }
-            
+
         } else if (effectiveTool === 'edit' || effectiveTool === 'cutter' || effectiveTool === 'reroute') {
             e.preventDefault();
             e.stopPropagation();
@@ -465,7 +465,7 @@ export const useInteraction = ({
         return { x, y, width, height };
     }, []);
 
-    const isIntersecting = (nodeRect: {x: number, y: number, width: number, height: number}, selection: {x: number, y: number, width: number, height: number}) => {
+    const isIntersecting = (nodeRect: { x: number, y: number, width: number, height: number }, selection: { x: number, y: number, width: number, height: number }) => {
         return (
             nodeRect.x < selection.x + selection.width &&
             nodeRect.x + nodeRect.width > selection.x &&
@@ -474,9 +474,9 @@ export const useInteraction = ({
         );
     };
 
-    const handlePointerMove = useCallback((pointer: {clientX: number, clientY: number}) => {
+    const handlePointerMove = useCallback((pointer: { clientX: number, clientY: number }) => {
         updatePointerPosition(pointer);
-        
+
         if (dollyZoomingInfo) {
             const dx = pointer.clientX - dollyZoomingInfo.startX;
             const zoomFactor = Math.pow(1.005, dx);
@@ -495,7 +495,7 @@ export const useInteraction = ({
         if (selectionRect) {
             const currentPoint = getTransformedPoint(pointer);
             setSelectionRect(prev => prev ? { ...prev, end: currentPoint } : null);
-            return; 
+            return;
         }
 
         if (draggingInfo) {
@@ -517,9 +517,9 @@ export const useInteraction = ({
                         }
                         return n;
                     });
-                    
+
                     setGroups(currentGroups => recalculateGroups(currentGroups, updatedNodes));
-                    
+
                     return updatedNodes;
                 });
 
@@ -529,20 +529,20 @@ export const useInteraction = ({
 
                 if (draggedNode && offset) {
                     const nodeCurrentPos = { x: rawX - offset.x, y: rawY - offset.y };
-                    
+
                     const effectiveHeight = draggedNode.isCollapsed ? HEADER_HEIGHT : draggedNode.height;
-                    const nodeCenter = { 
-                        x: nodeCurrentPos.x + draggedNode.width / 2, 
-                        y: nodeCurrentPos.y + effectiveHeight / 2 
+                    const nodeCenter = {
+                        x: nodeCurrentPos.x + draggedNode.width / 2,
+                        y: nodeCurrentPos.y + effectiveHeight / 2
                     };
 
                     if (isAltDown) {
                         const group = groups.find(g => g.nodeIds.includes(draggedNodeId));
                         if (group) {
                             const isOutside = nodeCenter.x < group.position.x ||
-                                              nodeCenter.x > group.position.x + group.width ||
-                                              nodeCenter.y < group.position.y ||
-                                              nodeCenter.y > group.position.y + group.height;
+                                nodeCenter.x > group.position.x + group.width ||
+                                nodeCenter.y < group.position.y ||
+                                nodeCenter.y > group.position.y + group.height;
                             if (isOutside) {
                                 setExtractionTarget(draggedNodeId);
                                 setHoveredGroupIdForDrop(null);
@@ -550,10 +550,10 @@ export const useInteraction = ({
                             }
                         }
                     }
-                    
+
                     setExtractionTarget(null);
                     let foundGroup: string | null = null;
-                    
+
                     // --- NEW INTERSECTION LOGIC ---
                     const nodeW = draggedNode.width;
                     const nodeH = effectiveHeight;
@@ -567,10 +567,10 @@ export const useInteraction = ({
                     const hitRight = nodeCurrentPos.x + nodeW - insetX;
                     const hitTop = nodeCurrentPos.y + insetY;
                     const hitBottom = nodeCurrentPos.y + nodeH - insetY;
-                    
+
                     for (const group of groups) {
                         if (group.nodeIds.includes(draggedNodeId)) continue;
-                        
+
                         const groupLeft = group.position.x;
                         const groupRight = group.position.x + group.width;
                         const groupTop = group.position.y;
@@ -578,7 +578,7 @@ export const useInteraction = ({
 
                         // Check for rectangle intersection
                         // A overlaps B if (A.Left < B.Right) && (A.Right > B.Left) && (A.Top < B.Bottom) && (A.Bottom > B.Top)
-                        const isOverlapping = 
+                        const isOverlapping =
                             hitLeft < groupRight &&
                             hitRight > groupLeft &&
                             hitTop < groupBottom &&
@@ -593,20 +593,20 @@ export const useInteraction = ({
                 }
             } else if (draggingInfo.type === 'group') {
                 const groupOffset = draggingInfo.offsets.get(draggingInfo.id);
-                if(groupOffset) {
+                if (groupOffset) {
                     let newGroupX = rawX - groupOffset.x;
                     let newGroupY = rawY - groupOffset.y;
                     if (isSnapToGrid) {
                         newGroupX = Math.round(newGroupX / GRID_SIZE) * GRID_SIZE;
                         newGroupY = Math.round(newGroupY / GRID_SIZE) * GRID_SIZE;
                     }
-                    setGroups(currentGroups => currentGroups.map(g => 
-                        g.id === draggingInfo.id ? { ...g, position: { x: newGroupX, y: newGroupY}} : g
+                    setGroups(currentGroups => currentGroups.map(g =>
+                        g.id === draggingInfo.id ? { ...g, position: { x: newGroupX, y: newGroupY } } : g
                     ));
                 }
                 setNodes(currentNodes => currentNodes.map(n => {
                     const offset = draggingInfo.offsets.get(n.id);
-                    if(offset) {
+                    if (offset) {
                         let newPosX = rawX - offset.x;
                         let newPosY = rawY - offset.y;
                         if (isSnapToGrid) {
@@ -635,7 +635,7 @@ export const useInteraction = ({
                 case NodeType.CHARACTER_ANALYZER:
                     minWidth = 460; minHeight = 500; break;
                 case NodeType.CHARACTER_GENERATOR:
-                    minWidth = 680; minHeight = 800; break;
+                    minWidth = 460; minHeight = 1000; break;
                 case NodeType.IMAGE_GENERATOR:
                     minWidth = 400; minHeight = 520; break;
                 case NodeType.IMAGE_PREVIEW:
@@ -671,14 +671,14 @@ export const useInteraction = ({
                 case NodeType.YOUTUBE_TITLE_GENERATOR:
                     minWidth = 680; minHeight = 800; break;
                 case NodeType.YOUTUBE_ANALYTICS:
-                    minWidth = 680; minHeight = 800; break;
+                    minWidth = 1200; minHeight = 800; break;
                 default:
                     minWidth = 200; minHeight = 150;
             }
 
             const dx = (pointer.clientX - startPosition.x) / viewTransform.scale;
             const dy = (pointer.clientY - startPosition.y) / viewTransform.scale;
-            
+
             let newWidth = Math.max(minWidth, startSize.width + dx);
             let newHeight = Math.max(minHeight, startSize.height + dy);
 
@@ -695,14 +695,14 @@ export const useInteraction = ({
         }
     }, [draggingInfo, resizingInfo, viewTransform, pan, updatePointerPosition, setNodes, setGroups, nodes, groups, selectionRect, getTransformedPoint, isSnapToGrid, setZoom, isPanning, dollyZoomingInfo, isAltDown]);
 
-    const handlePointerUp = useCallback((e: {shiftKey?: boolean} | ReactMouseEvent | ReactTouchEvent) => {
+    const handlePointerUp = useCallback((e: { shiftKey?: boolean } | ReactMouseEvent | ReactTouchEvent) => {
         if (dollyZoomingInfo) {
             setDollyZoomingInfo(null);
         }
 
         if (selectionRect) {
             const normalizedRect = getNormalizedRect(selectionRect.start, selectionRect.end);
-            
+
             if (normalizedRect.width > 5 || normalizedRect.height > 5) {
                 const selectedIdsInRect = nodes
                     .filter(node => {
@@ -732,14 +732,14 @@ export const useInteraction = ({
                     const charsY = 330 * viewTransform.scale;
                     const pointerYRelativeToNode = clientPointerPosition.y - nodeTop;
                     const midpoint = (promptY + charsY) / 2;
-                    
+
                     if (pointerYRelativeToNode < midpoint) {
                         finalConnectionTarget.handleId = 'prompt';
                     } else {
                         finalConnectionTarget.handleId = 'characters';
                     }
                 }
-                
+
                 if (toNode && toNode.type === NodeType.SCRIPT_ANALYZER) {
                     finalConnectionTarget.handleId = undefined;
                 }
@@ -748,14 +748,14 @@ export const useInteraction = ({
                     const nodeTop = toNode.position.y * viewTransform.scale + viewTransform.translate.y;
                     const nodeHeight = toNode.height * viewTransform.scale;
                     const pointerYRelativeToNode = clientPointerPosition.y - nodeTop;
-                    
+
                     if (pointerYRelativeToNode < nodeHeight / 2) {
                         finalConnectionTarget.handleId = 'all-script-analyzer-data';
                     } else {
                         finalConnectionTarget.handleId = 'style';
                     }
                 }
-                
+
                 let allowConnection = true;
                 if (toNode && toNode.type === NodeType.REROUTE_DOT) {
                     if (connections.some(c => c.toNodeId === toNode.id)) {
@@ -810,7 +810,7 @@ export const useInteraction = ({
             setGroups(currentGroups => {
                 let groupsAfterDrop = currentGroups;
                 const affectedGroupIds = new Set<string>();
-                
+
                 if (draggingInfo && hoveredGroupIdForDrop) {
                     const nodeIdsToMove = Array.from(draggingInfo.offsets.keys());
                     const nodeIdsToMoveSet = new Set(nodeIdsToMove);
@@ -821,7 +821,7 @@ export const useInteraction = ({
                         }
                     });
                     affectedGroupIds.add(hoveredGroupIdForDrop);
-                    
+
                     groupsAfterDrop = currentGroups.map(g => ({
                         ...g,
                         nodeIds: g.nodeIds.filter(id => !nodeIdsToMoveSet.has(id)),
@@ -896,7 +896,7 @@ export const useInteraction = ({
         clientPointerPosition.y, addConnection, setNodes, extractionTarget, handleExtractNodeFromGroup, draggingInfo,
         resizingInfo, setGroups, groups, hoveredGroupIdForDrop, stopPanning, setSelectedNodeIds, connections, onConnectionReleased
     ]);
-    
+
     useEffect(() => {
         const handleGlobalMouseMove = (e: MouseEvent) => handlePointerMove(e);
         const handleGlobalMouseUp = (e: MouseEvent) => handlePointerUp(e);
@@ -917,7 +917,7 @@ export const useInteraction = ({
             window.removeEventListener('touchend', handleGlobalTouchEnd);
         };
     }, [draggingInfo, resizingInfo, connectingInfo, isPanning, handlePointerMove, handlePointerUp, dollyZoomingInfo, selectionRect]);
-    
+
     return {
         activeTool,
         effectiveTool,

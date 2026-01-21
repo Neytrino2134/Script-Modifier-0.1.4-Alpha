@@ -93,8 +93,8 @@ export const nodes = {
     'node.action.moveDown': 'Вниз',
     'node.action.saveImage': 'Сохранить Изображение',
     'node.action.loadImage': 'Загрузить Изображение',
-    'node.action.saveCharacter': 'Сохранить Персонажа',
-    'node.action.loadCharacter': 'Загрузить Персонажа',
+    'node.action.saveCharacter': 'Сохранить на диск',
+    'node.action.loadCharacter': 'Загрузить с диска',
     'node.action.readData': 'Прочитать Данные',
     'node.action.refreshData': 'Обновить Данные',
     'node.action.stop': 'Стоп',
@@ -124,7 +124,7 @@ export const nodes = {
     'node.content.generateFromFrame': 'Генерировать с кадра:',
     'node.content.generateUpToFrame': 'по кадр',
     'node.content.analyzeFromFrame': 'Финализировать с кадра:',
-    'node.content.processFromFrame': 'Обработать с кадра:', 
+    'node.content.processFromFrame': 'Обработать с кадра:',
     'node.content.processFromScene': 'Обработать с сцены:',
     'node.content.analyzePrompt': 'Анализ Промпта',
     'node.content.analyzeScript': 'Анализ Сценария',
@@ -224,7 +224,7 @@ export const nodes = {
     'node.content.scriptPromptPlaceholder': 'Введите идею истории...',
     'node.content.seconds': 'сек',
     'node.content.stylePlaceholder': 'Промпт стиля...',
-    'node.content.stylePromptPlaceholder': 'Введите промпт стиля здесь...', 
+    'node.content.stylePromptPlaceholder': 'Введите промпт стиля здесь...',
     'node.content.styleOverride': 'Переопределить Стиль',
     'node.content.summary': 'Сводка',
     'node.content.targetLanguage': 'Целевой Язык',
@@ -335,10 +335,11 @@ export const nodes = {
     'node.content.commercialSafe': 'Безопасно для коммерции',
     'instruction.desc.commercial_safe': 'Строго избегает известных торговых марок.',
     'node.content.findStack': 'Найти в стеке...',
-    
+
     // Prompt Finalizer Stack Headers
     'node.content.spm_stack.priming': '1. Прайминг и Контекст',
     'node.content.spm_stack.physics': '2. Физика и Логика',
     'node.content.spm_stack.hierarchy': '3. Иерархия Субъекта',
     'node.content.spm_stack.construction': '4. Конструкция и Формат',
+    'node.content.suffix': 'Суффикс',
 };

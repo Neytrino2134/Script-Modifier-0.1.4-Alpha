@@ -91,8 +91,8 @@ export const nodes = {
     'node.action.moveDown': 'Move Down',
     'node.action.saveImage': 'Save Image',
     'node.action.loadImage': 'Load Image',
-    'node.action.saveCharacter': 'Save Character',
-    'node.action.loadCharacter': 'Load Character',
+    'node.action.saveCharacter': 'Save to Disk',
+    'node.action.loadCharacter': 'Load from Disk',
     'node.action.readData': 'Read Data',
     'node.action.refreshData': 'Refresh Data',
     'node.action.stop': 'Stop',
@@ -223,7 +223,7 @@ export const nodes = {
     'node.content.scriptPromptPlaceholder': 'Enter story idea...',
     'node.content.seconds': 'sec',
     'node.content.stylePlaceholder': 'Style prompt...',
-    'node.content.stylePromptPlaceholder': 'Enter style prompt here...', 
+    'node.content.stylePromptPlaceholder': 'Enter style prompt here...',
     'node.content.styleOverride': 'Override Style',
     'node.content.summary': 'Summary',
     'node.content.targetLanguage': 'Target Language',
@@ -336,7 +336,7 @@ export const nodes = {
     'node.content.findStack': 'Find in stack...',
     'node.content.notePlaceholder': 'Enter your note here...',
     'node.content.textInputPlaceholder': 'Enter text here...',
-    
+
     // Prompt Finalizer Stack Headers
     'node.content.spm_stack.priming': '1. Priming & Context',
     'node.content.spm_stack.physics': '2. Physics & Logic',
@@ -362,4 +362,5 @@ export const nodes = {
     'node.content.sg_stack.narrative': 'NARRATIVE ENGINE',
     'node.content.sg_stack.world': 'VISUAL WORLD',
     'node.content.sg_stack.constraints': 'OUTPUT FORMAT & CONSTRAINTS',
+    'node.content.suffix': 'Suffix',
 };

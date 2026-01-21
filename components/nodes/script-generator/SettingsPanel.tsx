@@ -36,17 +36,17 @@ interface SettingsPanelProps {
     model: string;
     isLoading: boolean;
     targetLanguage: string;
-    prompt: string; 
-    allCharacters: any[]; 
+    prompt: string;
+    allCharacters: any[];
     estimateFrames?: boolean;
     safeGeneration?: boolean;
     thinkingEnabled?: boolean;
-    scenelessMode?: boolean; 
+    scenelessMode?: boolean;
     simpleActions?: boolean;
     commercialSafe?: boolean;
     smartConceptEnabled?: boolean;
     atmosphericEntryEnabled?: boolean;
-    
+
     // Entity Generation Props passed from parent for stack visualization
     generateMainChars?: boolean;
     createSecondaryChars?: boolean;
@@ -54,7 +54,7 @@ interface SettingsPanelProps {
     onToggleGenerateMainChars?: () => void;
     onToggleCreateSecondaryChars?: () => void;
     onToggleCreateKeyItems?: () => void;
-    
+
     targetScrollId: string | null;
     onSetTargetScrollId: (id: string | null) => void;
 }
@@ -62,7 +62,7 @@ interface SettingsPanelProps {
 // Defined outside to prevent re-mounting and flickering
 const SearchTrigger: React.FC<{ id: string; onClick: (e: React.MouseEvent, id: string) => void; t: any }> = React.memo(({ id, onClick, t }) => (
     <Tooltip title={t('node.action.locateInStack')} position="left">
-        <button 
+        <button
             onClick={(e) => { e.stopPropagation(); onClick(e, id); }}
             className="ml-auto p-0.5 text-gray-500 hover:text-emerald-400 opacity-50 hover:opacity-100 transition-all focus:outline-none"
         >
@@ -82,7 +82,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     generateMainChars, createSecondaryChars, createKeyItems, onToggleGenerateMainChars, onToggleCreateSecondaryChars, onToggleCreateKeyItems,
     targetScrollId, onSetTargetScrollId
 }) => {
-    
+
     // Search & Filter State
     const [stackFilter, setStackFilter] = useState('');
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
@@ -90,24 +90,24 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const handleScrollToBrick = useCallback((e: React.MouseEvent, id: string) => {
-        setStackFilter(''); 
+        setStackFilter('');
         // Delay to allow filter clear to render, then scroll within the specific container
         requestAnimationFrame(() => {
             setTimeout(() => {
                 const el = brickRefs.current[id];
                 const container = scrollContainerRef.current;
-                
+
                 if (el && container) {
-                    const HEADER_OFFSET = 40; 
+                    const HEADER_OFFSET = 40;
                     const topPos = el.offsetTop - HEADER_OFFSET;
                     container.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
                     setHighlightedId(id);
                     setTimeout(() => setHighlightedId(null), 2000);
                 }
-            }, 50); 
+            }, 50);
         });
     }, []);
-    
+
     const getFormattedModelName = (modelId: string) => {
         if (modelId === 'gemini-3-flash-preview') return 'Gemini 3 Flash Preview';
         if (modelId === 'gemini-3-pro-preview') return 'Gemini 3 Pro Preview';
@@ -229,7 +229,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
     return (
         <div className={`border border-gray-600 hover:border-gray-200 rounded-md bg-gray-900 overflow-hidden flex-shrink-0 flex flex-col transition-colors duration-200 ${uiState.isSettingsCollapsed ? '' : 'h-[400px]'}`}>
-            <div 
+            <div
                 className="flex justify-between items-center p-2 bg-gray-800/50 cursor-pointer select-none hover:bg-gray-700/50 transition-colors flex-shrink-0"
                 onClick={() => onUpdateUiState({ isSettingsCollapsed: !uiState.isSettingsCollapsed })}
             >
@@ -239,14 +239,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     </svg>
                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('node.content.parameters')}</h4>
                 </div>
-                
+
                 <div className="flex items-center space-x-1">
                     <ActionButton title={t('toolbar.resetToDefault')} onClick={handleResetSettings} tooltipPosition="left">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                     </ActionButton>
-                    
+
                     <div className="pl-1 border-l border-gray-700 ml-1">
-                         <ActionButton tooltipPosition="left" title={uiState.isSettingsCollapsed ? t('node.action.expand') : t('node.action.collapse')} onClick={(e) => { e.stopPropagation(); onUpdateUiState({ isSettingsCollapsed: !uiState.isSettingsCollapsed }); }}>
+                        <ActionButton tooltipPosition="left" title={uiState.isSettingsCollapsed ? t('node.action.expand') : t('node.action.collapse')} onClick={(e) => { e.stopPropagation(); onUpdateUiState({ isSettingsCollapsed: !uiState.isSettingsCollapsed }); }}>
                             {uiState.isSettingsCollapsed ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                             ) : (
@@ -256,10 +256,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     </div>
                 </div>
             </div>
-            
+
             {!uiState.isSettingsCollapsed && (
                 <div className="flex flex-row flex-grow min-h-0 bg-gray-800/50" onWheel={(e) => e.stopPropagation()}>
-                        {/* LEFT COLUMN: Controls */}
+                    {/* LEFT COLUMN: Controls */}
                     <div className="w-1/2 p-2 space-y-3 border-r border-gray-600 overflow-y-auto custom-scrollbar">
                         {/* Row 1: Scene Count | Style */}
                         <div className="grid grid-cols-2 gap-2">
@@ -300,12 +300,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 <textarea id={`custom-style-input-${nodeId}`} value={customVisualStyle} onChange={e => onUpdateValue({ customVisualStyle: e.target.value })} onMouseDown={e => e.stopPropagation()} onFocus={deselectAllNodes} rows={2} className="w-full p-1 bg-gray-800 text-white rounded-md text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none custom-scrollbar resize-none" placeholder="..." />
                             </div>
                         )}
-                        
+
                         {/* Sceneless Mode Toggle */}
                         <div className="flex items-center space-x-2 h-6 bg-gray-800/50 rounded px-2 border border-gray-700">
-                             <CustomCheckbox id={`sceneless-mode-${nodeId}`} checked={scenelessMode} onChange={(checked) => onUpdateValue({ scenelessMode: checked })} disabled={isLoading} className="h-3.5 w-3.5" />
-                             <label className="text-xs text-emerald-400 font-bold select-none truncate cursor-pointer flex-grow" htmlFor={`sceneless-mode-${nodeId}`}>{t('node.content.scenelessMode')}</label>
-                             <SearchTrigger id="sceneless_mode" onClick={handleScrollToBrick} t={t} />
+                            <CustomCheckbox id={`sceneless-mode-${nodeId}`} checked={scenelessMode} onChange={(checked) => onUpdateValue({ scenelessMode: checked })} disabled={isLoading} className="h-3.5 w-3.5" />
+                            <label className="text-xs text-emerald-400 font-bold select-none truncate cursor-pointer flex-grow" htmlFor={`sceneless-mode-${nodeId}`}>{t('node.content.scenelessMode')}</label>
+                            <SearchTrigger id="sceneless_mode" onClick={handleScrollToBrick} t={t} />
                         </div>
 
                         {/* Row 2: Genre | Genre 2 */}
@@ -348,28 +348,23 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             </div>
 
                             {/* Safe Generation */}
-                             <div className="flex items-center space-x-2 h-6">
+                            <div className="flex items-center space-x-2 h-6">
                                 <CustomCheckbox id={`safe-gen-${nodeId}`} checked={safeGeneration} onChange={(checked) => onUpdateValue({ safeGeneration: checked })} disabled={isLoading} className="h-3.5 w-3.5" />
                                 <label className="text-xs text-gray-300 select-none truncate cursor-pointer hover:text-emerald-400 transition-colors flex-grow" htmlFor={`safe-gen-${nodeId}`}>{t('node.content.safeGeneration')}</label>
                                 <SearchTrigger id="safe_gen" onClick={handleScrollToBrick} t={t} />
                             </div>
-                            
+
                             {/* Commercial Safe */}
-                             <div className="flex items-center space-x-2 h-6">
+                            <div className="flex items-center space-x-2 h-6">
                                 <CustomCheckbox id={`commercial-safe-${nodeId}`} checked={commercialSafe} onChange={(checked) => onUpdateValue({ commercialSafe: checked })} disabled={isLoading} className="h-3.5 w-3.5" />
                                 <label className="text-xs text-gray-300 select-none truncate cursor-pointer hover:text-emerald-400 transition-colors flex-grow" htmlFor={`commercial-safe-${nodeId}`}>{t('node.content.commercialSafe')}</label>
                                 <SearchTrigger id={SCRIPT_GENERATOR_INSTRUCTIONS.COMMERCIAL_SAFE.id} onClick={handleScrollToBrick} t={t} />
                             </div>
 
-                            {/* Smart Concept Toggle */}
-                            <div className="flex items-center space-x-2 h-6">
-                                <CustomCheckbox id={`smart-concept-${nodeId}`} checked={smartConceptEnabled} onChange={(checked) => onUpdateValue({ smartConceptEnabled: checked })} disabled={isLoading} className="h-3.5 w-3.5" />
-                                <label className="text-xs text-gray-300 select-none truncate cursor-pointer hover:text-cyan-400 transition-colors flex-grow" htmlFor={`smart-concept-${nodeId}`}>{t('node.content.smartConcept')}</label>
-                                <SearchTrigger id="char_smart_concept" onClick={handleScrollToBrick} t={t} />
-                            </div>
+
 
                             {/* Atmospheric Entry Toggle */}
-                             <div className="flex items-center space-x-2 h-6">
+                            <div className="flex items-center space-x-2 h-6">
                                 <CustomCheckbox id={`atmospheric-entry-${nodeId}`} checked={atmosphericEntryEnabled} onChange={(checked) => onUpdateValue({ atmosphericEntryEnabled: checked })} disabled={isLoading || scenelessMode} className="h-3.5 w-3.5" />
                                 <label className={`text-xs text-gray-300 select-none truncate cursor-pointer hover:text-emerald-400 transition-colors flex-grow ${scenelessMode ? 'opacity-50' : ''}`} htmlFor={`atmospheric-entry-${nodeId}`}>
                                     {t('instruction.sg_exposition')}
@@ -378,12 +373,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             </div>
 
                             <div className="flex items-center space-x-2 h-6">
-                                <CustomCheckbox 
-                                    id={`no-characters-${nodeId}`} 
-                                    checked={noCharacters} 
-                                    onChange={(checked) => { onUpdateValue({ noCharacters: checked, useExistingCharacters: checked ? false : useExistingCharacters }); }} 
-                                    disabled={isLoading || isCharactersInputConnected} 
-                                    className="h-3.5 w-3.5" 
+                                <CustomCheckbox
+                                    id={`no-characters-${nodeId}`}
+                                    checked={noCharacters}
+                                    onChange={(checked) => { onUpdateValue({ noCharacters: checked, useExistingCharacters: checked ? false : useExistingCharacters }); }}
+                                    disabled={isLoading || isCharactersInputConnected}
+                                    className="h-3.5 w-3.5"
                                 />
                                 <label className={`text-xs text-gray-300 select-none truncate cursor-pointer flex-grow ${isCharactersInputConnected ? 'opacity-50 cursor-not-allowed' : ''}`} htmlFor={`no-characters-${nodeId}`}>{t('node.content.noCharacters')}</label>
                                 <SearchTrigger id="sg_no_chars" onClick={handleScrollToBrick} t={t} />
@@ -391,12 +386,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                             {/* Use Existing Characters Toggle */}
                             <div className="flex items-center space-x-2 h-6">
-                                <CustomCheckbox 
-                                    id={`use-existing-${nodeId}`} 
-                                    checked={useExistingCharacters || isCharactersInputConnected} 
-                                    onChange={(checked) => onUpdateValue({ useExistingCharacters: checked })} 
-                                    disabled={isLoading || noCharacters || isCharactersInputConnected} 
-                                    className="h-3.5 w-3.5" 
+                                <CustomCheckbox
+                                    id={`use-existing-${nodeId}`}
+                                    checked={useExistingCharacters || isCharactersInputConnected}
+                                    onChange={(checked) => onUpdateValue({ useExistingCharacters: checked })}
+                                    disabled={isLoading || noCharacters || isCharactersInputConnected}
+                                    className="h-3.5 w-3.5"
                                 />
                                 <label className={`text-xs text-gray-300 select-none truncate cursor-pointer flex-grow ${noCharacters ? 'opacity-50' : ''} ${isCharactersInputConnected ? 'cursor-not-allowed text-emerald-400' : ''}`} htmlFor={`use-existing-${nodeId}`}>
                                     {t('node.content.useExistingCharacters')}
@@ -409,13 +404,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 )}
                                 <SearchTrigger id="no_duplicates" onClick={handleScrollToBrick} t={t} />
                             </div>
-                            
+
                             <div className="flex items-center space-x-2 h-6">
                                 <CustomCheckbox id={`narrator-enabled-${nodeId}`} checked={narratorEnabled} onChange={(checked) => onUpdateValue({ narratorEnabled: checked })} className="h-3.5 w-3.5" />
                                 <label className="text-xs text-gray-300 select-none truncate cursor-pointer flex-grow" htmlFor={`narrator-enabled-${nodeId}`}>{t('node.content.narratorEnabled')}</label>
                                 <SearchTrigger id="sg_narrator" onClick={handleScrollToBrick} t={t} />
                             </div>
-                             <div className="flex items-center space-x-2 h-6">
+                            <div className="flex items-center space-x-2 h-6">
                                 <CustomCheckbox id={`simple-actions-${nodeId}`} checked={simpleActions} onChange={(checked) => onUpdateValue({ simpleActions: checked })} className="h-3.5 w-3.5" />
                                 <label className="text-xs text-emerald-300 font-medium select-none truncate cursor-pointer flex-grow" htmlFor={`simple-actions-${nodeId}`}>{t('node.content.simpleActions')}</label>
                                 <SearchTrigger id="sg_simple_actions" onClick={handleScrollToBrick} t={t} />
@@ -438,7 +433,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     <div className="w-1/2 flex flex-col relative">
                         {/* Search Filter Header - STICKY */}
                         <div className="p-2 border-b border-gray-700 bg-gray-800/80 sticky top-0 z-10 flex items-center gap-2">
-                             <div className="relative w-full">
+                            <div className="relative w-full">
                                 <input
                                     type="text"
                                     value={stackFilter}
@@ -454,7 +449,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                         &times;
                                     </button>
                                 )}
-                             </div>
+                            </div>
                         </div>
 
                         <div ref={scrollContainerRef} className="p-2 overflow-y-auto custom-scrollbar space-y-1 flex-grow relative">
@@ -463,51 +458,51 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                             <div className="space-y-1 pb-2 mb-2 border-b border-gray-700/30">
                                 {shouldShow(model, t('node.content.model')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['model-brick'] = el; }}
                                         id="model-brick"
-                                        label={t('node.content.model')} 
+                                        label={t('node.content.model')}
                                         text={getFormattedModelName(model)}
-                                        isMandatory 
+                                        isMandatory
                                         color='gray'
                                         isHighlighted={highlightedId === 'model-brick'}
                                     />
                                 )}
 
                                 {shouldShow(t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`), t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)) && (
-                                     <InstructionBrick 
-                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)} 
-                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text} 
-                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)} 
-                                        isMandatory color='gray' index={++stepCount} 
+                                    <InstructionBrick
+                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)}
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.text}
+                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.INPUTS_DATA.id}`)}
+                                        isMandatory color='gray' index={++stepCount}
                                     />
                                 )}
 
                                 {shouldShow(getNativeLanguageName(targetLanguage), t('node.content.targetLanguage')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['target_lang'] = el; }}
                                         id="target_lang"
                                         index={++stepCount}
-                                        label={t('node.content.targetLanguage')} 
-                                        text={`Target Language: ${getLanguageName(targetLanguage)}`} 
-                                        translatedText={getNativeLanguageName(targetLanguage)} 
-                                        isMandatory color='gray' 
+                                        label={t('node.content.targetLanguage')}
+                                        text={`Target Language: ${getLanguageName(targetLanguage)}`}
+                                        translatedText={getNativeLanguageName(targetLanguage)}
+                                        isMandatory color='gray'
                                         isHighlighted={highlightedId === 'target_lang'}
                                     />
                                 )}
 
                                 {/* Thinking Mode - Moved Here */}
                                 {shouldShow("Thinking Mode", t('node.content.thinkingEnabled')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['thinking_mode'] = el; }}
                                         id="thinking_mode"
                                         index={thinkingEnabled ? ++stepCount : undefined}
-                                        label={t('node.content.thinkingEnabled')} 
-                                        text="Enable extended reasoning for deeper plot coherence." 
-                                        translatedText="Включить расширенное мышление." 
-                                        isEnabled={thinkingEnabled} 
-                                        onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })} 
-                                        color='cyan' 
+                                        label={t('node.content.thinkingEnabled')}
+                                        text="Enable extended reasoning for deeper plot coherence."
+                                        translatedText="Включить расширенное мышление."
+                                        isEnabled={thinkingEnabled}
+                                        onToggle={() => onUpdateValue({ thinkingEnabled: !thinkingEnabled })}
+                                        color='cyan'
                                         isHighlighted={highlightedId === 'thinking_mode'}
                                     />
                                 )}
@@ -516,32 +511,32 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             {/* 1. PRIMING & CONTEXT */}
                             <div className="space-y-1 mb-3">
                                 <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.sg_stack.priming')}</h6>
-                                
+
                                 {/* Safe Generation */}
                                 {shouldShow(SAFE_GENERATION_INSTRUCTIONS.text, t('node.content.safeGeneration')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['safe_gen'] = el; }}
                                         id="safe_gen"
                                         index={safeGeneration ? ++stepCount : undefined}
-                                        label={t('node.content.safeGeneration')} 
-                                        text={SAFE_GENERATION_INSTRUCTIONS.text} 
-                                        translatedText={t('instruction.desc.safe_gen')} 
-                                        isCritical 
+                                        label={t('node.content.safeGeneration')}
+                                        text={SAFE_GENERATION_INSTRUCTIONS.text}
+                                        translatedText={t('instruction.desc.safe_gen')}
+                                        isCritical
                                         isEnabled={safeGeneration}
                                         onToggle={() => onUpdateValue({ safeGeneration: !safeGeneration })}
                                         isHighlighted={highlightedId === 'safe_gen'}
                                     />
                                 )}
-                                
+
                                 {/* Commercial Safe */}
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.COMMERCIAL_SAFE.text, t('node.content.commercialSafe')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current[SCRIPT_GENERATOR_INSTRUCTIONS.COMMERCIAL_SAFE.id] = el; }}
                                         id={SCRIPT_GENERATOR_INSTRUCTIONS.COMMERCIAL_SAFE.id}
                                         index={commercialSafe ? ++stepCount : undefined}
-                                        label={t('node.content.commercialSafe')} 
-                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.COMMERCIAL_SAFE.text} 
-                                        translatedText={t('instruction.desc.commercial_safe')} 
+                                        label={t('node.content.commercialSafe')}
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.COMMERCIAL_SAFE.text}
+                                        translatedText={t('instruction.desc.commercial_safe')}
                                         isCritical
                                         isEnabled={commercialSafe}
                                         onToggle={() => onUpdateValue({ commercialSafe: !commercialSafe })}
@@ -550,43 +545,43 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 )}
 
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.CORE.text, t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id}`)) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current[SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id] = el; }}
                                         id={SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id}
                                         index={++stepCount}
-                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id}`)} 
-                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.CORE.text} 
-                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id}`)} 
-                                        isMandatory color='emerald' 
+                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id}`)}
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.CORE.text}
+                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id}`)}
+                                        isMandatory color='emerald'
                                         isHighlighted={highlightedId === SCRIPT_GENERATOR_INSTRUCTIONS.CORE.id}
                                     />
                                 )}
-                                
+
                                 {/* Anti-Compression - Mandatory Readonly */}
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text, t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current[SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id] = el; }}
                                         id={SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}
                                         index={++stepCount}
-                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)} 
-                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text} 
-                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)} 
+                                        label={t(`instruction.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)}
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.text}
+                                        translatedText={t(`instruction.desc.${SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}`)}
                                         isMandatory color='emerald'
                                         isHighlighted={highlightedId === SCRIPT_GENERATOR_INSTRUCTIONS.ANTI_COMPRESSION.id}
                                     />
                                 )}
-                                
+
                                 {/* Sceneless Mode Brick - Moved here to be always visible and toggleable */}
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.SCENELESS_MODE.text, t('instruction.sceneless_mode')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sceneless_mode'] = el; }}
                                         id="sceneless_mode"
                                         index={scenelessMode ? ++stepCount : undefined}
-                                        label={t('instruction.sceneless_mode')} 
-                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.SCENELESS_MODE.text} 
-                                        translatedText={t('instruction.desc.sceneless_mode')} 
-                                        isEnabled={scenelessMode} 
-                                        onToggle={() => onUpdateValue({ scenelessMode: !scenelessMode })} 
+                                        label={t('instruction.sceneless_mode')}
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.SCENELESS_MODE.text}
+                                        translatedText={t('instruction.desc.sceneless_mode')}
+                                        isEnabled={scenelessMode}
+                                        onToggle={() => onUpdateValue({ scenelessMode: !scenelessMode })}
                                         color={scenelessMode ? 'emerald' : 'gray'}
                                         isHighlighted={highlightedId === 'sceneless_mode'}
                                     />
@@ -598,7 +593,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">
                                     {t('node.content.sg_stack.narrative')}
                                 </h6>
-                                
+
                                 {(!scenelessMode ? [
                                     SCRIPT_GENERATOR_INSTRUCTIONS.ANALYSIS,
                                     SCRIPT_GENERATOR_INSTRUCTIONS.IMPROVE_CONCEPT,
@@ -617,141 +612,127 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 ]).map(instr => {
                                     // Special handling for EXPOSITION (Atmospheric Entry) toggle
                                     if (instr.id === SCRIPT_GENERATOR_INSTRUCTIONS.EXPOSITION.id) {
-                                         return shouldShow(instr.text, t(`instruction.${instr.id}`)) && (
-                                            <InstructionBrick 
+                                        return shouldShow(instr.text, t(`instruction.${instr.id}`)) && (
+                                            <InstructionBrick
                                                 key={instr.id}
                                                 ref={el => { brickRefs.current[instr.id] = el; }}
                                                 id={instr.id}
-                                                index={atmosphericEntryEnabled ? ++stepCount : undefined} 
-                                                label={t(`instruction.${instr.id}`)} 
-                                                text={instr.text} 
-                                                translatedText={t(`instruction.desc.${instr.id}`)} 
+                                                index={atmosphericEntryEnabled ? ++stepCount : undefined}
+                                                label={t(`instruction.${instr.id}`)}
+                                                text={instr.text}
+                                                translatedText={t(`instruction.desc.${instr.id}`)}
                                                 isEnabled={atmosphericEntryEnabled}
                                                 onToggle={() => onUpdateValue({ atmosphericEntryEnabled: !atmosphericEntryEnabled })}
-                                                color='emerald' 
+                                                color='emerald'
                                                 isHighlighted={highlightedId === instr.id}
                                             />
-                                         );
+                                        );
                                     }
 
                                     return shouldShow(instr.text, t(`instruction.${instr.id}`)) && (
-                                    <InstructionBrick 
-                                        key={instr.id}
-                                        ref={el => { brickRefs.current[instr.id] = el; }}
-                                        id={instr.id}
-                                        index={++stepCount} 
-                                        label={t(`instruction.${instr.id}`) || instr.label} 
-                                        text={instr.text} 
-                                        translatedText={t(`instruction.desc.${instr.id}`)} 
-                                        isMandatory 
-                                        color={instr.id === 'rule_visuals' || instr.id === 'rule_flow' || instr.id === 'rule_atmosphere' ? 'gray' : 'emerald'} 
-                                        isHighlighted={highlightedId === instr.id}
-                                    />
-                                )})}
+                                        <InstructionBrick
+                                            key={instr.id}
+                                            ref={el => { brickRefs.current[instr.id] = el; }}
+                                            id={instr.id}
+                                            index={++stepCount}
+                                            label={t(`instruction.${instr.id}`) || instr.label}
+                                            text={instr.text}
+                                            translatedText={t(`instruction.desc.${instr.id}`)}
+                                            isMandatory
+                                            color={instr.id === 'rule_visuals' || instr.id === 'rule_flow' || instr.id === 'rule_atmosphere' ? 'gray' : 'emerald'}
+                                            isHighlighted={highlightedId === instr.id}
+                                        />
+                                    )
+                                })}
                             </div>
 
                             {/* 3. VISUAL STYLE & WORLD */}
                             <div className="space-y-1 mb-3">
                                 <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.sg_stack.world')}</h6>
-                                 
+
                                 {/* Living World */}
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.LIVING_WORLD.text, t('instruction.sg_living_world')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_living_world'] = el; }}
                                         id="sg_living_world"
                                         index={++stepCount}
-                                        label={t('instruction.sg_living_world')} 
-                                        text={characterType === 'anthro' 
-                                            ? "EXTRAS: Anthropomorphic animals of various species." 
-                                            : "EXTRAS: Human crowd appropriate to setting."} 
+                                        label={t('instruction.sg_living_world')}
+                                        text={characterType === 'anthro'
+                                            ? "EXTRAS: Anthropomorphic animals of various species."
+                                            : "EXTRAS: Human crowd appropriate to setting."}
                                         translatedText={characterType === 'anthro'
                                             ? t('instruction.desc.sg_living_world_anthro')
                                             : t('instruction.desc.sg_living_world_simple')
                                         }
                                         isMandatory
-                                        color='emerald' 
+                                        color='emerald'
                                         isHighlighted={highlightedId === 'sg_living_world'}
                                     />
                                 )}
-                                
-                                {/* Smart Concept Toggle Brick */}
-                                {shouldShow(CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.text, t(`instruction.${CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}`)) && (
-                                     <InstructionBrick 
-                                        key={CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id} 
-                                        ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id] = el; }} 
-                                        id={CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id} 
-                                        index={smartConceptEnabled ? ++stepCount : undefined} 
-                                        label={t(`instruction.${CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}`)} 
-                                        text={CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.text} 
-                                        translatedText={t(`instruction.desc.${CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}`)} 
-                                        isEnabled={smartConceptEnabled}
-                                        onToggle={() => onUpdateValue({ smartConceptEnabled: !smartConceptEnabled })}
-                                        color='gray'
-                                        isHighlighted={highlightedId === CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id} 
-                                     />
-                                )}
+
+
 
                                 {[SCRIPT_GENERATOR_INSTRUCTIONS.VISUAL_DNA, CHAR_GEN_INSTRUCTIONS.DETAILED_STYLE].map(instr => shouldShow(instr.text, t(`instruction.${instr.id}`)) && (
-                                     <InstructionBrick key={instr.id} ref={el => { brickRefs.current[instr.id] = el; }} id={instr.id} index={++stepCount} label={t(`instruction.${instr.id}`) || instr.label} text={instr.text} translatedText={t(`instruction.desc.${instr.id}`)} isMandatory color={instr.id === 'sg_visual_dna' ? 'cyan' : 'emerald'} isHighlighted={highlightedId === instr.id} />
+                                    <InstructionBrick key={instr.id} ref={el => { brickRefs.current[instr.id] = el; }} id={instr.id} index={++stepCount} label={t(`instruction.${instr.id}`) || instr.label} text={instr.text} translatedText={t(`instruction.desc.${instr.id}`)} isMandatory color={instr.id === 'sg_visual_dna' ? 'cyan' : 'emerald'} isHighlighted={highlightedId === instr.id} />
                                 ))}
-                                
+
                                 {/* Frame Estimation */}
                                 {shouldShow(SCRIPT_GENERATOR_INSTRUCTIONS.FRAME_ESTIMATION.text, t('node.content.recommendedFrames')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_frame_estimation'] = el; }}
                                         id="sg_frame_estimation"
                                         index={++stepCount}
-                                        label={t('node.content.recommendedFrames')} 
-                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.FRAME_ESTIMATION.text} 
-                                        translatedText={t('instruction.desc.sg_frame_estimation')} 
+                                        label={t('node.content.recommendedFrames')}
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.FRAME_ESTIMATION.text}
+                                        translatedText={t('instruction.desc.sg_frame_estimation')}
                                         isMandatory={true}
-                                        color='emerald' 
+                                        color='emerald'
                                         isHighlighted={highlightedId === 'sg_frame_estimation'}
                                     />
                                 )}
-                                
+
                                 {/* Visual Style Selection */}
                                 {shouldShow(t('instruction.sg_visual_style'), t('instruction.sg_visual_style')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_visual_style'] = el; }}
                                         id="sg_visual_style"
                                         index={visualStyle && visualStyle !== 'none' ? ++stepCount : undefined}
-                                        label={t('instruction.sg_visual_style')} 
-                                        text={`Request: Generate visual style based on '${visualStyle === 'custom' ? customVisualStyle : getStyleEnglishName(visualStyle)}'.`} 
-                                        translatedText={t('instruction.desc.sg_visual_style', { style: visualStyle === 'custom' ? customVisualStyle : t(`node.content.style.${visualStyle || 'none'}`) })} 
-                                        isEnabled={!!visualStyle && visualStyle !== 'none'} 
+                                        label={t('instruction.sg_visual_style')}
+                                        text={`Request: Generate visual style based on '${visualStyle === 'custom' ? customVisualStyle : getStyleEnglishName(visualStyle)}'.`}
+                                        translatedText={t('instruction.desc.sg_visual_style', { style: visualStyle === 'custom' ? customVisualStyle : t(`node.content.style.${visualStyle || 'none'}`) })}
+                                        isEnabled={!!visualStyle && visualStyle !== 'none'}
                                         onToggle={() => onUpdateValue({ visualStyle: visualStyle !== 'none' ? '' : 'simple' })}
-                                        color='cyan' 
+                                        color='cyan'
                                         isHighlighted={highlightedId === 'sg_visual_style'}
                                     />
                                 )}
 
                                 {/* Anthro */}
                                 {shouldShow(t('instruction.sg_anthro'), t('instruction.sg_anthro')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_anthro'] = el; }}
                                         id="sg_anthro"
                                         index={characterType === 'anthro' ? ++stepCount : undefined}
-                                        label={t('instruction.sg_anthro')} 
-                                        text="Characters MUST be animals with human traits." 
-                                        translatedText={t('instruction.desc.sg_anthro')} 
-                                        isEnabled={characterType === 'anthro'} 
+                                        label={t('instruction.sg_anthro')}
+                                        text="Characters MUST be animals with human traits."
+                                        translatedText={t('instruction.desc.sg_anthro')}
+                                        isEnabled={characterType === 'anthro'}
                                         onToggle={() => onUpdateValue({ characterType: characterType === 'anthro' ? 'simple' : 'anthro' })}
-                                        color='cyan' 
+                                        color='cyan'
                                         isHighlighted={highlightedId === 'sg_anthro'}
                                     />
                                 )}
 
                                 {/* Genre */}
                                 {shouldShow(t('instruction.sg_genre'), t('instruction.sg_genre')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_genre'] = el; }}
                                         id="sg_genre"
                                         index={!scenelessMode && (genre !== 'general' || genre2 !== 'general') ? ++stepCount : undefined}
-                                        label={t('instruction.sg_genre')} 
-                                        text={`Context: ${getGenreEnglishName(genre)}${genre2 !== 'general' ? ` + ${getGenreEnglishName(genre2)}` : ''}`} 
-                                        translatedText={t('instruction.desc.sg_genre', { genre: `${t(`genre.${genre}`)} ${genre2 !== 'general' ? `+ ${t(`genre.${genre2}`)}` : ''}` })} 
-                                        isEnabled={!scenelessMode && (genre !== 'general' || genre2 !== 'general')} 
+                                        label={t('instruction.sg_genre')}
+                                        text={`Context: ${getGenreEnglishName(genre)}${genre2 !== 'general' ? ` + ${getGenreEnglishName(genre2)}` : ''}`}
+                                        translatedText={t('instruction.desc.sg_genre', { genre: `${t(`genre.${genre}`)} ${genre2 !== 'general' ? `+ ${t(`genre.${genre2}`)}` : ''}` })}
+                                        isEnabled={!scenelessMode && (genre !== 'general' || genre2 !== 'general')}
                                         onToggle={() => {
                                             if (genre !== 'general' || genre2 !== 'general') {
                                                 onUpdateValue({ genre: 'general', genre2: 'general' });
@@ -759,7 +740,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                                 onUpdateValue({ genre: 'comedy' });
                                             }
                                         }}
-                                        color='cyan' 
+                                        color='cyan'
                                         isHighlighted={highlightedId === 'sg_genre'}
                                     />
                                 )}
@@ -767,43 +748,43 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                             {/* 4. OUTPUT FORMAT & CONSTRAINTS */}
                             <div className="space-y-1 mb-3">
-                                 <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.sg_stack.constraints')}</h6>
-                                
-                                 {/* Simple Actions */}
-                                 {shouldShow(t('instruction.sg_simple_actions'), t('instruction.sg_simple_actions')) && (
-                                     <InstructionBrick 
+                                <h6 className="text-[9px] font-bold text-gray-500 uppercase px-1 border-b border-gray-700/50 pb-0.5">{t('node.content.sg_stack.constraints')}</h6>
+
+                                {/* Simple Actions */}
+                                {shouldShow(t('instruction.sg_simple_actions'), t('instruction.sg_simple_actions')) && (
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_simple_actions'] = el; }}
                                         id="sg_simple_actions"
                                         index={simpleActions ? ++stepCount : undefined}
-                                        label={t('instruction.sg_simple_actions')} 
-                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.SIMPLE_ACTIONS.text} 
-                                        translatedText={t('instruction.desc.sg_simple_actions')} 
-                                        isEnabled={simpleActions} 
+                                        label={t('instruction.sg_simple_actions')}
+                                        text={SCRIPT_GENERATOR_INSTRUCTIONS.SIMPLE_ACTIONS.text}
+                                        translatedText={t('instruction.desc.sg_simple_actions')}
+                                        isEnabled={simpleActions}
                                         onToggle={() => onUpdateValue({ simpleActions: !simpleActions })}
                                         color='emerald'
-                                        isCritical 
+                                        isCritical
                                         isHighlighted={highlightedId === 'sg_simple_actions'}
                                     />
-                                 )}
+                                )}
 
-                                 {/* No Characters */}
-                                 {shouldShow(t('instruction.sg_no_chars'), t('instruction.sg_no_chars')) && (
-                                     <InstructionBrick 
+                                {/* No Characters */}
+                                {shouldShow(t('instruction.sg_no_chars'), t('instruction.sg_no_chars')) && (
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_no_chars'] = el; }}
                                         id="sg_no_chars"
                                         index={noCharacters ? ++stepCount : undefined}
-                                        label={t('instruction.sg_no_chars')} 
-                                        text="Focus on events/documentary style." 
-                                        translatedText={t('instruction.desc.sg_no_chars')} 
-                                        isEnabled={noCharacters} 
+                                        label={t('instruction.sg_no_chars')}
+                                        text="Focus on events/documentary style."
+                                        translatedText={t('instruction.desc.sg_no_chars')}
+                                        isEnabled={noCharacters}
                                         onToggle={() => onUpdateValue({ noCharacters: !noCharacters })}
-                                        color='emerald' 
+                                        color='emerald'
                                         isHighlighted={highlightedId === 'sg_no_chars'}
                                     />
-                                 )}
+                                )}
 
-                                 {/* Use Existing Characters Toggle */}
-                                 {!noCharacters && shouldShow(t('node.content.useExistingCharacters'), t('node.content.useExistingCharacters')) && (
+                                {/* Use Existing Characters Toggle */}
+                                {!noCharacters && shouldShow(t('node.content.useExistingCharacters'), t('node.content.useExistingCharacters')) && (
                                     <InstructionBrick
                                         ref={el => { brickRefs.current['use_existing'] = el; }}
                                         id="use_existing"
@@ -820,90 +801,90 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                         color='cyan'
                                         isHighlighted={highlightedId === 'use_existing'}
                                     />
-                                 )}
+                                )}
 
-                                 {/* Use Existing Chars Rules (Visible if !noCharacters) */}
+                                {/* Use Existing Chars Rules (Visible if !noCharacters) */}
                                 {!noCharacters && (
                                     <>
                                         {shouldShow(t(`instruction.${CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.id}`), t(`instruction.${CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.id}`)) && (
-                                            <InstructionBrick 
+                                            <InstructionBrick
                                                 ref={el => { brickRefs.current['no_duplicates'] = el; }}
                                                 id="no_duplicates"
-                                                index={useExistingCharacters ? ++stepCount : undefined} 
-                                                label={t(`instruction.${CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.id}`)} 
-                                                text={CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.text} 
-                                                translatedText={t(`instruction.desc.${CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.id}`)} 
-                                                isEnabled={useExistingCharacters} 
-                                                isMandatory={false} 
-                                                color='emerald' 
+                                                index={useExistingCharacters ? ++stepCount : undefined}
+                                                label={t(`instruction.${CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.id}`)}
+                                                text={CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.text}
+                                                translatedText={t(`instruction.desc.${CHAR_GEN_INSTRUCTIONS.NO_DUPLICATES.id}`)}
+                                                isEnabled={useExistingCharacters}
+                                                isMandatory={false}
+                                                color='emerald'
                                                 isHighlighted={highlightedId === 'no_duplicates'}
                                             />
                                         )}
-                                        
+
                                         {/* SECONDARY/KEY ITEMS REMOVED FROM HERE */}
                                     </>
                                 )}
-                                
+
                                 {/* Narrator */}
                                 {shouldShow(t('node.content.narrator'), t('node.content.narrator')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_narrator'] = el; }}
                                         id="sg_narrator"
                                         index={narratorEnabled ? ++stepCount : ++stepCount}
-                                        label={t('node.content.narrator')} 
-                                        text={narratorEnabled ? `Include Narrator voiceover text. Style: ${narratorMode}.` : "Do NOT include narrator text."} 
-                                        translatedText={narratorEnabled ? "Включить текст рассказчика." : "НЕ включать текст рассказчика."} 
-                                        isEnabled={narratorEnabled} 
+                                        label={t('node.content.narrator')}
+                                        text={narratorEnabled ? `Include Narrator voiceover text. Style: ${narratorMode}.` : "Do NOT include narrator text."}
+                                        translatedText={narratorEnabled ? "Включить текст рассказчика." : "НЕ включать текст рассказчика."}
+                                        isEnabled={narratorEnabled}
                                         onToggle={() => onUpdateValue({ narratorEnabled: !narratorEnabled })}
-                                        color='cyan' 
+                                        color='cyan'
                                         isHighlighted={highlightedId === 'sg_narrator'}
                                     />
                                 )}
 
                                 {/* Scene Count */}
                                 {shouldShow(t('node.content.numberOfScenes'), t('node.content.numberOfScenes')) && (
-                                     <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_scene_count'] = el; }}
                                         id="sg_scene_count"
                                         index={numberOfScenes ? ++stepCount : undefined}
-                                        label={t('node.content.numberOfScenes')} 
-                                        text={numberOfScenes ? `Exactly ${numberOfScenes} scenes.` : "Auto-determine scene count."} 
-                                        translatedText={numberOfScenes ? `${t('node.content.numberOfScenes')}: ${numberOfScenes}` : t('node.content.numberOfScenes.auto')} 
-                                        isEnabled={numberOfScenes !== null} 
+                                        label={t('node.content.numberOfScenes')}
+                                        text={numberOfScenes ? `Exactly ${numberOfScenes} scenes.` : "Auto-determine scene count."}
+                                        translatedText={numberOfScenes ? `${t('node.content.numberOfScenes')}: ${numberOfScenes}` : t('node.content.numberOfScenes.auto')}
+                                        isEnabled={numberOfScenes !== null}
                                         onToggle={() => onUpdateValue({ numberOfScenes: numberOfScenes ? null : 5 })}
-                                        color='cyan' 
+                                        color='cyan'
                                         isHighlighted={highlightedId === 'sg_scene_count'}
                                     />
                                 )}
-                                
+
                                 {/* Detailed Plot */}
                                 {shouldShow(t('instruction.sg_detailed_plot'), t('instruction.sg_detailed_plot')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_detailed_plot'] = el; }}
                                         id="sg_detailed_plot"
                                         index={!scenelessMode && isDetailedPlot ? ++stepCount : undefined}
-                                        label={t('instruction.sg_detailed_plot')} 
-                                        text="Plot Detail: Provide highly detailed descriptions of actions and plot." 
-                                        translatedText={t('instruction.desc.sg_detailed_plot')} 
-                                        isEnabled={!scenelessMode && isDetailedPlot} 
+                                        label={t('instruction.sg_detailed_plot')}
+                                        text="Plot Detail: Provide highly detailed descriptions of actions and plot."
+                                        translatedText={t('instruction.desc.sg_detailed_plot')}
+                                        isEnabled={!scenelessMode && isDetailedPlot}
                                         onToggle={() => onUpdateValue({ isDetailedPlot: !isDetailedPlot })}
-                                        color='emerald' 
+                                        color='emerald'
                                         isHighlighted={highlightedId === 'sg_detailed_plot'}
                                     />
                                 )}
 
                                 {/* Subscribe Scene */}
                                 {shouldShow(t('instruction.sg_subscribe'), t('instruction.sg_subscribe')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current['sg_subscribe'] = el; }}
                                         id="sg_subscribe"
                                         index={!scenelessMode && includeSubscribeScene ? ++stepCount : undefined}
-                                        label={t('instruction.sg_subscribe')} 
-                                        text="Include a scene asking audience to Subscribe/Like." 
-                                        translatedText={t('instruction.desc.sg_subscribe')} 
-                                        isEnabled={!scenelessMode && includeSubscribeScene} 
+                                        label={t('instruction.sg_subscribe')}
+                                        text="Include a scene asking audience to Subscribe/Like."
+                                        translatedText={t('instruction.desc.sg_subscribe')}
+                                        isEnabled={!scenelessMode && includeSubscribeScene}
                                         onToggle={() => onUpdateValue({ includeSubscribeScene: !includeSubscribeScene })}
-                                        color='emerald' 
+                                        color='emerald'
                                         isHighlighted={highlightedId === 'sg_subscribe'}
                                     />
                                 )}
@@ -911,22 +892,39 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                             {/* --- BOTTOM: ENTITY GENERATION STACK --- */}
                             <h5 className="text-[10px] text-gray-500 uppercase font-bold mb-1 pt-2 border-t border-gray-700">{t('node.content.entityGenerationStack')}</h5>
-                            
+
                             <div className="space-y-1 mb-3">
-                                <InstructionBrick 
-                                    label="Entity Mode" 
+                                <InstructionBrick
+                                    label="Entity Mode"
                                     text="Focus: Generating Entities based on the story concept."
                                     translatedText="Фокус: Генерация сущностей на основе концепции истории."
                                     isMandatory color='purple'
                                 />
 
+                                {/* Smart Concept Toggle Brick (Moved) */}
+                                {shouldShow(CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.text, t(`instruction.${CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}`)) && (
+                                    <InstructionBrick
+                                        key={CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}
+                                        ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id] = el; }}
+                                        id={CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}
+                                        index={smartConceptEnabled ? ++stepCount : undefined}
+                                        label={t(`instruction.${CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}`)}
+                                        text={CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.text}
+                                        translatedText={t(`instruction.desc.${CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}`)}
+                                        isEnabled={smartConceptEnabled}
+                                        onToggle={() => onUpdateValue({ smartConceptEnabled: !smartConceptEnabled })}
+                                        color='gray'
+                                        isHighlighted={highlightedId === CHAR_GEN_INSTRUCTIONS.SMART_CONCEPT.id}
+                                    />
+                                )}
+
                                 {shouldShow(t('instruction.create_main_chars'), t('instruction.create_main_chars')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.id] = el; }}
                                         id={CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.id}
-                                        label={t('instruction.create_main_chars')} 
-                                        text={CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.text} 
-                                        translatedText={t('instruction.desc.create_main_chars')} 
+                                        label={t('instruction.create_main_chars')}
+                                        text={CHAR_GEN_INSTRUCTIONS.MAIN_CHAR_LOGIC.text}
+                                        translatedText={t('instruction.desc.create_main_chars')}
                                         isEnabled={generateMainChars} // Use prop
                                         onToggle={onToggleGenerateMainChars}
                                         color='emerald'
@@ -935,12 +933,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 )}
 
                                 {shouldShow(t('instruction.create_secondary_chars'), t('instruction.create_secondary_chars')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.id] = el; }}
                                         id={CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.id}
-                                        label={t('instruction.create_secondary_chars')} 
-                                        text={CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.text} 
-                                        translatedText={t('instruction.desc.create_secondary_chars')} 
+                                        label={t('instruction.create_secondary_chars')}
+                                        text={CHAR_GEN_INSTRUCTIONS.SECONDARY_CHARS.text}
+                                        translatedText={t('instruction.desc.create_secondary_chars')}
                                         isEnabled={createSecondaryChars} // Use prop
                                         onToggle={onToggleCreateSecondaryChars}
                                         color='emerald'
@@ -949,15 +947,15 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                 )}
 
                                 {shouldShow(t('instruction.create_key_items'), t('instruction.create_key_items')) && (
-                                    <InstructionBrick 
+                                    <InstructionBrick
                                         ref={el => { brickRefs.current[CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.id] = el; }}
                                         id={CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.id}
-                                        label={t('instruction.create_key_items')} 
-                                        text={CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.text} 
-                                        translatedText={t('instruction.desc.create_key_items')} 
+                                        label={t('instruction.create_key_items')}
+                                        text={CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.text}
+                                        translatedText={t('instruction.desc.create_key_items')}
                                         isEnabled={createKeyItems}
                                         onToggle={onToggleCreateKeyItems}
-                                        color='cyan' 
+                                        color='cyan'
                                         isHighlighted={targetScrollId === CHAR_GEN_INSTRUCTIONS.KEY_ITEMS_LOGIC.id}
                                     />
                                 )}
