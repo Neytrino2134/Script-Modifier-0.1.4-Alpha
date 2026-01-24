@@ -1,7 +1,7 @@
 
 export const app = {
     // NOTE TO SELF: NEVER RENAME THIS PROJECT IN ENGLISH. LOCALIZED UI TITLE IS OK.
-    'app.title': 'Модификатор сценариев',
+    'app.title': 'Модификатор промтов',
     'app.description': 'Визуально создавайте, дорабатывайте и генерируйте сценарии и промпты с помощью Gemini API.',
     'app.slogan': 'Соедините идеи, чтобы создать шедевр',
     'app.subtitle': 'Визуализируйте свои сценарии',

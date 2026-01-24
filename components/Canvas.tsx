@@ -35,7 +35,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         handleCanvasTouchEnd,
         isDraggingOverCanvas,
         openContextMenu,
-        // Entities
         connections,
         nodes,
         groups,
@@ -48,7 +47,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         lineStyle,
         hoveredGroupIdForDrop,
         draggingInfo,
-        // Callbacks from context
         getConnectionPoints,
         removeConnectionById,
         handleSplitConnection,
@@ -60,7 +58,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         handleSaveGroupToDisk,
         handleCopyGroup,
         handleDuplicateGroup,
-        // Node Callbacks
         handleNodeMouseDown,
         handleNodeTouchStart,
         handleNodeResizeMouseDown,
@@ -105,6 +102,7 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         isModifyingScriptPrompts,
         handleApplyAliases,
         handleDetachCharacter,
+        // Fixed: removed redundant aliasing that caused re-declaration errors
         handleStartConnection,
         handleStartConnectionTouchStart,
         handleNodeClick,
@@ -153,7 +151,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         isImprovingScriptConcept,
         t,
         pointerPosition,
-        // Image Handling Props
         setFullSizeImage,
         getFullSizeImage,
         setImageViewer,
@@ -162,13 +159,11 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         onSaveCharacterCard,
         onLoadCharacterCard,
         onSaveCharacterToCatalog,
-        handleDownloadChat // Passed here
+        handleDownloadChat
     } = context;
 
-    // Apply Virtualization
     const { visibleNodes, visibleConnections } = useVirtualization(nodes, connections, viewTransform);
 
-    // Calculate set of grouped node IDs for O(1) lookup during render
     const groupedNodeIds = useMemo(() => {
         const ids = new Set<string>();
         groups.forEach(g => g.nodeIds.forEach(id => ids.add(id)));
@@ -176,10 +171,10 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
     }, [groups]);
 
     const connectingLineColor = React.useMemo(() => {
-        if (!connectingInfo) return '#6b7280'; // gray-500
-        if (connectingInfo.fromType === 'text') return '#34d399'; // emerald-400
-        if (connectingInfo.fromType === 'image') return '#22d3ee'; // cyan-400
-        return '#6b7280'; // gray-500
+        if (!connectingInfo) return '#6b7280';
+        if (connectingInfo.fromType === 'text') return '#34d399';
+        if (connectingInfo.fromType === 'image') return '#22d3ee';
+        return '#6b7280';
     }, [connectingInfo]);
 
     const handleContainerTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -217,16 +212,12 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         handleCanvasTouchEnd(e);
     };
 
-    // Optimization: avoid passing full value string for large data nodes (like images)
-    // This prevents massive string allocation/concatenation on every render frame during drag.
-    // We use a signature based on length and a prefix for large data.
     const getInputDataForNode = (nodeId: string) => {
         const incoming = connections.filter(c => c.toNodeId === nodeId);
         if (incoming.length === 0) return '';
         return incoming.map(c => {
             const fromNode = nodes.find(n => n.id === c.fromNodeId);
             if (!fromNode) return '';
-            // If value is large (likely containing images), create a lightweight signature
             if (fromNode.value.length > 2000) {
                 return `${c.fromHandleId}:LEN_${fromNode.value.length}_${fromNode.value.substring(0, 50)}`;
             }
@@ -241,31 +232,22 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
-
         const onWheelNative = (e: WheelEvent) => {
             const target = e.target as HTMLElement;
-
-            // Проверяем, находится ли курсор над нодой или внутри интерактивных элементов
-            // Если да, то не применяем масштабирование холста
-            if (
-                target.closest('.absolute.flex.flex-col') || // Нода (основной контейнер)
-                target.closest('textarea') ||
-                target.closest('input') ||
-                target.closest('.no-wheel') ||
-                target.closest('.custom-scrollbar') || // Элементы с прокруткой
-                target.closest('button') ||
-                target.closest('select')
-            ) {
-                return; // Позволяем стандартное поведение прокрутки
+            if (target.closest('.absolute.flex.flex-col') || target.closest('textarea') || target.closest('input') || target.closest('.no-wheel') || target.closest('.custom-scrollbar') || target.closest('button') || target.closest('select')) {
+                return;
             }
-
-            // Если курсор на пустом пространстве холста, применяем масштабирование
             handleWheelRef.current(e as unknown as React.WheelEvent<HTMLDivElement>);
         };
-
         container.addEventListener('wheel', onWheelNative, { passive: false });
         return () => container.removeEventListener('wheel', onWheelNative);
     }, []);
+
+    // Округление координат для предотвращения размытия в Chrome/Electron
+    const roundedTranslate = useMemo(() => ({
+        x: Math.round(viewTransform.translate.x),
+        y: Math.round(viewTransform.translate.y)
+    }), [viewTransform.translate]);
 
     return (
         <div
@@ -289,7 +271,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
                 overflow: 'hidden'
             }}
         >
-            {/* Background Grid Pattern (Static Background) */}
             <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -300,8 +281,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
 
             {children}
 
-            {/* Transform Layer: Moves everything together */}
-            {/* Added pointer-events-none so panning clicks pass through to app-container */}
             <div
                 id="canvas-transform-layer"
                 className="pointer-events-none"
@@ -311,22 +290,21 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
                     left: 0,
                     width: '100%',
                     height: '100%',
-                    transform: `translate3d(${viewTransform.translate.x}px, ${viewTransform.translate.y}px, 0) scale(${viewTransform.scale})`,
+                    // Округляем translate, но не scale. Добавляем preserve-3d для четкости.
+                    transform: `translate3d(${roundedTranslate.x}px, ${roundedTranslate.y}px, 0) scale(${viewTransform.scale})`,
                     transformOrigin: '0 0',
-                    // REMOVED will-change: transform to prevent blurry text at >100% zoom
+                    transformStyle: 'preserve-3d',
+                    backfaceVisibility: 'hidden'
                 }}
             >
-                {/* Origin Crosshair - Neat little plus */}
                 <div className="absolute pointer-events-none" style={{ left: 0, top: 0, zIndex: 0 }}>
                     <div className="absolute bg-emerald-500/50" style={{ width: '20px', height: '2px', left: '-10px', top: '-1px' }} />
                     <div className="absolute bg-emerald-500/50" style={{ width: '2px', height: '20px', left: '-1px', top: '-10px' }} />
                     <div className="absolute text-[10px] text-emerald-500/50 font-mono select-none" style={{ left: '4px', top: '4px' }}>0,0</div>
                 </div>
 
-                {/* Selection Rect */}
                 {selectionRect && <div className="absolute border-2 border-dashed border-emerald-400 bg-emerald-400/20 pointer-events-none" style={{ left: selectionRect.x, top: selectionRect.y, width: selectionRect.width, height: selectionRect.height, zIndex: 100 }} />}
 
-                {/* Group Creation Button */}
                 {groupButtonPosition && (
                     <button
                         onClick={(e) => { e.stopPropagation(); context.handleGroupSelection(); }}
@@ -340,7 +318,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
                     </button>
                 )}
 
-                {/* Connections SVG - pointer events handled by paths */}
                 <svg className="absolute top-0 left-0 w-full h-full overflow-visible pointer-events-none" style={{ zIndex: 9 }}>
                     <defs>
                         <filter id="glow-connection" x="-20%" y="-20%" width="140%" height="140%">
@@ -368,7 +345,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
                     )}
                 </svg>
 
-                {/* Groups */}
                 {groups.map(group => {
                     const isBeingDragged = (draggingInfo?.type === 'group' && draggingInfo.id === group.id) || (draggingInfo?.type === 'node' && group.nodeIds.some((id: string) => draggingInfo.offsets.has(id)));
                     return (
@@ -389,7 +365,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
                     )
                 })}
 
-                {/* Nodes */}
                 {visibleNodes.map(node => (
                     <NodeView
                         key={node.id}

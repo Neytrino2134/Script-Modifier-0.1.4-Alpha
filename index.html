@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <!-- NOTE TO SELF: NEVER RENAME THIS APPLICATION. THE NAME MUST REMAIN "Script Modifier" -->
     <title>Script Modifier</title>
     <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -13,13 +12,18 @@
     --cursor-zoom-in: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3e%3cpath d='M21 21 L28 28' stroke='%23374151' stroke-width='2.5' stroke-linecap='round'/%3e%3ccircle cx='14' cy='14' r='9' fill='%23111827' stroke='%23374151' stroke-width='2'/%3e%3cpath d='M14 10 V18 M10 14 H18' stroke='%23374151' stroke-width='2' stroke-linecap='round'/%3e%3c/svg%3e") 14 14, zoom-in;
   }
 
-  /* Global Text Selection Styling (Emerald Green) */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+    image-rendering: -webkit-optimize-contrast;
+  }
+
   ::selection {
-    background-color: #10b981; /* emerald-500 */
+    background-color: #10b981;
     color: white;
   }
 
-  /* Disable browser handling of gestures to allow canvas pinch-zoom */
   body, #root {
     touch-action: none;
     overscroll-behavior: none;
@@ -29,7 +33,6 @@
     cursor: var(--cursor-move);
   }
 
-  /* Hide default number input spinners */
   input[type=number]::-webkit-inner-spin-button, 
   input[type=number]::-webkit-outer-spin-button { 
     -webkit-appearance: none; 
@@ -42,7 +45,7 @@
   @keyframes new-node-border-fade {
     from {
       opacity: 1;
-      border-color: #34d399; /* emerald-400 */
+      border-color: #34d399;
     }
     to {
       opacity: 0;
@@ -55,13 +58,13 @@
     position: absolute;
     top: -2px; left: -2px; right: -2px; bottom: -2px;
     border: 2px solid transparent;
-    border-radius: 0.5rem; /* rounded-lg */
+    border-radius: 0.5rem;
     animation: new-node-border-fade 1.5s ease-out;
     pointer-events: none;
   }
   
   .node-newly-added.rounded-lg::after {
-    border-radius: 0.5rem; /* Ensure reroute dots also get the right radius */
+    border-radius: 0.5rem;
   }
 
   @keyframes creation-line-fade {
@@ -74,7 +77,6 @@
     stroke-dasharray: 5 5;
   }
 
-  /* Connection Flow Animation */
   @keyframes flow-move {
     from {
       stroke-dashoffset: 80;
@@ -93,7 +95,6 @@
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
   }
 
-  /* Custom Scrollbar for Script Generator */
   .custom-scrollbar::-webkit-scrollbar {
     width: 14px;
     height: 14px;
@@ -108,14 +109,14 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(75, 85, 99, 0.5); /* gray-600 with opacity */
+    background-color: rgba(75, 85, 99, 0.5);
     border-radius: 7px;
     border: 3px solid transparent;
     background-clip: content-box;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(52, 211, 153, 0.5); /* emerald-400 with opacity */
+    background-color: rgba(52, 211, 153, 0.5);
   }
 
   .custom-scrollbar::-webkit-scrollbar-button {
@@ -125,15 +126,22 @@
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
-    /* scrollbar-gutter: stable;  <-- REMOVED TO FIX SPACE ISSUE */
   }
 
-  /* Custom Textarea Resizer */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   textarea::-webkit-resizer {
     -webkit-appearance: none;
     appearance: none;
     background-color: transparent;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><path d="M2 10 L10 2 M5 10 L10 5" stroke="%236b7280" stroke-width="2" stroke-linecap="round"/></svg>'); /* gray-500 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><path d="M2 10 L10 2 M5 10 L10 5" stroke="%236b7280" stroke-width="2" stroke-linecap="round"/></svg>');
     background-repeat: no-repeat;
     background-position: bottom right;
     border-width: 0;
@@ -144,19 +152,18 @@
 
   textarea:hover::-webkit-resizer,
   textarea:focus::-webkit-resizer {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><path d="M2 10 L10 2 M5 10 L10 5" stroke="%2334d399" stroke-width="2" stroke-linecap="round"/></svg>'); /* emerald-400 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><path d="M2 10 L10 2 M5 10 L10 5" stroke="%2334d399" stroke-width="2" stroke-linecap="round"/></svg>');
   }
 
-  /* Custom Select Dropdown Styling */
   select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-color: #374151; /* gray-700 */
-    border: 1px solid #4b5563; /* gray-600 */
-    border-radius: 0.375rem; /* rounded-md */
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 0.375rem;
     padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-    color: #d1d5db; /* gray-300 */
+    color: #d1d5db;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.5rem center;
     background-repeat: no-repeat;
@@ -165,38 +172,25 @@
   }
 
   select:hover {
-    border-color: #6b7280; /* gray-500 */
+    border-color: #6b7280;
   }
 
   select:focus {
     outline: none;
-    border-color: #34d399; /* emerald-400 */
+    border-color: #34d399;
     box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.4);
   }
 
   select option {
-    background-color: #374151; /* gray-700 */
-    color: #d1d5db; /* gray-300 */
+    background-color: #374151;
+    color: #d1d5db;
   }
 
-  /* Toast Animations */
   @keyframes toast-centered-in-out {
-    0% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    10% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    90% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
+    0% { opacity: 0; transform: translateY(10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
   }
 
   .toast-animate-centered {
@@ -208,22 +202,10 @@
   }
   
   @keyframes toast-positioned-in-out {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, 0);
-    }
-    10% {
-      opacity: 1;
-      transform: translate(-50%, -20px);
-    }
-    90% {
-      opacity: 1;
-      transform: translate(-50%, -20px);
-    }
-    100% {
-      opacity: 0;
-      transform: translate(-50%, -40px);
-    }
+    0% { opacity: 0; transform: translate(-50%, 0); }
+    10% { opacity: 1; transform: translate(-50%, -20px); }
+    90% { opacity: 1; transform: translate(-50%, -20px); }
+    100% { opacity: 0; transform: translate(-50%, -40px); }
   }
 
   .toast-animate-positioned {
@@ -234,55 +216,33 @@
     animation-play-state: paused;
   }
 
-  /* Fade In Up Animation for Text */
   @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .animate-fade-in-up {
     animation: fade-in-up 0.4s ease-out forwards;
   }
 
-  /* Elegant Slide Up Animation for Welcome Screen (Retained for text items inside if needed, but main window uses cross-fade) */
   @keyframes elegant-slide-up {
-    0% {
-      opacity: 0;
-      transform: translateY(15px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   .animate-elegant-slide {
     animation: elegant-slide-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
   
-  /* Slide Down Animation for Dropdown */
   @keyframes slide-down {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   .animate-slide-down {
     animation: slide-down 0.2s ease-out forwards;
   }
 
-  /* Welcome Ring Animation */
   @keyframes rotate-ring {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -291,14 +251,11 @@
   .welcome-ring {
     position: absolute;
     inset: -3px; 
-    border-radius: 27px; /* 24px (3xl) + 3px padding */
+    border-radius: 27px;
     z-index: 20; 
     pointer-events: none; 
     padding: 3px; 
-    
-    -webkit-mask: 
-       linear-gradient(#fff 0 0) content-box, 
-       linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
   }
@@ -310,22 +267,15 @@
     background: conic-gradient(
       from 0deg,
       transparent 0deg,
-      
-      /* Runner 1 */
-      rgba(52, 211, 153, 0) 10deg,    /* Tail fade-in */
-      #059669 70deg,                  /* Emerald-600 */
-      #34d399 110deg,                 /* Emerald-400 (Head) */
-      transparent 150deg,             /* Head fade-out */
-      
-      /* Gap */
+      rgba(52, 211, 153, 0) 10deg,
+      #059669 70deg,
+      #34d399 110deg,
+      transparent 150deg,
       transparent 180deg,
-      
-      /* Runner 2 */
-      rgba(52, 211, 153, 0) 190deg,   /* Tail fade-in */
-      #059669 250deg,                 /* Emerald-600 */
-      #34d399 290deg,                 /* Emerald-400 (Head) */
-      transparent 330deg,             /* Head fade-out */
-      
+      rgba(52, 211, 153, 0) 190deg,
+      #059669 250deg,
+      #34d399 290deg,
+      transparent 330deg,
       transparent 360deg
     );
     animation: rotate-ring var(--ring-speed, 15s) linear infinite; 
@@ -341,7 +291,10 @@
     "react-dom": "https://esm.sh/react-dom@^19.2.3",
     "vite": "https://esm.sh/vite@^7.3.0",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "path": "https://esm.sh/path@^0.12.7"
+    "path": "https://esm.sh/path@^0.12.7",
+    "url": "https://esm.sh/url@^0.11.4",
+    "electron": "https://esm.sh/electron@^40.0.0",
+    "electron-is-dev": "https://esm.sh/electron-is-dev@^3.0.1"
   }
 }
 </script>

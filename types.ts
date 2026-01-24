@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export enum NodeType {
@@ -10,6 +11,7 @@ export enum NodeType {
   IMAGE_PREVIEW = 'IMAGE_PREVIEW',
   CHARACTER_CARD = 'CHARACTER_CARD',
   GEMINI_CHAT = 'GEMINI_CHAT',
+  PROMPT_MODIFIER = 'PROMPT_MODIFIER',
   TRANSLATOR = 'TRANSLATOR',
   SCRIPT_GENERATOR = 'SCRIPT_GENERATOR',
   SCRIPT_ANALYZER = 'SCRIPT_ANALYZER',
@@ -99,6 +101,7 @@ export interface CatalogItem {
   nodes?: Node[]; // For GROUPS
   connections?: Connection[]; // For GROUPS
   data?: any; // For other types (Character arrays, Script scenes, etc.)
+  driveFileId?: string; // ID файла в Google Drive для синхронизации
 }
 
 export interface LibraryItem {
@@ -146,6 +149,7 @@ export interface NodeContentProps {
   isModifyingScriptPart: string | null;
   handleCursor: string;
   onOutputHandleMouseDown: (e: React.MouseEvent<HTMLDivElement>, nodeId: string, handleId?: string, isSubNode?: boolean, subNodePosition?: Point) => void;
+  onOutputHandleTouchStart: (e: React.TouchEvent<HTMLDivElement>, nodeId: string, handleId?: string, isSubNode?: boolean, subNodePosition?: Point) => void;
   onAnalyzeScript: (nodeId: string) => void;
   isAnalyzingScript: string | null;
   onGenerateCharacters: (nodeId: string) => void;
@@ -172,6 +176,7 @@ export interface NodeContentProps {
   isCombiningStoryIdea: boolean;
   onGenerateNarratorText: (nodeId: string) => void;
   isGeneratingNarratorText: string | null;
+  // Added onTranscribeAudio and isTranscribingAudio to support AudioTranscriberNode
   onTranscribeAudio: (nodeId: string) => void;
   isTranscribingAudio: boolean;
   onGenerateYouTubeTitles: (nodeId: string) => void;

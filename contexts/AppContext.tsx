@@ -21,8 +21,9 @@ import {
   useDerivedMemo,
   useAutoSave,
   loadAutoSavedState,
+  useGoogleDrive
 } from '../hooks';
-import { getOutputHandleType, getInputHandleType } from '../utils/nodeUtils';
+import { getOutputHandleType } from '../utils/nodeUtils';
 import type { Toast } from '../components/ui/ToastContainer';
 import { INITIAL_CANVAS_STATE } from '../utils/initialCanvasState';
 
@@ -46,7 +47,6 @@ export interface AppContextType {
     lineStyle: LineStyle;
     setLineStyle: React.Dispatch<React.SetStateAction<LineStyle>>;
     
-    // UI State
     isQuickSearchOpen: boolean;
     isQuickAddOpen: boolean;
     quickAddPosition: Point;
@@ -64,10 +64,9 @@ export interface AppContextType {
     isDraggingOverCanvas: boolean;
     showDialog: boolean;
     
-    // Interaction State
     activeTool: Tool;
     effectiveTool: Tool;
-    connectingInfo: any; // Simplified for brevity
+    connectingInfo: any; 
     connectionTarget: any;
     hoveredNodeId: string | null;
     selectedNodeIds: string[];
@@ -81,13 +80,11 @@ export interface AppContextType {
     isAltDown: boolean;
     extractionTarget: string | null;
 
-    // Gemini State
     isExecutingChain: boolean;
     executingNodeId: string | null;
     error: string | null;
     stoppingNodes: Set<string>;
 
-    // Catalog & Library State
     currentCatalogItems: CatalogItem[];
     catalogPath: any[];
     currentLibraryItems: LibraryItem[];
@@ -96,12 +93,14 @@ export interface AppContextType {
     activeCategory: CatalogItemType | null;
     setActiveCategory: (category: CatalogItemType | null) => void;
 
-    // Refs
+    isSyncing: boolean;
+    handleSyncCloud: () => void;
+    handleUploadToCloud: (item: CatalogItem) => void;
+
     fileInputRef: React.RefObject<HTMLInputElement>;
     catalogFileInputRef: React.RefObject<HTMLInputElement>;
     libraryFileInputRef: React.RefObject<HTMLInputElement>;
 
-    // Handlers
     handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleCatalogFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleLibraryFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -121,7 +120,6 @@ export interface AppContextType {
     handleCanvasTouchMove: (e: React.TouchEvent<HTMLDivElement>) => void;
     handleCanvasTouchEnd: (e: React.TouchEvent<HTMLDivElement>) => void;
     
-    // Node Handlers
     handleNodeMouseDown: (e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>, nodeId: string) => void;
     handleNodeTouchStart: (e: React.TouchEvent<HTMLDivElement>, nodeId: string) => void;
     handleNodeResizeMouseDown: (e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>, nodeId: string) => void;
@@ -148,7 +146,6 @@ export interface AppContextType {
     handleToggleNodeOutputVisibility: (nodeId: string) => void;
     handleDownloadChat: (nodeId: string) => void;
 
-    // Group Handlers
     handleGroupMouseDown: (e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>, groupId: string) => void;
     handleGroupTouchStart: (e: React.TouchEvent<HTMLDivElement>, groupId: string) => void;
     handleGroupSelection: () => void;
@@ -159,11 +156,9 @@ export interface AppContextType {
     handleCopyGroup: (groupId: string) => void;
     handleDuplicateGroup: (groupId: string) => void;
     
-    // Connection Handlers
     removeConnectionById: (connectionId: string) => void;
     handleSplitConnection: (connectionId: string, e: React.MouseEvent) => void;
 
-    // Gemini Handlers
     getUpstreamTextValue: (nodeId: string, handleId: string | undefined) => string;
     handleEnhance: (nodeId: string) => Promise<void> | void;
     handleAnalyzePrompt: (nodeId: string) => Promise<void> | void;
@@ -225,7 +220,6 @@ export interface AppContextType {
     handleImproveScriptConcept: (nodeId: string, currentConcept: string) => void;
     isImprovingScriptConcept: string | null;
     
-    // UI Handlers
     handleCloseAddNodeMenus: () => void;
     setActiveTool: React.Dispatch<React.SetStateAction<Tool>>;
     onAddNode: (type: NodeType, position: Point, value?: string, title?: string) => string;
@@ -251,11 +245,9 @@ export interface AppContextType {
     declinePermission: () => void;
     translateGraph: () => void;
     
-    // State for connection quick add menu
     connectionMenu: { isOpen: boolean; position: Point; sourceNodeId: string; sourceHandleId?: string; fromType: 'text' | 'image' | null } | null;
     setConnectionMenu: React.Dispatch<React.SetStateAction<{ isOpen: boolean; position: Point; sourceNodeId: string; sourceHandleId?: string; fromType: 'text' | 'image' | null } | null>>;
 
-    // Catalog & Library Handlers
     navigateCatalogBack: () => void;
     navigateCatalogToFolder: (folderId: string | null) => void;
     createCatalogItem: (type: CatalogItemType) => void;
@@ -276,7 +268,6 @@ export interface AppContextType {
     triggerLoadLibraryFromFile: () => void;
     moveLibraryItem: (itemId: string, newParentId: string | null) => void;
 
-    // Props for NodeView
     handleValueChange: (nodeId: string, value: string) => void;
     connectedInputs: Map<string, Set<string | undefined>>;
     t: (key: string, options?: { [key: string]: string | number }) => string;
@@ -289,7 +280,6 @@ export interface AppContextType {
     setIsSettingsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     saveDataToCatalog: (nodeId: string, type: CatalogItemType, name: string) => void;
     
-    // Context Menu & Connection Menu
     handleSaveProject: () => void;
     handleLoadProject: (projectData: any) => void;
     closeContextMenu: () => void;
@@ -299,10 +289,8 @@ export interface AppContextType {
     isQuickAddPinned: boolean;
     toggleQuickAddPin: () => void;
     
-    // Auto-Save Loading
     handleLoadAutoSave: () => Promise<void>;
 
-    // Image Caching & Viewer
     setFullSizeImage: (nodeId: string, slotIndex: number, imageBase64: string) => void;
     getFullSizeImage: (nodeId: string, slotIndex: number) => string | null;
     setImageViewer: (data: { sources: {src: string, frameNumber: number; prompt?: string}[], initialIndex: number } | null) => void;
@@ -316,15 +304,11 @@ export interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
-const HEADER_HEIGHT = 40;
-const CONTENT_PADDING = 12;
-
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { t } = useLanguage();
     const [isSnapToGrid, setIsSnapToGrid] = useState(false);
     const [lineStyle, setLineStyle] = useState<LineStyle>('orthogonal');
     
-    // Context Menu Slots State
     const [contextMenuSlots, setContextMenuSlots] = useState<(NodeType | null)[]>(() => {
         try {
             const saved = localStorage.getItem('context-menu-slots');
@@ -333,8 +317,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         return Array(8).fill(null);
     });
 
-    // --- Image Cache & Viewer State ---
-    // Stores full resolution images in memory: Key = `${nodeId}-${slotIndex}`, Value = base64String
     const imageCache = useRef<Map<string, string>>(new Map());
     const [imageViewerState, setImageViewer] = useState<{ sources: {src: string, frameNumber: number; prompt?: string}[], initialIndex: number } | null>(null);
 
@@ -400,7 +382,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     
     const [tabs, setTabs] = useState<TabState[]>([createNewTab('Canvas 1', initialSavedState)]);
     const [activeTabIndex, setActiveTabIndex] = useState(0);
-    
     const loadedTabIdRef = useRef<string | null>(initialSavedState.id);
 
     const switchTab = (index: number) => {
@@ -416,8 +397,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const closeTab = (index: number) => {
         if (tabs.length <= 1) return;
-        const tabToClose = tabs[index];
-        const activeTab = tabs[activeTabIndex];
         let newIndex = activeTabIndex;
         if (index < activeTabIndex) {
             newIndex = activeTabIndex - 1;
@@ -432,10 +411,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setTabs(prev => prev.map((tab, i) => i === index ? { ...tab, name: newName } : tab));
     };
 
-    // Use INITIAL_CANVAS_STATE for initialization to avoid empty canvas flash
     const { nodes, setNodes, nodeIdCounter, handleValueChange, handleAddNode: addNodeFromHook, handleDeleteNode, handleCopyNodeValue, handlePasteNodeValue, handleToggleNodeCollapse: baseHandleToggleNodeCollapse, handleDuplicateNode: baseHandleDuplicateNode, handleDuplicateNodeEmpty, handleToggleNodeOutputVisibility } = useNodes(INITIAL_CANVAS_STATE.nodes, INITIAL_CANVAS_STATE.nodeIdCounter);
-    const handleDuplicateNode = baseHandleDuplicateNode;
-    
     const { connections, setConnections, addConnection, removeConnectionsByNodeId, removeConnectionById } = useConnections(INITIAL_CANVAS_STATE.connections);
     const { viewTransform, setViewTransform, isPanning, pointerPosition, clientPointerPosition, handleWheel, startPanning, pan, updatePointerPosition, stopPanning, setZoom, handleCanvasTouchStart, handleCanvasTouchMove, handleCanvasTouchEnd } = useCanvas(INITIAL_CANVAS_STATE.viewTransform);
     const { groups, setGroups, addGroup, removeGroup } = useGroups(INITIAL_CANVAS_STATE.groups);
@@ -509,66 +485,67 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [clientPointerPosition]);
 
     const { showDialog, requestPermission, declinePermission } = usePermissions('clipboard-read');
-    
     const { isQuickSearchOpen, isQuickAddOpen, quickAddPosition, openQuickSearchMenu, openQuickAddMenu, handleCloseAddNodeMenus, isCatalogOpen, handleToggleCatalog, handleCloseCatalog, isRadialMenuOpen, radialMenuPosition, openRadialMenu, isContextMenuOpen, contextMenuPosition, openContextMenu, closeContextMenu, connectionMenu, setConnectionMenu, isContextMenuPinned, toggleContextMenuPin, isQuickAddPinned, toggleQuickAddPin } = useUIState();
-    
     const geminiContext = useGemini(nodes, connections, setNodes);
     
-    const { currentCatalogItems, catalogPath, navigateCatalogBack, navigateCatalogToFolder, createCatalogItem, saveGroupToCatalog, saveGenericItemToCatalog, renameCatalogItem, deleteCatalogItem, saveCatalogItemToDisk, catalogFileInputRef, handleCatalogFileChange, triggerLoadFromFile, moveCatalogItem, catalogItems, activeCategory, setActiveCategory, importCatalog } = useCatalog(t);
-    const { libraryItems, currentLibraryItems, currentPath: libraryPath, navigateBack, navigateToFolder, createLibraryItem, updateLibraryItem, deleteLibraryItem, saveLibraryItemToDisk, libraryFileInputRef, handleLibraryFileChange, triggerLoadLibraryFromFile, moveLibraryItem, importLibrary } = usePromptLibrary(t);
+    const catalog = useCatalog('groups', t('catalog.tabs.groups'), t, 'groups');
+    const { 
+        currentItems: currentCatalogItems, catalogPath, navigateToFolder: navigateCatalogToFolder, createFolder: createCatalogFolder, saveGroupToCatalog, saveGenericItemToCatalog, renameItem: renameCatalogItem, deleteItem: deleteCatalogItem, importItemsData, persistItems: persistCatalogItems, catalogContext, catalogFileInputRef, handleCatalogFileChange, saveCatalogItemToDisk, triggerLoadFromFile, moveItem: moveCatalogItem 
+    } = catalog;
+    
+    const navigateCatalogBack = useCallback(() => {
+        if (catalogPath.length > 1) navigateCatalogToFolder(catalogPath[catalogPath.length - 2].id);
+    }, [catalogPath, navigateCatalogToFolder]);
+
+    const createCatalogItem = useCallback((type: CatalogItemType) => { if (type === CatalogItemType.FOLDER) createCatalogFolder(); }, [createCatalogFolder]);
+
+    const library = usePromptLibrary(t);
+    const { libraryItems, currentLibraryItems, currentPath: libraryPath, navigateBack, navigateToFolder, createLibraryItem, updateLibraryItem, deleteLibraryItem, saveLibraryItemToDisk, libraryFileInputRef, handleLibraryFileChange, triggerLoadLibraryFromFile, moveLibraryItem, importLibrary } = library;
+
     const [clearSelectionsSignal, setClearSelectionsSignal] = useState(0);
     const triggerClearSelections = useCallback(() => setClearSelectionsSignal(s => s + 1), []);
-    
     const [lastAddedNodeId, setLastAddedNodeId] = useState<string | null>(null);
     const [creationLine, setCreationLine] = useState<{ start: Point; end: Point; } | null>(null);
-    
     const saveDataToCatalogRef = useRef<((nodeId: string, type: CatalogItemType, name: string) => void) | null>(null);
 
-    const { renameInfo, setRenameInfo, promptEditInfo, setPromptEditInfo, confirmInfo, setConfirmInfo, isErrorCopied, handleCopyError, handleRenameGroup, handleRenameCatalogItem, handleRenameLibraryItem, confirmRename, confirmPromptEdit, handleDeleteCatalogItem, handleDeleteLibraryItem, handleClearCanvas, toasts, addToast: baseAddToast, removeToast } = useDialogsAndUI({ 
+    const dialogs = useDialogsAndUI({ 
         t, setGroups, renameCatalogItem, updateLibraryItem, libraryItems, deleteLibraryItem, setNodes, setConnections, nodeIdCounter, geminiContext, currentCatalogItems, deleteCatalogItem, 
         saveDataToCatalog: (nodeId: string, type: CatalogItemType, name: string) => saveDataToCatalogRef.current?.(nodeId, type, name)
     });
+    const { renameInfo, setRenameInfo, promptEditInfo, setPromptEditInfo, confirmInfo, setConfirmInfo, isErrorCopied, handleCopyError, handleRenameGroup, handleRenameCatalogItem, handleRenameLibraryItem, confirmRename, confirmPromptEdit, handleDeleteCatalogItem, handleDeleteLibraryItem, handleClearCanvas, toasts, addToast: baseAddToast, removeToast } = dialogs;
     
+    const handleRenameNode = useCallback((nodeId: string, currentTitle: string) => { setRenameInfo({ type: 'node', id: nodeId, currentTitle }); }, [setRenameInfo]);
+
     const addToast = useCallback((message: string, type: 'success' | 'info' | 'error' = 'info') => baseAddToast(message, type as 'success' | 'info'), [baseAddToast]);
+
+    const { isSyncing, handleSyncCatalogs, uploadCatalogItem } = useGoogleDrive({
+        groups: { items: catalog.items, importItemsData, persistItems: persistCatalogItems, catalogContext: 'groups' },
+        library: { items: [], importItemsData: () => {}, persistItems: () => {}, catalogContext: 'library' }, 
+        characters: { items: [], importItemsData: () => {}, persistItems: () => {}, catalogContext: 'characters' }
+    }, addToast, t);
 
     const translateGraph = useCallback(() => {
         setNodes(prev => prev.map(node => {
-            if (node.id === 'node-24-1763746608198') {
-                 return { ...node, title: t('app.title') };
-            }
-            return {
-                ...node,
-                title: t(`node.title.${node.type.toLowerCase()}` as any)
-            };
+            if (node.id === 'node-24-1763746608198') return { ...node, title: t('app.title') };
+            return { ...node, title: t(`node.title.${node.type.toLowerCase()}` as any) };
         }));
     }, [t, setNodes]);
     
-    // NEW: Handle loading auto-saved state
     const handleLoadAutoSave = useCallback(async () => {
         const savedState = await loadAutoSavedState();
         if (savedState && savedState.tabs.length > 0) {
             setTabs(savedState.tabs);
-            
-            // Validate index to prevent out of bounds
-            let targetIndex = savedState.activeTabIndex;
-            if (targetIndex >= savedState.tabs.length) targetIndex = 0;
-            
-            setActiveTabIndex(targetIndex);
-            
-            // Explicitly set the current nodes/connections to match the active tab to ensure immediate render update
-            const targetTab = savedState.tabs[targetIndex];
+            setActiveTabIndex(Math.min(savedState.activeTabIndex, savedState.tabs.length - 1));
+            const targetTab = savedState.tabs[Math.min(savedState.activeTabIndex, savedState.tabs.length - 1)];
             setNodes(targetTab.nodes);
             setConnections(targetTab.connections);
             setGroups(targetTab.groups);
             setViewTransform(targetTab.viewTransform);
             nodeIdCounter.current = targetTab.nodeIdCounter;
             loadedTabIdRef.current = targetTab.id;
-            
             baseAddToast(t('toast.projectLoaded'), 'success'); 
-        } else {
-             // If no save found, we are already at default state from initialization
         }
-    }, [t]);
+    }, [t, baseAddToast]);
 
     const handleResetToDefault = useCallback((silent: boolean = false) => {
         const doReset = () => {
@@ -578,387 +555,145 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
              setGroups(defaultState.groups || []);
              setViewTransform(defaultState.viewTransform);
              nodeIdCounter.current = defaultState.nodeIdCounter;
-             setTabs(prevTabs => prevTabs.map((tab, i) => {
-                 if (i === activeTabIndex) {
-                     return { ...tab, ...defaultState };
-                 }
-                 return tab;
-             }));
+             setTabs(prevTabs => prevTabs.map((tab, i) => i === activeTabIndex ? { ...tab, ...defaultState } : tab));
              setTimeout(translateGraph, 0); 
              if (!silent) baseAddToast(t('toast.resetComplete'), 'success');
         };
-        if (silent) {
-            doReset();
-        } else {
-            setConfirmInfo({
-                title: t('dialog.reset.title'),
-                message: t('dialog.reset.message'),
-                onConfirm: doReset
-            });
-        }
-    }, [t, setNodes, setConnections, setGroups, setViewTransform, nodeIdCounter, baseAddToast, translateGraph, activeTabIndex]);
+        if (silent) doReset(); else setConfirmInfo({ title: t('dialog.reset.title'), message: t('dialog.reset.message'), onConfirm: doReset });
+    }, [t, setNodes, setConnections, setGroups, setViewTransform, nodeIdCounter, baseAddToast, translateGraph, activeTabIndex, setConfirmInfo]);
 
     const clearCanvasData = useCallback(() => {
-        setNodes([]);
-        setConnections([]);
-        setGroups([]);
-        nodeIdCounter.current = 0;
-        setTabs(prevTabs => prevTabs.map((tab, i) => {
-             if (i === activeTabIndex) {
-                 return { ...tab, nodes: [], connections: [], groups: [], nodeIdCounter: 0 };
-             }
-             return tab;
-        }));
+        setNodes([]); setConnections([]); setGroups([]); nodeIdCounter.current = 0;
+        setTabs(prevTabs => prevTabs.map((tab, i) => i === activeTabIndex ? { ...tab, nodes: [], connections: [], groups: [], nodeIdCounter: 0 } : tab));
     }, [setNodes, setConnections, setGroups, activeTabIndex]);
     
-    // NEW: Completely clears all tabs and data for "Exit/Clear Project"
     const clearProject = useCallback(() => {
-        // Create a single completely empty tab
-        const emptyState = {
-            nodes: [],
-            connections: [],
-            groups: [],
-            viewTransform: { scale: 1, translate: { x: 0, y: 0 } },
-            nodeIdCounter: 1
-        };
-
+        const emptyState = { nodes: [], connections: [], groups: [], viewTransform: { scale: 1, translate: { x: 0, y: 0 } }, nodeIdCounter: 1 };
         const newTab = createNewTab('Canvas 1', emptyState);
-
-        // Reset local state variables
-        setNodes([]);
-        setConnections([]);
-        setGroups([]);
-        setViewTransform(emptyState.viewTransform);
-        nodeIdCounter.current = 1;
-
-        // Reset global tabs state to just this new empty tab
-        setTabs([newTab]);
-        setActiveTabIndex(0);
-        loadedTabIdRef.current = newTab.id;
-    }, [createNewTab]);
+        setNodes([]); setConnections([]); setGroups([]); setViewTransform(emptyState.viewTransform);
+        nodeIdCounter.current = 1; setTabs([newTab]); setActiveTabIndex(0); loadedTabIdRef.current = newTab.id;
+    }, [createNewTab, setNodes, setConnections, setGroups, setViewTransform]);
 
     const addConnectionWithLogic = useCallback((newConnection: Omit<Connection, 'id'>, fromNode: Node) => {
         const toNode = nodes.find(n => n.id === newConnection.toNodeId);
-        if (toNode && toNode.type === NodeType.REROUTE_DOT) {
-            const fromType = getOutputHandleType(fromNode, newConnection.fromHandleId);
-            handleValueChange(toNode.id, JSON.stringify({ type: fromType }));
-        }
         addConnection(newConnection);
         if (toNode && (toNode.type === NodeType.SPEECH_SYNTHESIZER || toNode.type === NodeType.DATA_READER)) {
             setTimeout(() => geminiContext.handleReadData(toNode.id), 100);
         }
-    }, [nodes, addConnection, handleValueChange, geminiContext]);
+    }, [nodes, addConnection, geminiContext]);
 
     const handleExtractNodeFromGroup = useCallback((nodeId: string) => { 
         setGroups(currentGroups => {
             const groupToUpdate = currentGroups.find(g => g.nodeIds.includes(nodeId));
             if (!groupToUpdate) return currentGroups;
             const updatedNodeIds = groupToUpdate.nodeIds.filter(id => id !== nodeId);
-            if (updatedNodeIds.length === 0) {
-                return currentGroups.filter(g => g.id !== groupToUpdate.id);
-            } else {
-                const memberNodes = nodes.filter(n => updatedNodeIds.includes(n.id));
-                const groupBounds = (g: Group, m: Node[]) => {
-                    if (m.length === 0) return g;
-                    const padding = 30;
-                    const paddingTop = 70;
-                    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-                    m.forEach(node => {
-                        minX = Math.min(minX, node.position.x);
-                        minY = Math.min(minY, node.position.y);
-                        maxX = Math.max(maxX, node.position.x + node.width);
-                        const nodeHeight = node.isCollapsed ? 40 : node.height;
-                        maxY = Math.max(maxY, node.position.y + nodeHeight);
-                    });
-                    return { ...g, position: { x: minX - padding, y: minY - paddingTop }, width: maxX - minX + padding * 2, height: (maxY - minY) + paddingTop + padding };
-                };
-                const updatedGroup = groupBounds({ ...groupToUpdate, nodeIds: updatedNodeIds }, memberNodes);
-                return currentGroups.map(g => g.id === updatedGroup.id ? updatedGroup : g);
-            }
+            if (updatedNodeIds.length === 0) return currentGroups.filter(g => g.id !== groupToUpdate.id);
+            const memberNodes = nodes.filter(n => updatedNodeIds.includes(n.id));
+            const groupBounds = (g: Group, m: Node[]) => {
+                const padding = 30; const paddingTop = 70;
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                m.forEach(node => { minX = Math.min(minX, node.position.x); minY = Math.min(minY, node.position.y); maxX = Math.max(maxX, node.position.x + node.width); maxY = Math.max(maxY, node.position.y + (node.isCollapsed ? 40 : node.height)); });
+                return { ...g, position: { x: minX - padding, y: minY - paddingTop }, width: maxX - minX + padding * 2, height: (maxY - minY) + paddingTop + padding };
+            };
+            return currentGroups.map(g => g.id === groupToUpdate.id ? groupBounds({ ...groupToUpdate, nodeIds: updatedNodeIds }, memberNodes) : g);
         });
      }, [nodes, setGroups]);
 
     const onConnectionReleased = useCallback((info: ConnectingInfo, position: Point) => {
-        setConnectionMenu({
-            isOpen: true,
-            position,
-            sourceNodeId: info.fromNodeId,
-            sourceHandleId: info.fromHandleId,
-            fromType: info.fromType
-        });
+        setConnectionMenu({ isOpen: true, position, sourceNodeId: info.fromNodeId, sourceHandleId: info.fromHandleId, fromType: info.fromType });
     }, [setConnectionMenu]);
 
-    const { activeTool, effectiveTool, setActiveTool, connectingInfo, connectionTarget, hoveredNodeId, setHoveredNodeId, selectedNodeIds, setSelectedNodeIds, deselectAllNodes, handleNodeMouseDown, handleGroupMouseDown, handleNodeResizeMouseDown, handleStartConnection, handleNodeClick: handleNodeCutConnections, hoveredGroupIdForDrop, handleCanvasMouseDown: useInteractionCanvasMouseDown, selectionRect: selectionRectPoints, draggingInfo, dollyZoomingInfo, handleNodeTouchStart, handleGroupTouchStart, handleNodeResizeTouchStart, handleStartConnectionTouchStart, isAltDown, extractionTarget,
-    } = useInteraction({
-        nodes, setNodes, groups, setGroups, addConnection: addConnectionWithLogic, connections,
-        setConnections,
-        viewTransform, updatePointerPosition, pan, isPanning, startPanning, stopPanning, isSnapToGrid,
-        onAddNode: addNodeFromHook, removeConnectionsByNodeId, setZoom, triggerClearSelections, t, clientPointerPosition,
-        clientPointerPositionRef,
-        isQuickAddOpen,
-        handleCloseAddNodeMenus,
-        handleExtractNodeFromGroup,
-        openRadialMenu,
-        onConnectionReleased,
+    const { activeTool, effectiveTool, setActiveTool, connectingInfo, connectionTarget, hoveredNodeId, setHoveredNodeId, selectedNodeIds, setSelectedNodeIds, deselectAllNodes: baseDeselectAllNodes, handleNodeMouseDown, handleGroupMouseDown, handleNodeResizeMouseDown, handleStartConnection, handleNodeClick: handleNodeCutConnections, hoveredGroupIdForDrop, handleCanvasMouseDown: useInteractionCanvasMouseDown, selectionRect: selectionRectPoints, draggingInfo, dollyZoomingInfo, handleNodeTouchStart, handleGroupTouchStart, handleNodeResizeTouchStart, handleStartConnectionTouchStart, isAltDown, extractionTarget } = useInteraction({
+        nodes, setNodes, groups, setGroups, addConnection: addConnectionWithLogic, connections, setConnections, viewTransform, updatePointerPosition, pan, isPanning, startPanning, stopPanning, isSnapToGrid, onAddNode: (type, pos) => onAddNode(type, pos), removeConnectionsByNodeId, setZoom, triggerClearSelections, t, clientPointerPosition, clientPointerPositionRef, handleExtractNodeFromGroup, isQuickAddOpen, handleCloseAddNodeMenus, openRadialMenu, onConnectionReleased
     });
     
-    const { onAddNode, handleAddNodeFromToolbar, deleteNodeAndConnections, handleSplitConnection, handleGroupSelection, handleRemoveGroup, handleSaveGroupToCatalog, handleSaveGroupToDisk, handleCopyGroup, handleDuplicateGroup, handleAddGroupFromCatalog, handleApplyAliases, handleDetachCharacter, addCharacterCardFromFile, addImagePreviewNodeFromFile, handlePasteFromClipboard, handleAddGroupFromTemplate, handleDuplicateNode: handleDuplicateNodeFromEntityActions, handleDuplicateNodeEmpty: handleDuplicateNodeEmptyFromEntityActions, saveDataToCatalog, handleDownloadChat } = useEntityActions({
-      nodes, connections, groups, addNodeFromHook, t,
-      clientPointerPosition, clientPointerPositionRef, viewTransform, setCreationLine, setLastAddedNodeId, handleDeleteNode, removeConnectionsByNodeId,
-      addConnection: addConnectionWithLogic, handleValueChange, nodeIdCounter, setNodes, setConnections, addGroup, selectedNodeIds, setSelectedNodeIds: setSelectedNodeIds, removeGroup, saveGroupToCatalog, catalogItems, currentCatalogItems, handleCloseCatalog,
-      geminiContext,
-      addToast, setGroups, handleDuplicateNode,
-      handleDuplicateNodeEmpty,
-      saveGenericItemToCatalog
+    const entityActions = useEntityActions({
+      nodes, connections, groups, addNodeFromHook, t, clientPointerPosition, clientPointerPositionRef, viewTransform, setCreationLine, setLastAddedNodeId, handleDeleteNode, removeConnectionsByNodeId, addConnection: addConnectionWithLogic, handleValueChange, nodeIdCounter, setNodes, setConnections, addGroup, selectedNodeIds, setSelectedNodeIds, removeGroup, saveGroupToCatalog, catalogItems: catalog.items, currentCatalogItems: catalog.currentItems, handleCloseCatalog, geminiContext, addToast, setGroups, 
+      handleDuplicateNode: baseHandleDuplicateNode, 
+      handleDuplicateNodeEmpty, saveGenericItemToCatalog
     });
+    const { 
+        onAddNode, 
+        handleAddNodeFromToolbar, 
+        deleteNodeAndConnections, 
+        handleSplitConnection, 
+        handleGroupSelection, 
+        handleRemoveGroup, 
+        handleSaveGroupToCatalog, 
+        handleSaveGroupToDisk, 
+        handleCopyGroup, 
+        handleDuplicateGroup, 
+        handleAddGroupFromCatalog, 
+        handleApplyAliases, 
+        handleDetachCharacter, 
+        addCharacterCardFromFile, 
+        addImagePreviewNodeFromFile, 
+        handlePasteFromClipboard, 
+        handleAddGroupFromTemplate, 
+        saveDataToCatalog, 
+        handleDownloadChat,
+        handleDuplicateNode
+    } = entityActions;
 
     const handleAddNodeFromConnectionMenu = useCallback((type: NodeType) => {
         if (!connectionMenu) return;
-        const canvasPosition = {
-            x: (connectionMenu.position.x - viewTransform.translate.x) / viewTransform.scale,
-            y: (connectionMenu.position.y - viewTransform.translate.y) / viewTransform.scale,
-        };
-        const pos = { x: canvasPosition.x - 20, y: canvasPosition.y - 20 };
-        let value: string | undefined;
-        if (type === NodeType.REROUTE_DOT && connectionMenu.fromType) {
-             value = JSON.stringify({ type: connectionMenu.fromType });
-        }
-        const newNodeId = onAddNode(type, pos, value);
+        const canvasPos = { x: (connectionMenu.position.x - viewTransform.translate.x) / viewTransform.scale, y: (connectionMenu.position.y - viewTransform.translate.y) / viewTransform.scale };
+        const pos = { x: canvasPos.x - 20, y: canvasPos.y - 20 };
+        const newNodeId = onAddNode(type, pos);
         const fromNode = nodes.find(n => n.id === connectionMenu.sourceNodeId);
-        if (fromNode) {
-             let toHandleId: string | undefined = undefined;
-             if (type === NodeType.SCRIPT_GENERATOR) toHandleId = 'prompt';
-             else if (type === NodeType.SCRIPT_PROMPT_MODIFIER) toHandleId = 'all-script-analyzer-data';
-             else if (type === NodeType.SCRIPT_ANALYZER) toHandleId = undefined; 
-             addConnectionWithLogic({
-                 fromNodeId: connectionMenu.sourceNodeId,
-                 fromHandleId: connectionMenu.sourceHandleId,
-                 toNodeId: newNodeId,
-                 toHandleId
-             }, fromNode);
-        }
+        if (fromNode) addConnectionWithLogic({ fromNodeId: connectionMenu.sourceNodeId, fromHandleId: connectionMenu.sourceHandleId, toNodeId: newNodeId }, fromNode);
         setConnectionMenu(null);
-    }, [connectionMenu, viewTransform, onAddNode, nodes, addConnectionWithLogic, setConnectionMenu]);
+    }, [connectionMenu, viewTransform, onAddNode, nodes, addConnectionWithLogic]);
 
-    useEffect(() => {
-        saveDataToCatalogRef.current = saveDataToCatalog;
-    }, [saveDataToCatalog]);
+    useEffect(() => { saveDataToCatalogRef.current = saveDataToCatalog; }, [saveDataToCatalog]);
     
-    const handleNodeDoubleClick = (nodeId: string) => isAltDown ? handleExtractNodeFromGroup(nodeId) : handleToggleNodeCollapse(nodeId);
+    const handleNodeDoubleClickWrapper = (nodeId: string) => isAltDown ? handleExtractNodeFromGroup(nodeId) : handleToggleNodeCollapse(nodeId);
     
     const handleSaveProject = useCallback(() => {
-        try {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const dateTimeString = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-            
-            const projectData = {
-                type: 'script-modifier-project',
-                timestamp: Date.now(),
-                appState: { activeTabIndex, isSnapToGrid, lineStyle },
-                tabs, catalog: catalogItems, library: libraryItems
-            };
-            const stateString = JSON.stringify(projectData, null, 2);
-            const blob = new Blob([stateString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Script_Modifier_Project_${dateTimeString}.SMP`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            baseAddToast(t('toast.projectSaved'), 'success');
-        } catch (err) {
-            console.error("Failed to save project:", err);
-            baseAddToast(t('toast.saveFailed') || "Failed to save project", 'info');
-        }
-    }, [activeTabIndex, isSnapToGrid, lineStyle, tabs, catalogItems, libraryItems, baseAddToast, t]);
+        const now = new Date(); const dateTimeString = now.toISOString().replace(/[:.]/g, '-');
+        const projectData = { type: 'script-modifier-project', timestamp: Date.now(), appState: { activeTabIndex, isSnapToGrid, lineStyle }, tabs, catalog: catalog.items, library: libraryItems };
+        const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Script_Modifier_Project_${dateTimeString}.SMP`; a.click(); URL.revokeObjectURL(url);
+        baseAddToast(t('toast.projectSaved'), 'success');
+    }, [activeTabIndex, isSnapToGrid, lineStyle, tabs, catalog.items, libraryItems, baseAddToast, t]);
 
-    const handleLoadProject = useCallback((projectData: any) => {
-        if (projectData.type !== 'script-modifier-project') {
-            baseAddToast(t('alert.loadProjectFailed') || 'Invalid project file format', 'info');
-            return;
-        }
-        setConfirmInfo({
-            title: 'Load Project',
-            message: t('alert.confirmLoadProject'),
-            onConfirm: () => {
-                if (projectData.appState) {
-                    if (typeof projectData.appState.activeTabIndex === 'number') setActiveTabIndex(projectData.appState.activeTabIndex);
-                    if (typeof projectData.appState.isSnapToGrid === 'boolean') setIsSnapToGrid(projectData.appState.isSnapToGrid);
-                    if (projectData.appState.lineStyle) setLineStyle(projectData.appState.lineStyle);
-                }
-                if (Array.isArray(projectData.tabs)) {
-                    setTabs(projectData.tabs);
-                    loadedTabIdRef.current = null;
-                    const activeIdx = projectData.appState?.activeTabIndex || 0;
-                    const targetTab = projectData.tabs[activeIdx] || projectData.tabs[0];
-                    if (targetTab) {
-                        setNodes(targetTab.nodes);
-                        setConnections(targetTab.connections);
-                        setGroups(targetTab.groups || []);
-                        setViewTransform(targetTab.viewTransform);
-                        nodeIdCounter.current = targetTab.nodeIdCounter;
-                        loadedTabIdRef.current = targetTab.id;
-                    }
-                }
-                if (projectData.catalog) importCatalog(projectData.catalog);
-                if (projectData.library) importLibrary(projectData.library);
-                baseAddToast(t('toast.projectLoaded'), 'success');
-            }
-        });
-    }, [t, baseAddToast, importCatalog, importLibrary, setNodes, setConnections, setGroups, setViewTransform, nodeIdCounter]);
+    const handleLoadProjectWrapper = useCallback((projectData: any) => {
+        if (projectData.type !== 'script-modifier-project') { baseAddToast(t('alert.loadProjectFailed') || 'Invalid format', 'info'); return; }
+        setConfirmInfo({ title: 'Load Project', message: t('alert.confirmLoadProject'), onConfirm: () => {
+            if (projectData.appState) { setActiveTabIndex(projectData.appState.activeTabIndex || 0); setIsSnapToGrid(!!projectData.appState.isSnapToGrid); setLineStyle(projectData.appState.lineStyle || 'orthogonal'); }
+            if (Array.isArray(projectData.tabs)) { setTabs(projectData.tabs); loadedTabIdRef.current = null; const targetTab = projectData.tabs[projectData.appState?.activeTabIndex || 0] || projectData.tabs[0]; if (targetTab) { setNodes(targetTab.nodes); setConnections(targetTab.connections); setGroups(targetTab.groups || []); setViewTransform(targetTab.viewTransform); nodeIdCounter.current = targetTab.nodeIdCounter; loadedTabIdRef.current = targetTab.id; } }
+            if (projectData.catalog) importItemsData(projectData.catalog); if (projectData.library) importLibrary(projectData.library);
+            baseAddToast(t('toast.projectLoaded'), 'success');
+        }});
+    }, [t, baseAddToast, importItemsData, importLibrary, setNodes, setConnections, setGroups, setViewTransform, nodeIdCounter, setConfirmInfo]);
 
-    const handleLoadProjectRef = useRef<((data: any) => void) | null>(null);
-
-    useEffect(() => {
-        handleLoadProjectRef.current = handleLoadProject;
-    }, [handleLoadProject]);
-
-    const { fileInputRef, handleSaveCanvas, handleLoadCanvas, handleFileChange: baseHandleFileChange, loadStateFromFileContent } = useCanvasIO({ 
-        nodes, connections, groups, viewTransform, nodeIdCounter, setNodes, setConnections, setGroups, setViewTransform, 
-        activeTabName: tabs[activeTabIndex]?.name || 'default',
-        onLoadProject: (data) => handleLoadProjectRef.current?.(data),
-        addToast: baseAddToast,
-        setGlobalError: geminiContext.setError 
-    });
+    const { fileInputRef, handleSaveCanvas, handleLoadCanvas, handleFileChange: baseHandleFileChange, loadStateFromFileContent } = useCanvasIO({ nodes, connections, groups, viewTransform, nodeIdCounter, setNodes, setConnections, setGroups, setViewTransform, activeTabName: tabs[activeTabIndex]?.name || 'default', onLoadProject: handleLoadProjectWrapper, addToast: baseAddToast, setGlobalError: geminiContext.setError });
     
     const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const regex = /^Script_Modifier_Canvas_(.+)_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.(SMC|json)$/i;
-            const match = file.name.match(regex);
-            if (match && match[1]) {
-                const tabName = match[1].replace(/_/g, ' ');
-                renameTab(activeTabIndex, tabName);
-            }
+            const match = file.name.match(/^Script_Modifier_Canvas_(.+)_\d{4}-\d{2}-\d{2}/i);
+            if (match && match[1]) renameTab(activeTabIndex, match[1].replace(/_/g, ' '));
         }
         baseHandleFileChange(e);
     }, [baseHandleFileChange, renameTab, activeTabIndex]);
 
-    const { isDraggingOverCanvas, handleCanvasDoubleClick, handleDrop, handleDragOver, handleDragLeave } = useCanvasEvents({
-      isQuickSearchOpen, handleToggleCatalog, openQuickSearchMenu, openQuickAddMenu, clientPointerPosition,
-      clientPointerPositionRef,
-      onAddNode, handleCloseAddNodeMenus, loadStateFromFileContent, activeTool, setActiveTool,
-      isSnapToGrid, setIsSnapToGrid, lineStyle, setLineStyle, selectedNodeIds,
-      copyNodeValue: handleCopyNodeValue, geminiContext,
-      addCharacterCardFromFile, addImagePreviewNodeFromFile, viewTransform, nodes,
-      handlePasteFromClipboard,
-      handleAddGroupFromTemplate,
-      catalogItems,
-      handleToggleNodeCollapse,
-      handleNodeDoubleClick,
-      deleteNodeAndConnections,
-      setSelectedNodeIds: setSelectedNodeIds,
-      handleGroupSelection,
-      handleDuplicateNode: handleDuplicateNodeFromEntityActions,
-      handleDuplicateNodeEmpty: handleDuplicateNodeEmptyFromEntityActions,
-      t,
-      contextMenuSlots,
-      handleValueChange,
-      handleSaveProject,
-      handleLoadProject,
-      addToast 
+    const { isDraggingOverCanvas, handleCanvasDoubleClick: baseHandleCanvasDoubleClick, handleDrop: baseHandleDrop, handleDragOver: baseHandleDragOver, handleDragLeave: baseHandleDragLeave } = useCanvasEvents({
+      isQuickSearchOpen, handleToggleCatalog, openQuickSearchMenu, openQuickAddMenu, clientPointerPosition, clientPointerPositionRef, onAddNode, handleCloseAddNodeMenus, loadStateFromFileContent, activeTool, setActiveTool, isSnapToGrid, setIsSnapToGrid, lineStyle, setLineStyle, selectedNodeIds, copyNodeValue: (id) => handleCopyNodeValue(id), geminiContext, addCharacterCardFromFile, addImagePreviewNodeFromFile, viewTransform, nodes, handlePasteFromClipboard, handleAddGroupFromTemplate, catalogItems: catalog.items, handleToggleNodeCollapse, handleNodeDoubleClick: handleNodeDoubleClickWrapper, deleteNodeAndConnections, setSelectedNodeIds, handleGroupSelection, handleDuplicateNode, handleDuplicateNodeEmpty: (id) => handleDuplicateNodeEmpty(id, t), t, contextMenuSlots, handleValueChange, handleSaveProject, handleLoadProject: handleLoadProjectWrapper, addToast 
     });
     
-    const { connectedInputs, groupButtonPosition, getCanvasCursor, getConnectionPoints, selectionRect } = useDerivedMemo({ nodes, connections, selectedNodeIds, dollyZoomingInfo, draggingInfo, effectiveTool, isPanning, t, selectionRect: selectionRectPoints });
+    const { connectedInputs: derivedConnectedInputs, groupButtonPosition, getCanvasCursor, getConnectionPoints, selectionRect } = useDerivedMemo({ nodes, connections, selectedNodeIds, dollyZoomingInfo, draggingInfo, effectiveTool, isPanning, t, selectionRect: selectionRectPoints });
 
-    const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (isContextMenuOpen && !isContextMenuPinned) {
-            closeContextMenu();
-        }
-        if (e.button !== 2) {
-             useInteractionCanvasMouseDown(e);
-        }
-    }, [isContextMenuOpen, isContextMenuPinned, closeContextMenu, useInteractionCanvasMouseDown]);
+    const [activeCategory, setActiveCategory] = useState<CatalogItemType | null>(null);
+    const onSaveCharacterCard = useCallback((nodeId: string) => addToast("Saving character card...", "info"), [addToast]);
+    const onLoadCharacterCard = useCallback((nodeId: string) => addToast("Loading character card...", "info"), [addToast]);
+    const onSaveCharacterToCatalog = useCallback((nodeId: string) => saveDataToCatalog(nodeId, CatalogItemType.CHARACTERS, "New Character"), [saveDataToCatalog]);
 
-    const handleCanvasContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        openContextMenu({ x: e.clientX, y: e.clientY });
-    }, [openContextMenu]);
-
-    const handleRenameNode = useCallback((nodeId: string, currentTitle: string) => {
-        setRenameInfo({ type: 'node', id: nodeId, currentTitle });
-    }, [setRenameInfo]);
-
-    // Character Card specific handlers placeholders
-    const onSaveCharacterCard = (nodeId: string) => { console.log('Save character card', nodeId); };
-    const onLoadCharacterCard = (nodeId: string) => { console.log('Load character card', nodeId); };
-    const onSaveCharacterToCatalog = (nodeId: string) => { saveDataToCatalog(nodeId, CatalogItemType.CHARACTERS, "Character"); };
-    
     const contextValue: AppContextType = {
-        tabs, activeTabIndex, switchTab, addTab, closeTab, renameTab,
-        nodes, setNodes, connections, groups, viewTransform, setViewTransform, isSnapToGrid, setIsSnapToGrid, lineStyle, setLineStyle, setZoom,
-        isQuickSearchOpen, isQuickAddOpen, quickAddPosition, isRadialMenuOpen, radialMenuPosition, isContextMenuOpen, contextMenuPosition,
-        isCatalogOpen, isErrorCopied, renameInfo, promptEditInfo, confirmInfo, isDraggingOverCanvas: isDraggingOverCanvas || !!extractionTarget, showDialog,
-        activeTool, effectiveTool, connectingInfo, connectionTarget, hoveredNodeId, selectedNodeIds, setSelectedNodeIds, selectionRect, groupButtonPosition, draggingInfo, dollyZoomingInfo, hoveredGroupIdForDrop, dragOverNodeId: null, isAltDown, extractionTarget,
-        currentCatalogItems, catalogPath, currentLibraryItems, libraryPath, libraryItems, activeCategory, setActiveCategory,
-        fileInputRef, catalogFileInputRef, libraryFileInputRef,
-        handleFileChange, handleCatalogFileChange, handleLibraryFileChange, handleCanvasMouseDown, handleCanvasContextMenu, updatePointerPosition, pointerPosition, clientPointerPosition,
-        handleWheel, handleCanvasDoubleClick, handleDrop, handleDragOver, handleDragLeave, getCanvasCursor, getConnectionPoints,
-        handleCanvasTouchStart, handleCanvasTouchMove, handleCanvasTouchEnd, handleNodeMouseDown, handleNodeTouchStart, handleNodeResizeMouseDown, handleNodeResizeTouchStart,
-        handleStartConnection, handleStartConnectionTouchStart, setHoveredNodeId, deleteNodeAndConnections, removeConnectionsByNodeId, 
-        copyNodeValue: handleCopyNodeValue,
-        pasteNodeValue: handlePasteNodeValue,
-        handleDuplicateNode: handleDuplicateNodeFromEntityActions,
-        handleDuplicateNodeEmpty: handleDuplicateNodeEmptyFromEntityActions,
-        handleToggleNodeCollapse, deselectAllNodes, handleNodeClick: handleNodeCutConnections, handleNodeDoubleClick, handleGroupMouseDown, handleGroupTouchStart, handleGroupSelection, handleRenameGroup, handleRemoveGroup, handleSaveGroupToCatalog,
-        handleSaveGroupToDisk,
-        removeConnectionById, handleSplitConnection,
-        handleCloseAddNodeMenus, setActiveTool, onAddNode, handleAddNodeFromToolbar, handleSaveCanvas, handleLoadCanvas, openQuickSearchMenu, openQuickAddMenu, openRadialMenu, onOpenCatalog: handleToggleCatalog,
-        handleClearCanvas, handleResetToDefault, handleCloseCatalog, confirmRename, confirmPromptEdit, setRenameInfo, setPromptEditInfo, setConfirmInfo, handleCopyError, requestPermission, declinePermission,
-        navigateCatalogBack, navigateCatalogToFolder, createCatalogItem, handleAddGroupFromCatalog, handleRenameCatalogItem, saveCatalogItemToDisk, handleDeleteCatalogItem, triggerLoadFromFile, moveCatalogItem,
-        importCatalog,
-        importLibrary,
-        navigateBack, navigateToFolder, createLibraryItem, updateLibraryItem, deleteLibraryItem: (id: string) => handleDeleteLibraryItem(id), saveLibraryItemToDisk, triggerLoadLibraryFromFile, moveLibraryItem,
-        handleValueChange, connectedInputs, t, lastAddedNodeId, creationLine, clearSelectionsSignal,
-        ...geminiContext,
-        handleGenerateEntities: geminiContext.handleGenerateEntities,
-        isGeneratingEntities: geminiContext.isGeneratingEntities,
-        onAnalyzeYouTubeStats: geminiContext.handleAnalyzeYouTubeStats,
-        handleApplyAliases, handleDetachCharacter,
-        addCharacterCardFromFile, addImagePreviewNodeFromFile,
-        handlePasteFromClipboard,
-        toasts, addToast, removeToast,
-        setIsSettingsOpen: () => {},
-        contextMenuSlots, setContextMenuSlot,
-        saveDataToCatalog,
-        connectionMenu, setConnectionMenu,
-        handleAddNodeFromConnectionMenu,
-        handleRenameNode,
-        handleSaveProject,
-        handleLoadProject,
-        closeContextMenu, openContextMenu,
-        isContextMenuPinned, toggleContextMenuPin, isQuickAddPinned, toggleQuickAddPin,
-        handleCopyGroup,
-        handleDuplicateGroup,
-        translateGraph,
-        clearCanvasData,
-        clearProject,
-        handleToggleNodeOutputVisibility,
-        // Image Handling
-        setFullSizeImage,
-        getFullSizeImage,
-        setImageViewer,
-        imageViewerState,
-        onCopyImageToClipboard,
-        onDownloadImage,
-        onSaveCharacterCard,
-        onLoadCharacterCard,
-        onSaveCharacterToCatalog,
-        handleGenerateMusicIdeas: geminiContext.handleGenerateMusicIdeas,
-        isGeneratingMusicIdeas: geminiContext.isGeneratingMusicIdeas,
-        handleExtractTextFromImage: geminiContext.handleExtractTextFromImage,
-        isExtractingText: geminiContext.isExtractingText,
-        isAnalyzingYouTubeStats: geminiContext.isAnalyzingYouTubeStats,
-        handleDownloadChat,
-        handleLoadAutoSave, // Exported
+        tabs, activeTabIndex, switchTab, addTab, closeTab, renameTab, nodes, setNodes, connections, groups, viewTransform, setViewTransform, isSnapToGrid, setIsSnapToGrid, lineStyle, setLineStyle, setZoom, isQuickSearchOpen, isQuickAddOpen, quickAddPosition, isRadialMenuOpen, radialMenuPosition, isContextMenuOpen, contextMenuPosition, isCatalogOpen, isErrorCopied, renameInfo, promptEditInfo, confirmInfo, isDraggingOverCanvas: isDraggingOverCanvas || !!extractionTarget, showDialog, activeTool, effectiveTool, connectingInfo, connectionTarget, hoveredNodeId, selectedNodeIds, setSelectedNodeIds, selectionRect, groupButtonPosition, draggingInfo, dollyZoomingInfo, hoveredGroupIdForDrop, dragOverNodeId: null, isAltDown, extractionTarget, currentCatalogItems, catalogPath, currentLibraryItems, libraryPath, libraryItems, activeCategory, setActiveCategory, isSyncing, handleSyncCloud: handleSyncCatalogs, handleUploadToCloud: (item) => uploadCatalogItem(item, 'groups'), fileInputRef, catalogFileInputRef, libraryFileInputRef, handleFileChange, handleCatalogFileChange, handleLibraryFileChange, handleCanvasMouseDown: useInteractionCanvasMouseDown, handleCanvasContextMenu: (e) => openContextMenu({ x: e.clientX, y: e.clientY }), updatePointerPosition, pointerPosition, clientPointerPosition, handleWheel, handleCanvasDoubleClick: baseHandleCanvasDoubleClick, handleDrop: baseHandleDrop, handleDragOver: baseHandleDragOver, handleDragLeave: baseHandleDragLeave, getCanvasCursor, getConnectionPoints, handleCanvasTouchStart, handleCanvasTouchMove, handleCanvasTouchEnd, handleNodeMouseDown, handleNodeTouchStart, handleNodeResizeMouseDown, handleNodeResizeTouchStart, setHoveredNodeId, deleteNodeAndConnections, removeConnectionsByNodeId, copyNodeValue: handleCopyNodeValue, pasteNodeValue: handlePasteNodeValue, handleDuplicateNode, handleDuplicateNodeEmpty: (id) => handleDuplicateNodeEmpty(id, t), handleToggleNodeCollapse, deselectAllNodes: baseDeselectAllNodes, handleNodeClick: handleNodeCutConnections, handleNodeDoubleClick: handleNodeDoubleClickWrapper, handleGroupMouseDown, handleGroupTouchStart, handleGroupSelection, handleRenameGroup, handleRemoveGroup, handleSaveGroupToCatalog, handleSaveGroupToDisk, removeConnectionById, handleSplitConnection, handleCloseAddNodeMenus, setActiveTool, onAddNode, handleAddNodeFromToolbar, handleSaveCanvas, handleLoadCanvas, openQuickSearchMenu, openQuickAddMenu, openRadialMenu, onOpenCatalog: handleToggleCatalog, handleClearCanvas, handleResetToDefault, handleCloseCatalog, confirmRename, confirmPromptEdit, setRenameInfo, setPromptEditInfo, setConfirmInfo, handleCopyError, requestPermission, declinePermission, navigateCatalogBack, navigateCatalogToFolder, createCatalogItem, handleAddGroupFromCatalog, handleRenameCatalogItem, saveCatalogItemToDisk, handleDeleteCatalogItem, triggerLoadFromFile, moveCatalogItem, importCatalog: importItemsData, importLibrary, navigateBack, navigateToFolder, createLibraryItem, updateLibraryItem, deleteLibraryItem: (id: string) => handleDeleteLibraryItem(id), saveLibraryItemToDisk, triggerLoadLibraryFromFile, moveLibraryItem, handleValueChange, connectedInputs: derivedConnectedInputs, t, lastAddedNodeId, creationLine, clearSelectionsSignal, ...geminiContext, handleGenerateEntities: geminiContext.handleGenerateEntities, isGeneratingEntities: geminiContext.isGeneratingEntities, onAnalyzeYouTubeStats: geminiContext.handleAnalyzeYouTubeStats, handleApplyAliases, handleDetachCharacter, addCharacterCardFromFile, addImagePreviewNodeFromFile, handlePasteFromClipboard, toasts, addToast, removeToast, setIsSettingsOpen: () => {}, contextMenuSlots, setContextMenuSlot, saveDataToCatalog, connectionMenu, setConnectionMenu, handleAddNodeFromConnectionMenu, handleRenameNode, handleSaveProject, handleLoadProject: handleLoadProjectWrapper, closeContextMenu, openContextMenu, isContextMenuPinned, toggleContextMenuPin, isQuickAddPinned, toggleQuickAddPin, handleCopyGroup, handleDuplicateGroup, translateGraph, clearCanvasData, clearProject, handleToggleNodeOutputVisibility, setFullSizeImage, getFullSizeImage, setImageViewer, imageViewerState, onCopyImageToClipboard, onDownloadImage, onSaveCharacterCard, onLoadCharacterCard, onSaveCharacterToCatalog, handleGenerateMusicIdeas: geminiContext.handleGenerateMusicIdeas, isGeneratingMusicIdeas: geminiContext.isGeneratingMusicIdeas, handleExtractTextFromImage: geminiContext.handleExtractTextFromImage, isExtractingText: geminiContext.isExtractingText, isAnalyzingYouTubeStats: geminiContext.isAnalyzingYouTubeStats, handleDownloadChat, handleLoadAutoSave,
+        // Added missing properties to fix build error
+        handleStartConnection,
+        handleStartConnectionTouchStart
     };
 
     return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

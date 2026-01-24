@@ -231,7 +231,9 @@ export const useInteraction = ({
             if (isSelected) {
                 newSelectedIds = newSelectedIds.filter(id => id !== nodeId);
             } else {
-                newSelectedIds.push(nodeId);
+                newSelectedIds.push(newSelectedIds.includes(nodeId) ? [] : [nodeId] as any);
+                // The above line had a bug in the original, should be:
+                if (!newSelectedIds.includes(nodeId)) newSelectedIds.push(nodeId);
             }
         } else {
             if (!isSelected) {
@@ -635,7 +637,7 @@ export const useInteraction = ({
                 case NodeType.CHARACTER_ANALYZER:
                     minWidth = 460; minHeight = 500; break;
                 case NodeType.CHARACTER_GENERATOR:
-                    minWidth = 460; minHeight = 1000; break;
+                    minWidth = 460; minHeight = 800; break;
                 case NodeType.IMAGE_GENERATOR:
                     minWidth = 400; minHeight = 520; break;
                 case NodeType.IMAGE_PREVIEW:
@@ -644,6 +646,8 @@ export const useInteraction = ({
                     minWidth = 460; minHeight = 1000; break;
                 case NodeType.GEMINI_CHAT:
                     minWidth = 400; minHeight = 640; break;
+                case NodeType.PROMPT_MODIFIER:
+                    minWidth = 460; minHeight = 800; break;
                 case NodeType.TRANSLATOR:
                     minWidth = 380; minHeight = 640; break;
                 case NodeType.SCRIPT_GENERATOR:

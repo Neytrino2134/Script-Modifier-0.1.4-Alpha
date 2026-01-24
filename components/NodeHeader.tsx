@@ -48,6 +48,7 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
         [NodeType.IMAGE_PREVIEW]: t('node.help.image_preview'),
         [NodeType.CHARACTER_CARD]: t('node.help.character_card'),
         [NodeType.GEMINI_CHAT]: t('node.help.gemini_chat'),
+        [NodeType.PROMPT_MODIFIER]: t('node.help.prompt_modifier'),
         [NodeType.TRANSLATOR]: t('node.help.translator'),
         [NodeType.SCRIPT_GENERATOR]: t('node.help.script_generator'),
         [NodeType.SCRIPT_ANALYZER]: t('node.help.script_analyzer'),
@@ -92,7 +93,8 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                 }];
                 break;
             case NodeType.GEMINI_CHAT:
-                newValue = { messages: [], currentInput: '' };
+            case NodeType.PROMPT_MODIFIER:
+                newValue = { messages: [], currentInput: '', mode: node.type === NodeType.PROMPT_MODIFIER ? 'prompt' : 'general' };
                 break;
             case NodeType.SCRIPT_GENERATOR:
                 // Preserve settings, clear only content and the prompt
@@ -426,7 +428,7 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                                     };
 
                                     const dataStr = JSON.stringify(dataWithMeta, null, 2);
-                                    const blob = new Blob([dataStr], { type: "application/json" });
+                                    const blob = new Blob([dataWithMeta], { type: "application/json" });
                                     const url = URL.createObjectURL(blob);
                                     const a = document.createElement("a");
                                     a.href = url;
@@ -450,13 +452,13 @@ const NodeHeader: React.FC<NodeHeaderProps> = ({
                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                         </ActionButton>
 
-                        {(node.type === NodeType.GEMINI_CHAT) && (
+                        {(node.type === NodeType.GEMINI_CHAT || node.type === NodeType.PROMPT_MODIFIER) && (
                             <ActionButton title="Download Chat" onClick={() => onDownloadChat && onDownloadChat(node.id)}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                             </ActionButton>
                         )}
 
-                        {(node.type === NodeType.PROMPT_ANALYZER || node.type === NodeType.CHARACTER_ANALYZER || node.type === NodeType.SCRIPT_GENERATOR || node.type === NodeType.SCRIPT_ANALYZER || node.type === NodeType.CHARACTER_GENERATOR || node.type === NodeType.SCRIPT_PROMPT_MODIFIER || node.type === NodeType.CHARACTER_CARD || node.type === NodeType.TEXT_INPUT || node.type === NodeType.NOTE || node.type === NodeType.ERROR_ANALYZER || node.type === NodeType.NARRATOR_TEXT_GENERATOR || node.type === NodeType.SPEECH_SYNTHESIZER || node.type === NodeType.IDEA_GENERATOR || node.type === NodeType.YOUTUBE_ANALYTICS || node.type === NodeType.YOUTUBE_TITLE_GENERATOR || node.type === NodeType.MUSIC_IDEA_GENERATOR || node.type === NodeType.GEMINI_CHAT || node.type === NodeType.AUDIO_TRANSCRIBER) && (<ActionButton title={t('node.action.clear')} onClick={handleClear}><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></ActionButton>)}
+                        {(node.type === NodeType.PROMPT_ANALYZER || node.type === NodeType.CHARACTER_ANALYZER || node.type === NodeType.SCRIPT_GENERATOR || node.type === NodeType.SCRIPT_ANALYZER || node.type === NodeType.CHARACTER_GENERATOR || node.type === NodeType.SCRIPT_PROMPT_MODIFIER || node.type === NodeType.CHARACTER_CARD || node.type === NodeType.TEXT_INPUT || node.type === NodeType.NOTE || node.type === NodeType.ERROR_ANALYZER || node.type === NodeType.NARRATOR_TEXT_GENERATOR || node.type === NodeType.SPEECH_SYNTHESIZER || node.type === NodeType.IDEA_GENERATOR || node.type === NodeType.YOUTUBE_ANALYTICS || node.type === NodeType.YOUTUBE_TITLE_GENERATOR || node.type === NodeType.MUSIC_IDEA_GENERATOR || node.type === NodeType.GEMINI_CHAT || node.type === NodeType.PROMPT_MODIFIER || node.type === NodeType.AUDIO_TRANSCRIBER) && (<ActionButton title={t('node.action.clear')} onClick={handleClear}><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></ActionButton>)}
 
                         <ActionButton title={t('node.action.duplicateWithContent')} onClick={() => onDuplicateNode(node.id)}>
                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>

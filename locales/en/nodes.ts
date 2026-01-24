@@ -1,5 +1,4 @@
 
-
 export const nodes = {
     'node.title.text_input': 'Text Input',
     'node.title.prompt_processor': 'Prompt Processor',
@@ -10,6 +9,7 @@ export const nodes = {
     'node.title.image_preview': 'Image Preview',
     'node.title.character_card': 'Character Card',
     'node.title.gemini_chat': 'Gemini Chat',
+    'node.title.prompt_modifier': 'Prompt Modifier',
     'node.title.translator': 'Translator',
     'node.title.script_generator': 'Script Generator',
     'node.title.script_analyzer': 'Script Analyzer',
@@ -35,6 +35,7 @@ export const nodes = {
     'node.help.image_preview': 'Displays an image from a file. Drag and drop an image file onto the node.',
     'node.help.character_card': 'Stores a character\'s image, name, and prompt. Allows image generation, saving, and loading.',
     'node.help.gemini_chat': 'Node for direct conversation with Gemini AI. Maintains chat history.',
+    'node.help.prompt_modifier': 'Specialized chat for modifying and improving prompts.',
     'node.help.translator': 'Translates incoming text to the selected language.',
     'node.help.script_generator': 'Takes a story idea and generates a series of script scenes.',
     'node.help.script_analyzer': 'Analyzes the script structure, breaking it down into characters and frames with detailed descriptions.',
@@ -185,9 +186,8 @@ export const nodes = {
     'node.content.minFrames': 'Min',
     'node.content.maxFrames': 'Max',
     'node.content.numberOfCharactersShort': 'Qty',
-    'node.content.fullDescription': 'Full Description',
+    'node.content.fullDescription': 'Toäo Description',
     'node.content.generateCharacters': 'Generate Characters',
-    'node.content.generateEntities': 'GENERATE CHARACTERS',
     'node.content.generateFinalPrompts': 'Generate Final Prompts',
     'node.content.generatingProgress': 'Generating {current} of {total}',
     'node.content.generateImage': 'Generate Image',

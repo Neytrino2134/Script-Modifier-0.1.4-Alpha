@@ -1,5 +1,3 @@
-
-
 export const dialogs = {
     'dialog.rename.title': 'Rename Item',
     'dialog.rename.group.title': 'Rename Group',
@@ -30,6 +28,13 @@ export const dialogs = {
     'dialog.apiKey.save': 'Save Key',
     'dialog.apiKey.update': 'Update Key',
     'dialog.apiKey.useFreeKey': 'Use free key (for development)',
+    'dialog.googleDrive.title': 'Google Drive Integration',
+    'dialog.googleDrive.clientIdLabel': 'Google Client ID',
+    'dialog.googleDrive.clientIdPlaceholder': 'Enter your Google Client ID',
+    'dialog.googleDrive.connect': 'Connect Google Drive',
+    'dialog.googleDrive.disconnect': 'Disconnect',
+    'dialog.googleDrive.statusConnected': 'Connected',
+    'dialog.googleDrive.statusDisconnected': 'Not connected',
     'dialog.permission.title': 'Clipboard Access',
     'dialog.permission.description': 'This application requests access to your clipboard to enable the "Paste" functionality in nodes. We will only read from your clipboard when you explicitly use this feature.',
     'dialog.permission.decline': 'Decline',
@@ -63,4 +68,6 @@ export const dialogs = {
     'toast.apiKeyCleared': 'API Key cleared',
     'toast.projectLoaded': 'Project loaded successfully',
     'alert.batchMismatch': 'Warning: Scene {scene} frame count mismatch (Expected: {expected}, Got: {got}). Mapping best effort.',
+    'toast.googleDriveConnected': 'Google Drive connected successfully',
+    'toast.googleDriveDisconnected': 'Google Drive disconnected',
 };

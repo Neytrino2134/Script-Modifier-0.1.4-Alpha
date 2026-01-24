@@ -1,28 +1,46 @@
-
 {
   "name": "script-modifier",
   "private": true,
   "version": "0.1.5-alpha.4",
   "type": "module",
-  "homepage": "https://Neytrino2134.github.io/Script-Modifier",
+  "main": "main.js",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "predeploy": "vite build --mode gh-pages",
-    "deploy": "gh-pages -d dist"
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "npm run build && electron-builder"
   },
   "dependencies": {
-    "@google/genai": "*",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@google/genai": "^1.33.0",
+    "electron-is-dev": "^2.0.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "gh-pages": "^6.1.1",
+    "concurrently": "^8.2.2",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
     "typescript": "^5.5.3",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.meowmaster.scriptmodifier",
+    "productName": "Script Modifier",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js"
+    ],
+    "win": {
+      "target": "nsis"
+    }
   }
 }

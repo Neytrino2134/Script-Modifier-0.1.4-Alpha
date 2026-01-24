@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import type { Node, Tool, ConnectingInfo, LibraryItem, Point, Connection, CatalogItemType } from '../types';
 import { NodeType } from '../types';
@@ -106,6 +105,8 @@ interface NodeViewProps {
   deselectAllNodes: () => void;
   isDragOverTarget?: boolean;
   onAddNodeFromMenu?: (type: NodeType) => void;
+  onAddNode?: (type: NodeType, position: Point) => string;
+  onAddNodeAtPosition?: (type: NodeType, position: Point) => string;
   onProcessChainForward: (nodeId: string) => void;
   connectedInputs?: Set<string | undefined>;
   lastAddedNodeId?: string | null;
@@ -136,14 +137,13 @@ interface NodeViewProps {
   onRenameNode: (nodeId: string, currentTitle: string) => void;
   onImproveScriptConcept: (nodeId: string, currentConcept: string) => void;
   isImprovingScriptConcept: string | null;
-  inputData: string; // Reactive data
-  // Image handling props
+  inputData: string; 
   onSaveCharacterCard: (nodeId: string) => void;
   onLoadCharacterCard: (nodeId: string) => void;
   onSaveCharacterToCatalog: (nodeId: string) => void;
   setFullSizeImage: (nodeId: string, slotIndex: number, imageBase64: string) => void;
   getFullSizeImage: (nodeId: string, slotIndex: number) => string | null;
-  setImageViewer: (data: { sources: { src: string, frameNumber: number }[], initialIndex: number } | null) => void;
+  setImageViewer: (data: { sources: {src: string, frameNumber: number}[], initialIndex: number } | null) => void;
   onCopyImageToClipboard: (base64: string) => void;
   onDownloadImage: (base64: string, filename: string) => void;
   onUpdateCharacterDescription?: (nodeId: string, charIndex: number) => void;
@@ -151,7 +151,6 @@ interface NodeViewProps {
   onModifyCharacter?: (nodeId: string, charIndex: number, request: string) => void;
   isModifyingCharacter?: string | null;
   getUpstreamNodeValues?: (nodeId: string) => any[];
-  onAddNode?: (type: NodeType, position: Point) => string;
   onDownloadChat: (nodeId: string) => void;
 }
 
@@ -189,11 +188,12 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
       case NodeType.PROMPT_PROCESSOR: return { minWidth: 460, minHeight: 280 };
       case NodeType.PROMPT_ANALYZER: return { minWidth: 460, minHeight: 1000 };
       case NodeType.CHARACTER_ANALYZER: return { minWidth: 460, minHeight: 500 };
-      case NodeType.CHARACTER_GENERATOR: return { minWidth: 460, minHeight: 1000 };
+      case NodeType.CHARACTER_GENERATOR: return { minWidth: 460, minHeight: 800 };
       case NodeType.IMAGE_GENERATOR: return { minWidth: 400, minHeight: 520 };
       case NodeType.IMAGE_PREVIEW: return { minWidth: 300, minHeight: 400 };
       case NodeType.CHARACTER_CARD: return { minWidth: 460, minHeight: 1000 };
       case NodeType.GEMINI_CHAT: return { minWidth: 400, minHeight: 640 };
+      case NodeType.PROMPT_MODIFIER: return { minWidth: 460, minHeight: 800 };
       case NodeType.TRANSLATOR: return { minWidth: 380, minHeight: 640 };
       case NodeType.SCRIPT_GENERATOR: return { minWidth: 680, minHeight: 800 };
       case NodeType.SCRIPT_ANALYZER: return { minWidth: 680, minHeight: 800 };
@@ -245,10 +245,8 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
       isExtractingText: props.isExtractingText === node.id,
       isAnalyzingYouTubeStats: props.isAnalyzingYouTubeStats === node.id,
       isImprovingScriptConcept: props.isImprovingScriptConcept === node.id,
-      // Ensure isGeneratingEntities remains a string | null matching NodeContentProps
       isGeneratingEntities: props.isGeneratingEntities === node.id ? props.isGeneratingEntities : null,
       inputData: inputData,
-      // Pass Image props down
       onSaveCharacterCard,
       onLoadCharacterCard,
       onSaveCharacterToCatalog,
@@ -270,6 +268,7 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
       case NodeType.NOTE: return <NoteNode {...contentProps} />;
       case NodeType.TRANSLATOR: return <TranslatorNode {...contentProps} />;
       case NodeType.GEMINI_CHAT: return <GeminiChatNode {...contentProps} />;
+      case NodeType.PROMPT_MODIFIER: return <GeminiChatNode {...contentProps} />;
       case NodeType.SCRIPT_GENERATOR: return <ScriptGeneratorNode {...contentProps} />;
       case NodeType.SCRIPT_ANALYZER: return <ScriptAnalyzerNode {...contentProps} />;
       case NodeType.SCRIPT_PROMPT_MODIFIER: return <ScriptPromptModifierNode {...contentProps} />;
@@ -336,27 +335,24 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
   const nodeBaseClasses = "absolute flex flex-col transition-colors duration-200 pointer-events-auto";
   const nodeShapeClasses = "rounded-lg";
 
-  const contentPaddingClass = 'p-3';
-
-  // Determine Z-Index
-  // Selected nodes are highest (50).
-  // Free nodes are middle (20).
-  // Grouped nodes are lower (6), just above Group Background (5).
-  // Note: Dragging items are usually handled by the container (1000), but basic z-index is here.
   const zIndex = isSelected ? 50 : (isGrouped ? 6 : 20);
+
+  // Округляем координаты для четкости
+  const roundedX = Math.round(node.position.x);
+  const roundedY = Math.round(node.position.y);
 
   return (
     <div
       className={`${nodeBaseClasses} ${bgClass} ${nodeShapeClasses} ${isNewlyAdded ? 'node-newly-added' : ''} ${isRerouteDot ? 'cursor-move' : ''}`}
       style={{
-        // Using raw coordinates (no rounding) to prevent jitter during zoom/pan
-        // Added backface-visibility to help with rendering edge cases
-        transform: `translate3d(${node.position.x}px, ${node.position.y}px, 0)`,
+        // Используем translate3d с округленными координатами и preserve-3d
+        transform: `translate3d(${roundedX}px, ${roundedY}px, 0)`,
         width: node.width, height: node.isCollapsed ? `${HEADER_HEIGHT}px` : node.height,
         minWidth: isRerouteDot ? undefined : `${minSize.minWidth}px`, minHeight: node.isCollapsed ? `${HEADER_HEIGHT}px` : (isRerouteDot ? undefined : `${minSize.minHeight}px`),
         zIndex: zIndex,
         cursor: nodeCursor,
         backfaceVisibility: 'hidden',
+        transformStyle: 'preserve-3d'
       }}
       onClick={handleNodeClick} onMouseEnter={() => onNodeMouseEnter(node.id)} onMouseLeave={onNodeMouseLeave} onMouseDown={isRerouteDot ? handleDragMouseDown : undefined} onTouchStart={isRerouteDot ? handleDragTouchStart : undefined}
       onContextMenu={(e) => e.stopPropagation()}
@@ -384,7 +380,7 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
         onRenameNode={onRenameNode}
         onDownloadChat={onDownloadChat}
       />
-      {!isRerouteDot && !node.isCollapsed && <div className={`${contentPaddingClass} flex-grow min-h-0`}>{renderContent()}</div>}
+      {!isRerouteDot && !node.isCollapsed && <div className="p-3 flex-grow min-h-0">{renderContent()}</div>}
 
       <InputHandles node={node} getHandleColor={getHandleColor} handleCursor={handleCursor} t={t} isHovered={isHovered} isCollapsed={node.isCollapsed} />
       <OutputHandles
@@ -403,11 +399,10 @@ const NodeView: React.FC<NodeViewProps> = (props) => {
   );
 };
 
-// Custom comparison to avoid re-rendering all nodes when one node moves.
 function arePropsEqual(prev: NodeViewProps, next: NodeViewProps) {
-  if (prev.node !== next.node) return false; // Position, size, or internal data changed
+  if (prev.node !== next.node) return false; 
   if (prev.isSelected !== next.isSelected) return false;
-  if (prev.isGrouped !== next.isGrouped) return false; // Check group status
+  if (prev.isGrouped !== next.isGrouped) return false;
   if (prev.isHovered !== next.isHovered) return false;
   if (prev.isExecuting !== next.isExecuting) return false;
   if (prev.isEnhancing !== next.isEnhancing) return false;
@@ -439,10 +434,7 @@ function arePropsEqual(prev: NodeViewProps, next: NodeViewProps) {
   if (prev.isImprovingScriptConcept !== next.isImprovingScriptConcept) return false;
   if (prev.isUpdatingDescription !== next.isUpdatingDescription) return false;
   if (prev.isModifyingCharacter !== next.isModifyingCharacter) return false;
-
-  // Critical Change: Re-render if upstream input data changes
   if (prev.inputData !== next.inputData) return false;
-
   if (prev.activeTool !== next.activeTool) return false;
   if (prev.connections !== next.connections) return false;
   if (prev.connectionTarget !== next.connectionTarget) return false;
@@ -450,7 +442,6 @@ function arePropsEqual(prev: NodeViewProps, next: NodeViewProps) {
   if (prev.connectingInfo !== next.connectingInfo) return false;
   if (prev.lastAddedNodeId !== next.lastAddedNodeId) return false;
   if (prev.clearSelectionsSignal !== next.clearSelectionsSignal) return false;
-
   return true;
 }
 
