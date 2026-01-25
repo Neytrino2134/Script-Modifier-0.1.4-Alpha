@@ -1,5 +1,6 @@
 
-import React, { useRef, useMemo, useEffect } from 'react';
+
+import React, { useRef, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useAppContext } from '../contexts/Context';
 import NodeView from './NodeView';
 import ConnectionView from './ConnectionView';
@@ -16,6 +17,46 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
     const context = useAppContext();
     const longPressTimer = useRef<number | null>(null);
     const touchStartPos = useRef<Point | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Prevent browser auto-scrolling (e.g. on paste/focus of off-screen inputs)
+    useLayoutEffect(() => {
+        // 1. Lock Window Scroll
+        const preventWindowScroll = () => {
+            if (window.scrollY !== 0 || window.scrollX !== 0) {
+                window.scrollTo(0, 0);
+            }
+        };
+
+        // 2. Lock Container Scroll
+        // This is crucial because the Toolbar is absolute inside this container.
+        // If this container scrolls, the Toolbar moves away.
+        const preventContainerScroll = () => {
+            if (containerRef.current) {
+                if (containerRef.current.scrollTop !== 0 || containerRef.current.scrollLeft !== 0) {
+                    containerRef.current.scrollTop = 0;
+                    containerRef.current.scrollLeft = 0;
+                }
+            }
+        };
+
+        window.addEventListener('scroll', preventWindowScroll);
+        document.body.addEventListener('scroll', preventWindowScroll);
+        
+        // Attach directly to the container if available
+        const container = containerRef.current;
+        if (container) {
+            container.addEventListener('scroll', preventContainerScroll);
+        }
+        
+        return () => {
+            window.removeEventListener('scroll', preventWindowScroll);
+            document.body.removeEventListener('scroll', preventWindowScroll);
+            if (container) {
+                container.removeEventListener('scroll', preventContainerScroll);
+            }
+        };
+    }, []);
 
     if (!context) return null;
 
@@ -234,7 +275,6 @@ const Canvas: React.FC<CanvasProps> = ({ children, checkTarget = false }) => {
         }).sort().join('||');
     };
 
-    const containerRef = useRef<HTMLDivElement>(null);
     const handleWheelRef = useRef(handleWheel);
     handleWheelRef.current = handleWheel;
 

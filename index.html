@@ -15,6 +15,24 @@
     --cursor-move: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3e%3cpath stroke='%23374151' stroke-width='2' stroke-linecap='round' d='M16 4 V28 M4 16 H28'/%3e%3cpath fill='%23111827' stroke='%23374151' stroke-width='2' stroke-linejoin='round' d='M16 4 L12 9 H20 Z M16 28 L12 23 H20 Z M4 16 L9 12 V20 Z M28 16 L23 12 V20 Z'/%3e%3c/svg%3e") 16 16, move;
     --cursor-zoom-in: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3e%3cpath d='M21 21 L28 28' stroke='%23374151' stroke-width='2.5' stroke-linecap='round'/%3e%3ccircle cx='14' cy='14' r='9' fill='%23111827' stroke='%23374151' stroke-width='2'/%3e%3cpath d='M14 10 V18 M10 14 H18' stroke='%23374151' stroke-width='2' stroke-linecap='round'/%3e%3c/svg%3e") 14 14, zoom-in;
   }
+  
+  /* STRICT VIEWPORT LOCKING */
+  html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed; /* Crucial for preventing scroll-into-view behavior */
+    top: 0;
+    left: 0;
+  }
+
+  #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
 
   /* Global Text Selection Styling (Emerald Green) */
   ::selection {
