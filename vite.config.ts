@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       sourcemap: false,
       rollupOptions: {
-        external: ['browser-id3-writer']
+        external: []
       }
     }
   };

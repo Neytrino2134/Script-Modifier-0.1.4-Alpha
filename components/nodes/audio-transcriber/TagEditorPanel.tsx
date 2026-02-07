@@ -1,11 +1,15 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import CustomCheckbox from '../../ui/CustomCheckbox';
 import { Mp3File } from './types';
 import { fileToArrayBuffer, getAudioFingerprint } from '../../../utils/audioUtils';
 import { generateMp3Tags } from '../../../services/geminiService';
 import { CopyIcon, PasteIcon, CloseIcon } from '../../icons/AppIcons';
+// Fix for "does not provide an export named 'default'" error with browser-id3-writer
+import * as ID3WriterModule from 'browser-id3-writer';
 // @ts-ignore
-import ID3Writer from 'browser-id3-writer';
+const ID3Writer = ID3WriterModule.default || ID3WriterModule;
+
 import Tooltip from '../../ui/Tooltip';
 
 interface TagEditorPanelProps {
