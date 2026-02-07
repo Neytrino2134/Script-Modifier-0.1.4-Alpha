@@ -52,7 +52,7 @@ export const generateSpeech = async (text: string, voice: string, intonation?: s
 
 export const generateNarratorText = async (prompt: string, role: string, languages: any, ssml: boolean) => {
     const ai = getAiClient();
-    const promptText = `Generate narrator text for: ${prompt}. Role: ${role}. Languages: ${JSON.stringify(languages)}. Use SSML: ${ssml}. Return JSON with keys matching language codes (ru, en).`;
+    const promptText = `Generate narrator text for: ${prompt}. Role: ${role}. Languages: ${JSON.stringify(languages)}. Use SSML: ${ssml}. Return JSON object where keys correspond strictly to the requested language codes.`;
     const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: promptText,
