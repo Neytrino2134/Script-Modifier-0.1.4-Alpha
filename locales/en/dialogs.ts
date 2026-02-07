@@ -9,7 +9,7 @@ export const dialogs = {
     'dialog.rename.cancel': 'Cancel',
     'dialog.promptEdit.title': 'Edit Prompt',
     'dialog.promptEdit.nameLabel': 'Prompt Name',
-    'dialog.promptEdit.contentLabel': 'Prompt Content',
+    'dialog.promptEdit.contentLabel': 'Content',
     'dialog.promptEdit.confirm': 'Save',
     'dialog.promptEdit.cancel': 'Cancel',
     'dialog.reset.title': 'Reset Canvas',
@@ -64,5 +64,6 @@ export const dialogs = {
     'toast.apiKeySaved': 'API Key saved successfully',
     'toast.apiKeyCleared': 'API Key cleared',
     'toast.projectLoaded': 'Project loaded successfully',
+    'toast.downloadComplete': 'Download started',
     'alert.batchMismatch': 'Warning: Scene {scene} frame count mismatch (Expected: {expected}, Got: {got}). Mapping best effort.',
 };

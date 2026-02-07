@@ -394,7 +394,7 @@ export const useGeminiGeneration = ({
                     newAudioFiles.push({
                         id: `simple-${Date.now()}`,
                         title: 'Generated Audio',
-                        text: text.substring(0, 50) + '...',
+                        text: text,
                         audioData,
                         voiceName: isMultiSpeaker ? 'Multi' : voice,
                         intonation

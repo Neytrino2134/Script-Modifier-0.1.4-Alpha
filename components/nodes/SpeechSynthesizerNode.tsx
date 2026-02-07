@@ -5,6 +5,8 @@ import { ActionButton } from '../ActionButton';
 import { generateSpeech } from '../../services/geminiService';
 import CustomSelect, { CustomSelectOption } from '../ui/CustomSelect';
 import CustomCheckbox from '../ui/CustomCheckbox';
+import { CopyIcon } from '../icons/AppIcons';
+import Tooltip from '../ui/Tooltip';
 
 // Audio decoding utilities from Gemini documentation
 function decode(base64: string) {
@@ -95,10 +97,11 @@ interface AudioPlayerItemProps {
     onSelect: (id: string | number) => void;
     onDownload: (id: string | number) => void;
     onPlayRequest: (stopFn: () => void) => void;
+    onCopyPrompt: (text: string) => void;
     t: (key: string) => string;
 }
 
-const AudioPlayerItem: React.FC<AudioPlayerItemProps> = ({ id, title, text, audioData, voiceName, intonation, isSelected, onSelect, onDownload, onPlayRequest, t }) => {
+const AudioPlayerItem: React.FC<AudioPlayerItemProps> = ({ id, title, text, audioData, voiceName, intonation, isSelected, onSelect, onDownload, onPlayRequest, onCopyPrompt, t }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const audioContextRef = useRef<AudioContext | null>(null);
     const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -196,8 +199,15 @@ const AudioPlayerItem: React.FC<AudioPlayerItemProps> = ({ id, title, text, audi
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
                     )}
                 </button>
+                <button 
+                    onClick={(e) => { e.stopPropagation(); onCopyPrompt(text); }}
+                    className="p-2 rounded-full bg-gray-600 text-gray-300 hover:bg-emerald-600 hover:text-white transition-colors"
+                    title={t('node.action.copy')}
+                >
+                    <CopyIcon className="h-5 w-5" />
+                </button>
                 <button onClick={() => onDownload(id)} className="p-2 rounded-full bg-cyan-600 text-white hover:bg-cyan-700 transition-colors" aria-label="Download">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                 </button>
             </div>
         </div>
@@ -344,8 +354,9 @@ const SpeechSynthesizerNode: React.FC<NodeContentProps> = ({
         const file = audioFiles.find((f: any) => f.id === id);
         if (file) {
             downloadWav(file.audioData, file.id, file.voiceName, file.intonation || 'standard', file.title);
+            addToast(t('toast.downloadComplete'), 'success');
         }
-    }, [audioFiles]);
+    }, [audioFiles, t, addToast]);
 
     const handleDownloadSelected = useCallback(async () => {
         const filesToDownload = audioFiles.filter((file: any) => selectedAudio.has(file.id));
@@ -353,7 +364,10 @@ const SpeechSynthesizerNode: React.FC<NodeContentProps> = ({
             downloadWav(file.audioData, file.id, file.voiceName, file.intonation || 'standard', file.title);
             await new Promise(resolve => setTimeout(resolve, 300));
         }
-    }, [audioFiles, selectedAudio]);
+        if (filesToDownload.length > 0) {
+             addToast(t('toast.downloadComplete'), 'success');
+        }
+    }, [audioFiles, selectedAudio, t, addToast]);
     
     const prevAudioFilesLength = useRef(audioFiles.length);
     useEffect(() => {
@@ -362,9 +376,12 @@ const SpeechSynthesizerNode: React.FC<NodeContentProps> = ({
             for (const file of newFiles) {
                 downloadWav(file.audioData, file.id, file.voiceName, file.intonation || 'standard', file.title);
             }
+             if (newFiles.length > 0) {
+                 addToast(t('toast.downloadComplete'), 'success');
+             }
         }
         prevAudioFilesLength.current = audioFiles.length;
-    }, [audioFiles, isAutoDownloadEnabled]);
+    }, [audioFiles, isAutoDownloadEnabled, t, addToast]);
 
     const handleSelectAudio = (id: string|number) => {
         setSelectedAudio(prev => {
@@ -377,6 +394,11 @@ const SpeechSynthesizerNode: React.FC<NodeContentProps> = ({
             return newSet;
         });
     };
+
+    const handleCopyPrompt = useCallback((text: string) => {
+        navigator.clipboard.writeText(text);
+        addToast(t('toast.copied'), 'success');
+    }, [addToast, t]);
     
     const handleToggleCollapse = (sceneNumber: number) => {
         setCollapsedScenes(prev => {
@@ -645,6 +667,7 @@ const SpeechSynthesizerNode: React.FC<NodeContentProps> = ({
                                 onSelect={handleSelectAudio}
                                 onDownload={handleDownloadSingle}
                                 onPlayRequest={handlePlayRequest}
+                                onCopyPrompt={handleCopyPrompt}
                                 t={t}
                             />
                         )) : (

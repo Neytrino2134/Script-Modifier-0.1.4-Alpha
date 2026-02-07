@@ -1,6 +1,7 @@
 
 
 
+
 export const dialogs = {
     'dialog.rename.title': 'Переименование',
     'dialog.rename.group.title': 'Переименовать группу',
@@ -65,5 +66,6 @@ export const dialogs = {
     'toast.apiKeySaved': 'API ключ успешно сохранен',
     'toast.apiKeyCleared': 'API ключ удален',
     'toast.projectLoaded': 'Проект успешно загружен',
+    'toast.downloadComplete': 'Скачивание началось',
     'alert.batchMismatch': 'Внимание: Сцена {scene} несовпадение кадров (Ожидалось: {expected}, Получено: {got}). Сопоставление может быть неточным.',
 };
