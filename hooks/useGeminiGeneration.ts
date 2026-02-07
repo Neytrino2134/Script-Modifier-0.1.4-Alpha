@@ -446,14 +446,15 @@ export const useGeminiGeneration = ({
         if (!node) return;
         let parsedValue;
         try { parsedValue = JSON.parse(node.value || '{}'); } catch { parsedValue = {}; }
-        const { audioBase64, mimeType } = parsedValue;
+        const { audioBase64, mimeType, model } = parsedValue; // Get model from node data
 
         if (!audioBase64) { setError("No audio loaded."); return; }
 
         setIsTranscribingAudio(nodeId);
         setError(null);
         try {
-            const rawSegmentsString = await transcribeAudio(audioBase64, mimeType || 'audio/mp3');
+            // Pass model to service
+            const rawSegmentsString = await transcribeAudio(audioBase64, mimeType || 'audio/mp3', model);
             // Parse result to set plain text as well
             let segments = [];
             try { segments = JSON.parse(rawSegmentsString); } catch { }

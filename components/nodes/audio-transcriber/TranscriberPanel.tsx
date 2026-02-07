@@ -2,6 +2,7 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { fileToArrayBuffer, audioBufferToWav } from '../../../utils/audioUtils';
 import { TranscriberData } from './types';
+import Tooltip from '../../ui/Tooltip';
 
 interface TranscriberPanelProps {
     data: TranscriberData;
@@ -21,7 +22,7 @@ export const TranscriberPanel: React.FC<TranscriberPanelProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isConverting, setIsConverting] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
-    const { audioBase64, transcription, fileName, segments, mimeType } = data;
+    const { audioBase64, transcription, fileName, segments, mimeType, model } = data;
 
     const handleFile = async (file: File) => {
         if (file.type.startsWith('video/mp4')) {
@@ -168,11 +169,39 @@ export const TranscriberPanel: React.FC<TranscriberPanelProps> = ({
                     )}
                 </div>
             </div>
+
+            {/* Model Selector */}
+            <div className="flex w-full flex-shrink-0 gap-1 select-none bg-gray-900/50 rounded-lg p-0.5 h-8 mt-1">
+                <Tooltip title={t('tooltip.model.flash')} position="top" className="h-full flex-1">
+                    <button 
+                        onClick={() => onUpdate({ model: 'gemini-2.5-flash' })}
+                        className={`w-full h-full text-[10px] font-bold text-center transition-colors rounded-md flex items-center justify-center ${
+                            model === 'gemini-2.5-flash' || !model
+                            ? 'bg-emerald-600 text-white shadow-sm' 
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                        }`}
+                    >
+                        FLASH
+                    </button>
+                </Tooltip>
+                <Tooltip title={t('tooltip.model.pro')} position="top" className="h-full flex-1">
+                    <button 
+                        onClick={() => onUpdate({ model: 'gemini-2.5-pro' })}
+                        className={`w-full h-full text-[10px] font-bold text-center transition-colors rounded-md flex items-center justify-center ${
+                            model === 'gemini-2.5-pro' 
+                            ? 'bg-emerald-600 text-white shadow-sm' 
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                        }`}
+                    >
+                        PRO
+                    </button>
+                </Tooltip>
+            </div>
             
-                <button
+            <button
                 onClick={isLoading ? onStop : onTranscribe}
                 disabled={isStopping || !audioBase64 || isConverting}
-                className={`w-full px-4 py-2 font-bold text-white rounded-md transition-colors duration-200 flex-shrink-0 flex items-center justify-center gap-2 mt-2 ${
+                className={`w-full px-4 py-2 font-bold text-white rounded-md transition-colors duration-200 flex-shrink-0 flex items-center justify-center gap-2 mt-1 ${
                     isStopping 
                     ? 'bg-yellow-600' 
                     : (isLoading 
@@ -200,7 +229,7 @@ export const TranscriberPanel: React.FC<TranscriberPanelProps> = ({
                 onWheel={e => e.stopPropagation()}
             />
             
-                {transcription && (
+            {transcription && (
                 <button
                     onClick={handleDownloadSRT}
                     className="w-full px-4 py-2 font-bold text-white bg-cyan-600 rounded-md hover:bg-cyan-700 transition-colors duration-200 flex items-center justify-center gap-2 flex-shrink-0 mt-2"

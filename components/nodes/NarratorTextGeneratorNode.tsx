@@ -18,11 +18,13 @@ const LANGUAGES = [
     { code: 'zh', label: 'ZH' },
     { code: 'ja', label: 'JA' },
     { code: 'ko', label: 'KO' },
+    { code: 'uz', label: 'UZ' },
 ];
 
 const LANGUAGE_NAMES: Record<string, string> = {
     ru: 'Русский', en: 'English', es: 'Español', fr: 'Français', de: 'Deutsch',
-    it: 'Italiano', pt: 'Português', zh: '中文', ja: '日本語', ko: '한국어'
+    it: 'Italiano', pt: 'Português', zh: '中文', ja: '日本語', ko: '한국어',
+    uz: 'Oʻzbek'
 };
 
 const NarratorTextGeneratorNode: React.FC<NodeContentProps> = ({

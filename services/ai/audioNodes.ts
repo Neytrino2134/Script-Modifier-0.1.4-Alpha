@@ -1,3 +1,4 @@
+
 import { GenerateContentResponse, Type, Modality } from "@google/genai";
 import { getAiClient, withRetry, cleanJsonString } from "./client";
 
@@ -60,10 +61,10 @@ export const generateNarratorText = async (prompt: string, role: string, languag
     return JSON.parse(cleanJsonString(response.text || '{}'));
 };
 
-export const transcribeAudio = async (audioBase64: string, mimeType: string) => {
+export const transcribeAudio = async (audioBase64: string, mimeType: string, model: string = 'gemini-2.5-flash') => {
     const ai = getAiClient();
     const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: model, // Use passed model
         contents: {
             parts: [
                 { inlineData: { mimeType, data: audioBase64 } },

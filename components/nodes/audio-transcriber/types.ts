@@ -11,6 +11,7 @@ export interface TranscriberData {
     transcription: string;
     segments: TranscriptionSegment[];
     fileName: string | null;
+    model?: string; // Added model field
 }
 
 export interface Mp3File {

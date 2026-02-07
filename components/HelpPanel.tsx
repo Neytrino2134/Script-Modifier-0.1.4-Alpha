@@ -1,5 +1,3 @@
-
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../localization';
@@ -126,7 +124,7 @@ const HelpPanel: React.FC = () => {
           category: t('help.category.alpha'),
           headerColor: 'text-blue-400',
           links: [
-               { label: "Script Modifier 0.1.5", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1y9CSUmlVQK2xq7ckses7fpM6wpbZdBnB?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
+               { label: "Script Modifier 0.1.6", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1y9CSUmlVQK2xq7ckses7fpM6wpbZdBnB?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
                { label: "Prompt Modifier 0.1.8", subLabel: t('help.sub.alpha'), url: "https://aistudio.google.com/apps/drive/1OJfPP9wUKlnjvZ5_2_Fxq_v1dW0iftlW?showAssistant=true&resourceKey=&showPreview=true", iconType: 'google' },
           ]
       },
@@ -134,7 +132,7 @@ const HelpPanel: React.FC = () => {
           category: t('help.category.github'),
           headerColor: 'text-yellow-400',
           links: [
-              { label: "Script Modifier Repo", subLabel: "v0.1.5 Alpha", url: "https://github.com/Neytrino2134/Script-Modifier", iconType: 'github' },
+              { label: "Script Modifier Repo", subLabel: "v0.1.6 Alpha", url: "https://github.com/Neytrino2134/Script-Modifier", iconType: 'github' },
               { label: "Prompt Modifier Repo", subLabel: "v0.1.8 Alpha", url: "https://github.com/Neytrino2134/Prompt-Modifier", iconType: 'github' },
           ]
       }

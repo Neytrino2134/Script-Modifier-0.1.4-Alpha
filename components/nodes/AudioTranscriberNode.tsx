@@ -52,10 +52,18 @@ const AudioTranscriberNode: React.FC<NodeContentProps> = ({
                 transcription: parsed.transcription || '', // Plain text for display
                 segments: parsed.segments || [], // Hidden structured data for SRT
                 fileName: parsed.fileName || null,
-                initialTab: parsed.initialTab
+                initialTab: parsed.initialTab,
+                model: parsed.model || 'gemini-2.5-flash' // Default model
             };
         } catch {
-            return { audioBase64: null, mimeType: null, transcription: '', segments: [], fileName: null };
+            return { 
+                audioBase64: null, 
+                mimeType: null, 
+                transcription: '', 
+                segments: [], 
+                fileName: null,
+                model: 'gemini-2.5-flash' 
+            };
         }
     }, [node.value]);
 
